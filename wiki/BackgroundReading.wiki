@@ -14,6 +14,14 @@ http://senseis.xmp.net/?TetsukiEditor
 == Computer Go ==
 http://www.intelligentgo.org/Home/Overview%20of%20Computer%20Go.html
 http://del.icio.us/barelylegalprogrammer/go
+http://www.gnu.org/software/gnugo/
+http://senseis.xmp.net/?WritingAComputerGoEngine
+http://www.computer-go.org/mailman/listinfo/computer-go/
+http://en.wikibooks.org/wiki/Computer_Go
+http://www.gnu.org/software/gnugo/free_go_software.html
 
 == Javascript Engines/Libraries ==
 http://ejohn.org/blog/javascript-engine-speeds/
+
+== Go Background ==
+http://en.wikipedia.org/wiki/Go_(board_game)
