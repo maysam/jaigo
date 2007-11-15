@@ -1,11 +1,11 @@
 #summary Resources on other go engines, iPhone development, etc
 
 == iPhone Development ==
-
 http://developer.apple.com/iphone/devcenter/
 
 == WebUI for Go ==
 http://senseis.xmp.net/?EidoGo
+http://retrogames.cc/
 
 == iPhoneUI for Go ==
 http://code.google.com/p/ishudan/
@@ -13,3 +13,7 @@ http://senseis.xmp.net/?TetsukiEditor
 
 == Computer Go ==
 http://www.intelligentgo.org/Home/Overview%20of%20Computer%20Go.html
+http://del.icio.us/barelylegalprogrammer/go
+
+== Javascript Engines/Libraries ==
+http://ejohn.org/blog/javascript-engine-speeds/
