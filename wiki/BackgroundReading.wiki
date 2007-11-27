@@ -12,12 +12,13 @@ http://code.google.com/p/ishudan/
 http://senseis.xmp.net/?TetsukiEditor
 
 == Computer Go ==
+http://senseis.xmp.net/?WritingAComputerGoEngine
+http://en.wikibooks.org/wiki/Computer_Go
+http://www.computer-go.org/mailman/listinfo/computer-go/
 http://www.intelligentgo.org/Home/Overview%20of%20Computer%20Go.html
+http://www.inventivity.com/OpenGo/
 http://gobase.org/information/computers/
 http://www.cs.ualberta.ca/~games/go/compgo_biblio/
-http://senseis.xmp.net/?WritingAComputerGoEngine
-http://www.computer-go.org/mailman/listinfo/computer-go/
-http://en.wikibooks.org/wiki/Computer_Go
 http://www.gnu.org/software/gnugo/free_go_software.html
 
 == Go Engines ==
