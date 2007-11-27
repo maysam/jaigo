@@ -4,26 +4,27 @@
 http://developer.apple.com/iphone/devcenter/
 
 == WebUI for Go ==
-http://senseis.xmp.net/?EidoGo
-http://retrogames.cc/
+  *http://senseis.xmp.net/?EidoGo
+  *http://retrogames.cc/
 
 == iPhoneUI for Go ==
-http://code.google.com/p/ishudan/
-http://senseis.xmp.net/?TetsukiEditor
+  *http://code.google.com/p/ishudan/
+  *http://senseis.xmp.net/?TetsukiEditor
 
 == Computer Go ==
   *http://senseis.xmp.net/?WritingAComputerGoEngine
+  *http://www.itee.uq.edu.au/~janetw/Computer%20Go/CS-TR-339.html
   *http://en.wikibooks.org/wiki/Computer_Go
   *http://www.computer-go.org/mailman/listinfo/computer-go/
-http://www.intelligentgo.org/Home/Overview%20of%20Computer%20Go.html
-http://www.inventivity.com/OpenGo/
-http://gobase.org/information/computers/
-http://www.cs.ualberta.ca/~games/go/compgo_biblio/
+  *http://www.intelligentgo.org/Home/Overview%20of%20Computer%20Go.html
+  *http://www.inventivity.com/OpenGo/
+  *http://gobase.org/information/computers/
+  *http://www.cs.ualberta.ca/~games/go/compgo_biblio/
 
 == Go Engines ==
-http://www.gnu.org/software/gnugo/
-http://www.spec.org/osg/cpu95/CINT95/099.go/
-http://sourceforge.net/projects/moyoman
+  *http://www.gnu.org/software/gnugo/
+  *http://www.spec.org/osg/cpu95/CINT95/099.go/
+  *http://sourceforge.net/projects/moyoman
 
 == Javascript Engines/Libraries ==
 http://ejohn.org/blog/javascript-engine-speeds/
