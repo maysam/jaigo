@@ -12,8 +12,8 @@ http://developer.apple.com/iphone/devcenter/
   *http://senseis.xmp.net/?TetsukiEditor
 
 == Computer Go ==
-  *http://senseis.xmp.net/?WritingAComputerGoEngine
-  *http://www.itee.uq.edu.au/~janetw/Computer%20Go/CS-TR-339.html
+  *[http://senseis.xmp.net/?WritingAComputerGoEngine]
+  *[http://www.itee.uq.edu.au/~janetw/Computer%20Go/CS-TR-339.html]
   *http://en.wikibooks.org/wiki/Computer_Go
   *http://www.computer-go.org/mailman/listinfo/computer-go/
   *http://www.intelligentgo.org/Home/Overview%20of%20Computer%20Go.html
