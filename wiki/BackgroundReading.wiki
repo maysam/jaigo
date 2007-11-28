@@ -6,6 +6,7 @@
 == WebUI for Go ==
   *[http://senseis.xmp.net/?EidoGo
   *[http://retrogames.cc/
+  *[http://sourceforge.net/projects/jsgameviewer/
 
 == iPhoneUI for Go ==
   *[http://code.google.com/p/ishudan/
@@ -25,12 +26,19 @@
 ===Candidates for Porting===
   *[http://www.spec.org/osg/cpu95/CINT95/099.go/
   *[http://londerings.sourceforge.net/go/simple_go/0_1/
+  *[http://sparcs.kaist.ac.kr/~tinuviel/chuk/
+  *[http://sourceforge.net/projects/javago/
+  *[http://sourceforge.net/projects/tinygo/
+  *[http://sourceforge.net/projects/mgo/
 ===References===
   *[http://www.gnu.org/software/gnugo/
   *[http://sourceforge.net/projects/moyoman
   *[http://javaboutique.internet.com/Go/
   *[http://code.google.com/p/diggo/
   *[http://www.codeplex.com/GoTraxx
+  *[http://sourceforge.net/projects/tesujigolibrary/
+  *[http://sourceforge.net/projects/olego/
+  *[http://sourceforge.net/projects/jgo/
 
 == Javascript Engines/Libraries ==
 [http://ejohn.org/blog/javascript-engine-speeds/]
