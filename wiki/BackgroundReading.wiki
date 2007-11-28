@@ -22,12 +22,15 @@
   *[http://www.cs.ualberta.ca/~games/go/compgo_biblio/
 
 == Go Engines ==
-  *[http://www.gnu.org/software/gnugo/
+===Candidates for Porting===
   *[http://www.spec.org/osg/cpu95/CINT95/099.go/
+  *[http://londerings.sourceforge.net/go/simple_go/0_1/
+===References===
+  *[http://www.gnu.org/software/gnugo/
   *[http://sourceforge.net/projects/moyoman
   *[http://javaboutique.internet.com/Go/
   *[http://code.google.com/p/diggo/
-  *[http://londerings.sourceforge.net/go/simple_go/0_1/
+  *[http://www.codeplex.com/GoTraxx
 
 == Javascript Engines/Libraries ==
 [http://ejohn.org/blog/javascript-engine-speeds/]
