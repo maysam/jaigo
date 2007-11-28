@@ -23,10 +23,11 @@ http://developer.apple.com/iphone/devcenter/
 
 == Go Engines ==
   *http://www.gnu.org/software/gnugo/
-  *http://www.spec.org/osg/cpu95/CINT95/099.go/
+  **http://www.spec.org/osg/cpu95/CINT95/099.go/*
   *http://sourceforge.net/projects/moyoman
   *http://javaboutique.internet.com/Go/
   *http://code.google.com/p/diggo/
+  **http://londerings.sourceforge.net/go/simple_go/0_1/*
 
 == Javascript Engines/Libraries ==
 http://ejohn.org/blog/javascript-engine-speeds/
