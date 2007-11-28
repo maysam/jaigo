@@ -26,6 +26,7 @@ http://developer.apple.com/iphone/devcenter/
   *http://www.spec.org/osg/cpu95/CINT95/099.go/
   *http://sourceforge.net/projects/moyoman
   *http://javaboutique.internet.com/Go/
+  *http://code.google.com/p/diggo/
 
 == Javascript Engines/Libraries ==
 http://ejohn.org/blog/javascript-engine-speeds/
