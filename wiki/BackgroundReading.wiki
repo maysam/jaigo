@@ -25,7 +25,7 @@
 == Go Engines ==
 ===Candidates for Porting===
   *[http://www.spec.org/osg/cpu95/CINT95/099.go/
-  *[http://londerings.sourceforge.net/go/simple_go/0_1/
+  *[http://senseis.xmp.net/?SimpleGo
   *[http://sparcs.kaist.ac.kr/~tinuviel/chuk/
   *[http://sourceforge.net/projects/javago/
   *[http://sourceforge.net/projects/tinygo/
