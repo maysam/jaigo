@@ -24,11 +24,11 @@
 
 == Go Engines ==
 ===Candidates for Porting===
-  *[http://www.spec.org/osg/cpu95/CINT95/099.go/
   *[http://senseis.xmp.net/?SimpleGo
+  *[http://sourceforge.net/projects/tinygo/
+  *[http://www.spec.org/osg/cpu95/CINT95/099.go/
   *[http://sparcs.kaist.ac.kr/~tinuviel/chuk/
   *[http://sourceforge.net/projects/javago/
-  *[http://sourceforge.net/projects/tinygo/
   *[http://sourceforge.net/projects/mgo/
 ===References===
   *[http://www.gnu.org/software/gnugo/
