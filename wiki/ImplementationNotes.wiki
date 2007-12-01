@@ -1,0 +1,5 @@
+#summary Documentation on the implementation of the javascript jaigo engine
+
+= Compatibility =
+
+Targets [http://developer.apple.com/referencelibrary/AppleApplications/idxSafari-date.html#//apple_ref/doc/uid/TP30000943-TP30000418-TP30001042 Safari 3/Webkit x], using [http://developer.mozilla.org/en/docs/JavaScript Javascript 1.6].
