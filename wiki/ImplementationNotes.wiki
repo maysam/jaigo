@@ -9,4 +9,4 @@ Targets [http://developer.apple.com/referencelibrary/AppleApplications/idxSafari
   *[http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference Javascript 1.5 Reference]
 
 = Implementation Standards =
-Renamed all object methods to Capital_Case. Added all object methods to Object.prototype.Method_Name. 
+Renamed all object methods to {{{Capital_Case}}}. Added all object methods to {{{Object.prototype.Method_Name}}}. 
