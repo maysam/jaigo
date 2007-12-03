@@ -1,7 +1,14 @@
 #summary Notes regarding the algorithms, data structures, and sundry in jaigo of academic interest.
 
+= Interaction/UI = 
+
+Output in GTP, so any GTP-compatible UI works.
+
 = Scoring =
 The board is scored using [http://senseis.xmp.net/?BensonsAlgorithm Benson's Algorithm].
 
 = Board representation =
 Representing the board turns out to be the most difficult part of writing a go engine.
+
+= Engine choice =
+What is the engine with the smallest expression in javascript and the highest kyu ranking?
