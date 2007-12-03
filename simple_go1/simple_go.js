@@ -4,25 +4,35 @@ var WHITE = "O";
 var WORST_SCORE = -1000000000;
 var normal_stone_value_ratio = 0.7;
 var x_coords_string = "ABCDEFGHJKLMNOPQRSTUVWXYZ";
-var max_size = len(x_coords_string);
+var max_size = x_coords_string.length;
 var debug_flag = false;
 
 var BOTH = BLACK + WHITE;
 
-colors = {BLACK, WHITE}
+other_side = {BLACK: WHITE, WHITE: BLACK};
 
-other_side = {BLACK: WHITE, WHITE: BLACK}
+function Move(x, y) {
+    this.x = x;
+    this.y = y;
+    Move.prototype.equals = function (move) {
+	for (e in move) {
+	    if (this[e] != move[e]) return false;
+        }
+	return true;
+    };
+}
 
-PASS_MOVE = {-1, -1}
+PASS_MOVE = new Move(-1, -1);
 
 function move_as_string(move, board_size)
 {
     /*convert move tuple to string
       example: (2, 3) -> B3
 	*/
-    move==PASS_MOVE ? return "PASS";
-    x, y = move;
-    return x_coords_string[x-1] + str(y);
+    if (PASS_MOVE.equals(move)) {
+	return "PASS";
+    }
+    return x_coords_string[move.x - 1] + str(move.y);
 }
 
 function string_as_move(m, size)
@@ -30,10 +40,12 @@ function string_as_move(m, size)
     /*convert string to move tuple
       example: B3 -> (2, 3)
     */
-    m=="PASS" ? return PASS_MOVE;
+    if (m == "PASS") {
+	return PASS_MOVE;
+    }
     x = x_coords_string.indexOf(m.charAt(0));
     y = m.charAt(1);
-    return x,y; //TODO: is this a valid return type?
+    return new Move(x,y);
 }
 
 /* Block class
@@ -53,31 +65,31 @@ function Block(color)
 	this.color = color;
 }
 
-Block.prototype.Add_Stone(position) = function()
+Block.prototype.Add_Stone = function(position)
 {
 	/*add stone or empty point at given position
     */
     this.stones[position] = true;
-}
+};
 
-Block.prototype.Remove_Stone(position) = function()
+Block.prototype.Remove_Stone = function(position)
 {
     /*remove stone or empty point at given position
     */
     this.stones[position] = false;
 	//TODO: this may not be equivalent to del self.stones[pos]
-}
+};
 
-Block.prototype.Add_Block(other_block) = function()
+Block.prototype.Add_Block = function(other_block)
 {
     /*add all stones and neighbours to this block
     */
     this.stones.Update(other_block.stones);
     this.neighbour.Update(other_block.neighbour);
 	//TODO: not sure if this subobject method syntax is correct
-}
+};
 
-Block.prototype.Mark_Stones(mark) = function()
+Block.prototype.Mark_Stones = function(mark)
 {
     /*mark all stones with given value
     */
@@ -85,30 +97,30 @@ Block.prototype.Mark_Stones(mark) = function()
 	{
 		this.stones[stone] = mark;		
 	}
-}
+};
 
-Block.prototype.Size() = function()
+Block.prototype.Size = function()
 {
     /*returns block size
     */
     return this.stones.length;
-}
+};
 
-Block.prototype.Max_Liberties() = function()
+Block.prototype.Max_Liberties = function()
 {
     /*returns maximum amount liberties possible for this block size
     */
     return this.Size() * 2 + 2;
-}
+};
 
-Block.prototype.Get_Origin() = function()
+Block.prototype.Get_Origin = function()
 {
     /*return origin pos of block
     */
-    lst = this.stones; //TODO: is this how to copy an array by value?
+    lst = this.stones.slice(0, a.length);
     lst.sort();
     return lst[0];	
-}
+};
 
 /*Eye: collection of empty blocks and either black or white blocks
 
@@ -120,7 +132,7 @@ function Eye()
     this.parts = [];	
 }
 
-Eye.prototype.Iterate_Stones(self) = function()
+Eye.prototype.Iterate_Stones = function()
 {
     /*Go through all stones in all blocks in eye
     */
@@ -128,11 +140,12 @@ Eye.prototype.Iterate_Stones(self) = function()
 	{
 		for (var stone in block.stones)
 		{
-			//TODO: yield stone; is there a javascript equiv to the yield keyword? http://www.network-theory.co.uk/docs/pylang/yieldstatement.html
+		    //TODO: yield stone; is there a javascript equiv to the yield keyword? http://www.network-theory.co.uk/docs/pylang/yieldstatement.html
+		    // JavaScript doesn't have generators. They're coming in ECMAScript 4 (http://www.ecmascript.org/es4/spec/overview.pdf)
 		}
 	}	
-}
-Eye.prototype.Mark_Status(live_color) = function()
+};
+Eye.prototype.Mark_Status = function(live_color)
 {
 	/*Go through all stones in all blocks in eye
            All opposite colored blocks are marked dead.
@@ -142,13 +155,17 @@ Eye.prototype.Mark_Status(live_color) = function()
 	{
 		switch (block.color)
 		{
-			//TODO: is status a reserved keyword in javascript? Also, is block an instance of Block, and if so, does it need to be declared/instantiated differently?
+			//note: status is not a reserved word in javascript.
+		        //TODO: Also, is block an instance of Block, and if so, does it need to be declared/instantiated differently?
 			case live_color:
 				block.status = "alive";
+			break;
 			case other_side[live_color]:
 				block.status = "dead";
+			break;
 			default:
 				block.status = live_color + " territory";
+			break;
 		}
 	}
-}
+};
