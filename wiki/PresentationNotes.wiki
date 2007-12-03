@@ -1,0 +1,7 @@
+#summary Notes regarding the algorithms, data structures, and sundry in jaigo of academic interest.
+
+= Scoring =
+The board is scored using [http://senseis.xmp.net/?BensonsAlgorithm Benson's Algorithm]
+
+= Board representation =
+Representing the board turns out to be the most difficult part of writing a go engine.
