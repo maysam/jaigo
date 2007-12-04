@@ -200,11 +200,11 @@ function Board(board_size)
 	{
 		//can't use set_goban method here, because goban doesn't yet really exists
 	    this.goban[pos] = EMPTY;
-	    this.current_hash = this.current_hash ^ this.board_hash_values[EMPTY, pos];
+	    this.current_hash = this.current_hash ^ this.board_hash_values[EMPTY][pos];
 	}
 	this.blocks = []; //blocks dictionary
 	//Create and initialize one whole board empty block
-	var new_block = Block(EMPTY);
+	var new_block = new Block(EMPTY);
 	for (pos in self.iterate_goban()) //TODO: again here.
 	{
 	    new_block.add_stone(pos);
@@ -214,7 +214,7 @@ function Board(board_size)
 	this.chains = [];
 }
 
-Board.prototype.Iterate_Goban() = function()
+Board.prototype.Iterate_Goban = function()
 {
     /*This goes through all positions in goban
        Example usage: see above __init__ method
@@ -223,12 +223,12 @@ Board.prototype.Iterate_Goban() = function()
 	{
 		for (var y in range(1, this.board_size+1))
 		{
-			yield x, y; //TODO: replace yield
+			//TODO: yield x, y;
 		}
 	}
-}
+};
 
-Board.prototype.Iterate_Neighbour(pos) = function()
+Board.prototype.Iterate_Neighbour = function(pos)
 {
     /*This goes through all neighbour positions in clockwise:
        up, right, down, left
@@ -239,12 +239,12 @@ Board.prototype.Iterate_Neighbour(pos) = function()
 	{
     	if (1<=x2<=this.board_size and 1<=y2<=this.board_size)
 		{
-        	yield (x2, y2); //TODO: replace yield
+        	//TODO: yield (x2, y2);
 		}
 	}
-}
+};
 
-Board.prototype.Iterate_Diagonal_Neighbour(pos) = function()
+Board.prototype.Iterate_Diagonal_Neighbour = function(pos)
 {
     /*This goes through all neighbour positions in clockwise:
        NE, SE, SW, NW
@@ -255,12 +255,12 @@ Board.prototype.Iterate_Diagonal_Neighbour(pos) = function()
 	{
         if (1<=x2<=this.board_size and 1<=y2<=this.board_size)
 		{	
-        	yield (x2, y2); //TODO: replace yield
+		    //TODO: yield (x2, y2);
 		}
 	}
-}
+};
 
-Board.prototype.Iterate_Blocks(colors) = function()
+Board.prototype.Iterate_Blocks = function(colors)
 {
     /*This goes through all distinct blocks on board with given colors.
        Example usage: see analyze_unconditionally_alive
@@ -269,12 +269,12 @@ Board.prototype.Iterate_Blocks(colors) = function()
 	{
         if (block.color in colors)
 		{
-            yield block; //TODO: replace yield
+		    //TODO: yield block;
 		}
 	}
-}
+};
 
-Board.prototype.Iterate_Neighbour_Blocks(block) = function()
+Board.prototype.Iterate_Neighbour_Blocks = function(block)
 {
     /*Go through all neighbour positions and add new blocks.
        Return once for each new block
@@ -284,13 +284,13 @@ Board.prototype.Iterate_Neighbour_Blocks(block) = function()
 	{
 		if(blocks_seen.indexOf(this.blocks[stone]) == -1)
 		{
-        	yield block2; //TODO: replace yield
-            blocks_seen.push(block2);
+		    //TODO: yield block2;
+		    blocks_seen.push(block2);
 		}
 	}
-}
+};
 
-Board.prototype.Iterate_Neighbour_Eye_Blocks(eye) = function()
+Board.prototype.Iterate_Neighbour_Eye_Blocks = function(eye)
 {
 	/*First copy eye blocks to list of blocks seen
 	   Then go through all neighbour positions and add new blocks.
@@ -303,14 +303,14 @@ Board.prototype.Iterate_Neighbour_Eye_Blocks(eye) = function()
 		{
 			if(blocks_seen.indexOf(this.blocks[pos]) == -1)
 			{
-	        	yield block2; //TODO: replace yield
-	            blocks_seen.push(block2);
+			    //TODO: yield block2;
+			    blocks_seen.push(block2);
 			}
 		}
 	}
-}
+};
 
-Board.prototype.Init_Hash() = function()
+Board.prototype.Init_Hash = function()
 {
     /*Individual number for every possible color and position combination */
     this.board_hash_values = [];
@@ -318,36 +318,37 @@ Board.prototype.Init_Hash() = function()
 	{
         for (var pos in this.iterate_goban())
 		{
-        	this.board_hash_values[color, pos] = Math.floor(Math.random() * (Number.MAX_VALUE - Number.MIN_VALUE + 1)) + Number.MIN_VALUE; //TODO: check to make sure this returns a random int in [-max, max]
+		this.board_hash_values[color] = [];
+        	this.board_hash_values[color][pos] = Math.floor(Math.random() * (Number.MAX_VALUE - Number.MIN_VALUE + 1)) + Number.MIN_VALUE; //TODO: check to make sure this returns a random int in [-max, max]
 		}
     	this.current_hash = 0;
 	}
-}
+};
 
-Board.prototype.Set_Goban(color, pos) = function()
+    Board.prototype.Set_Goban = function(color, pos)
 {
     /*Set stone at position to color and update hash value*/
     var old_color = this.goban[pos];
-    this.current_hash = this.current_hash ^ this.board_hash_values[old_color, pos];
+    this.current_hash = this.current_hash ^ this.board_hash_values[old_color][pos];
     this.goban[pos] = color;
-    this.current_hash = this.current_hash ^ this.board_hash_values[color, pos];
-}
+    this.current_hash = this.current_hash ^ this.board_hash_values[color][pos];
+};
 
-Board.prototype.Key() = function()
+Board.prototype.Key = function()
 {
     /*This returns unique key for board.
        Returns hash value for current position (Zobrist hashing)
        Key can be used for example in super-ko detection
     */
     return this.current_hash;
-}
+};
 
-Board.prototype.Change_Side() = function()
+Board.prototype.Change_Side = function()
 {
 	this.side = other_side[this.side];
-}
+};
 
-Board.prototype.Are_Adjacent_Points(pos1, pos2) = function()
+Board.prototype.Are_Adjacent_Points = function(pos1, pos2)
 {
     /*Tests whether pos1 and pos2 are adjacent.
        Returns True or False.
@@ -360,9 +361,9 @@ Board.prototype.Are_Adjacent_Points(pos1, pos2) = function()
 		}    
 		return false;
 	}
-}
+};
 
-Board.prototype.List_Empty_3x3_Neighbour(pos) = function()
+Board.prototype.List_Empty_3x3_Neighbour = function(pos)
 {
     //check normal neighbour positions first
     var neighbour_list = [];
@@ -384,9 +385,9 @@ Board.prototype.List_Empty_3x3_Neighbour(pos) = function()
 		}
 	}            
     return neighbour_list, diagonal_neighbour_list
-}
+};
 
-Board.prototype.Is_3x3_Empty(pos) = function()
+Board.prototype.Is_3x3_Empty = function(pos)
 {
     if this.goban[pos]!= EMPTY ? return false;
     var neighbour_list, diagonal_neighbour_list = this.List_Empty_3x3_Neighbour(pos);
@@ -395,9 +396,9 @@ Board.prototype.Is_3x3_Empty(pos) = function()
         return true;
 	}
     return false;
-}
+};
 
-Board.prototype.Simple_Same_Block(pos_list) = function()
+Board.prototype.Simple_Same_Block = function(pos_list)
 {
     /*Check if all positions in pos_list are in same block.
        This searches only at immediate neighbour.
@@ -431,9 +432,9 @@ Board.prototype.Simple_Same_Block(pos_list) = function()
 		}
 	}
     return true;
-}
+};
 
-Board.prototype.Add_Stone(color, pos) = function()
+Board.prototype.Add_Stone = function(color, pos)
 {
     /*add stone or empty at given position
        color: color of stone or empty
@@ -555,18 +556,18 @@ Board.prototype.Add_Stone(color, pos) = function()
                 print block.neighbour
                 import pdb; pdb.set_trace()
 	*/
-}
+};
 
-Board.prototype.Add_Block(block) = function()
+Board.prototype.Add_Block = function(block)
 {
     this.block_list.push(block);
     for (var stone in block.stones)
 	{
         this.blocks[stone] = block;
 	}
-}
+};
 
-Board.prototype.Combine_Blocks(new_block, other_block) = function()
+Board.prototype.Combine_Blocks = function(new_block, other_block)
 {
     /*add all stones from other block to new block
        make board positions to point at new block
@@ -586,9 +587,9 @@ Board.prototype.Combine_Blocks(new_block, other_block) = function()
 	}
     this.block_list.splice(this.block_list.indexOf(other_block),1);
     return new_block;
-}
+};
 
-Board.prototype.Split_Marked_Group(block, mark) = function()
+Board.prototype.Split_Marked_Group = function(block, mark)
 {
     /*move all stones with given mark to new block
        Return splitted group.
@@ -603,9 +604,9 @@ Board.prototype.Split_Marked_Group(block, mark) = function()
 		}
 	}
     return new_block;
-}
+};
 
-Board.prototype.Flood_Mark(block, start_pos, mark) = function()
+Board.prototype.Flood_Mark = function(block, start_pos, mark)
 {
     /* mark all stones reachable from given
        starting position with given mark
@@ -624,9 +625,9 @@ Board.prototype.Flood_Mark(block, start_pos, mark) = function()
 			}
 		}
 	}
-}
+};
 
-Board.prototype.Calculate_Neighbour(block) = function()
+Board.prototype.Calculate_Neighbour = function(block)
 {
     /*find all neighbour positions for block
     */
@@ -641,9 +642,9 @@ Board.prototype.Calculate_Neighbour(block) = function()
 			}
 		}
 	}
-}
+};
 
-Board.prototype.Change_Block_Color(color, pos) = function()
+Board.prototype.Change_Block_Color = function(color, pos)
 {
     /*change block color and
        set same color to all block positions in goban
@@ -654,14 +655,14 @@ Board.prototype.Change_Block_Color(color, pos) = function()
 	{
         this.Set_Goban(color, pos2);
 	}
-}
+};
 
-Board.prototype.Remove_Block(pos) = function()
+Board.prototype.Remove_Block = function(pos)
 {
     this.Change_Block_Color(EMPTY, pos);
-}
+};
 
-Board.prototype.List_Block_Liberties(block) = function()
+Board.prototype.List_Block_Liberties = function(block)
 {
     /*Returns list of liberties for block of stones.
     */
@@ -674,22 +675,22 @@ Board.prototype.List_Block_Liberties(block) = function()
 		}
 	}
     return liberties;
-}
+};
 
-Board.prototype.Block_Liberties(block) = function()
+Board.prototype.Block_Liberties = function(block)
 {
     /*Returns number of liberties for block of stones.
     */
     var liberties = this.List_Block_Liberties(block);
     return liberties.length;
-}
+};
 
-Board.prototype.Liberties(pos) = function()
+Board.prototype.Liberties = function(pos)
 {
     /*Returns number of liberties for block of stones in given position.
     */
     return this.Block_Liberties(this.blocks[pos]);
-}
+};
 
 Board.prototype.Initialize_Undo_Log()
 {
@@ -698,14 +699,14 @@ Board.prototype.Initialize_Undo_Log()
     this.undo_log = [];
 }
 
-Board.prototype.Add_Undo_Info(method, color, pos) = function()
+Board.prototype.Add_Undo_Info = function(method, color, pos)
 {
     /* Add info needed to undo move
        at start of log.
        Its added to start because changes are undone in reverse direction.
     */
     this.undo_log.insert(0, (method, color, pos)); //TODO: what is the js insert equiv?
-}
+};
 
 Board.prototype.Apply_Undo_Info(method, color, pos)
 {
@@ -721,7 +722,7 @@ Board.prototype.Apply_Undo_Info(method, color, pos)
 	}
 }
 
-Board.prototype.Legal_Move(move) = function()
+Board.prototype.Legal_Move = function(move)
 {
     /*Test whether given move is legal.
        Returns truth value.
@@ -739,9 +740,9 @@ Board.prototype.Legal_Move(move) = function()
         if (this.goban[pos]==other_side[this.side] and this.Liberties(pos)==1) ? return true;
 	}
     return false;
-}
+};
 
-Board.prototype.Make_Move(move) = function()
+Board.prototype.Make_Move = function(move)
 {
     /*Make move given in argument.
        Returns move or None if illegl.
@@ -772,9 +773,9 @@ Board.prototype.Make_Move(move) = function()
         return move;
 	}
     return null;
-}
+};
 
-Board.prototype.Undo_Move(undo_log) = function()
+Board.prototype.Undo_Move = function(undo_log)
 {
 	/*Undo move using undo_log.
 	*/
@@ -783,9 +784,9 @@ Board.prototype.Undo_Move(undo_log) = function()
 	{
         this.Apply_Undo_Info(method, color, pos);
 	}
-}
+};
 
-Board.prototype.Analyse_Eye_Point(pos, other_color) = function()
+Board.prototype.Analyse_Eye_Point = function(pos, other_color)
 {
     /* Analyse one point for eye type.
        If not empty or adjacent to other color: return None.
@@ -846,9 +847,9 @@ Board.prototype.Analyse_Eye_Point(pos, other_color) = function()
 	{
         if (other_count > 0) ? return false : return true;
 	}
-}
+};
 
-Board.prototype.Analyse_Opponent_Stone_As_Eye_Point() = function(pos)
+Board.prototype.Analyse_Opponent_Stone_As_Eye_Point = function(pos)
 {
     /* Analyse one point for eye type.
        Otherwise analyse True/False status of eye.
@@ -887,7 +888,7 @@ Board.prototype.Analyse_Opponent_Stone_As_Eye_Point() = function(pos)
 	}
 };
 
-Board.prototype.Analyze_Color_Unconditional_Status() = function(color)
+Board.prototype.Analyze_Color_Unconditional_Status = function(color)
 {
     /* This is Benson's Algorithm for unconditional life.
 	   1) List potential eyes (eyes: empty+opponent areas flood filled):
