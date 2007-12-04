@@ -780,7 +780,7 @@ Board.prototype.Undo_Move = function(undo_log)
 	/*Undo move using undo_log.
 	*/
     this.Change_Side();
-    for (var method, color, pos in undo_log) //TODO: can you iterate in js like this?
+    for (var method, color, pos in undo_log) //TODO: can you iterate in js like this? If not, what object is being pulled from undo_log?
 	{
         this.Apply_Undo_Info(method, color, pos);
 	}
@@ -1569,4 +1569,324 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
 			}
 		}
 	}
+};
+
+Board.prototype.Analyze_Unconditional_Status = function()
+{
+    /*Analyze unconditional status for each color separately
+    */
+    //Initialize status to unknown for all blocks
+    for (var block in this.Iterate_Blocks(BLACK+WHITE+EMPTY)) //TODO: What does this argument resolve to in py?
+	{
+        block.status = "unknown";
+	}
+    //import pdb; pdb.set_trace()
+    this.Analyze_Color_Unconditional_Status(BLACK);
+    this.Analyze_Color_Unconditional_Status(WHITE);
+    //cleanup
+    for (var block in this.Iterate_Blocks(BLACK+WHITE+EMPTY))
+	{
+        block.eye = null;
+	}
+};
+
+Board.prototype.Has_Block_Status = function(colors, status)
+{
+    for (var block in this.Iterate_Blocks(colors))
+	{
+        if (block.status==status) ? return true;
+	}
+    return false;
+};
+
+Board.prototpe.Territory_As_Dict = function()
+{
+    var territory = []; //TODO: Do we need to define our own javascript dictionary object?
+    for (var block in this.Iterate_Blocks(EMPTY))
+	{
+        if ((block.status==(WHITE + " territory")) || (block.status==(BLACK + " territory")))
+		{
+            territory.Update(block.stones);
+		}
+	}
+    return territory;
+};
+
+Board.prototype.Score_Stone_Block = function(block)
+{
+    /* Score white/black block.
+       All blocks whose status we know will get full score.
+       Other blocks with unknown status will get score depending on their liberties and number of stones.
+
+       ....8....8-4=4....
+       ...XXX...XXX.O....
+       ..................
+       .7-4=3..6-2=4.....
+       ....XX...XX..7-3=4
+       .....X...OX...XXX.
+       ...............O..
+       .....O............
+       ..................
+       ..................
+
+       ..................
+       .....@OOO.........
+       .AXXXBxxxO........
+       .....@OOO.........
+       ..................
+       ..................
+       @:filled(@) or empty(.)
+       s = block.size()
+       l = block.liberties()
+       L = block.max_liberties()
+       s * l / L
+       X:3
+       x:3/8(.375)
+       AX:4 
+       XBx@:7*7/16(3.0625)
+       XBx.:7*9/16(3.9375)
+       X+x:3.375
+       AX+x:4.375
+       
+       r = l / L
+       s * (1 - (1-r)^2)
+       X:3
+       x:0.703125
+       AX:4
+       XBx@:4.78515625
+       XBx.:5.66015625
+       X+x:3.703125
+       AX+x:4.703125
+
+       ..................
+       .....@OO..........
+       ..AXXBxxO.........
+       .....@OO..........
+       ..................
+       ..................
+       r = l / L
+       s * (1 - (1-r)^2)
+       X:2
+       x:0.611111111112
+       X+x:2.611111111112
+       AX:3
+       AX+x:3.611111111112
+       XBx@:3.29861111112
+       XBx.:4.13194444444
+       
+       0.525 A3
+       0.2296875 B3
+       0.0875 C1
+       -0.13125 C3
+
+         ABC    A3
+        +---+
+       3|x..|3  X:1.5
+       2|OXX|2  x:0.4375
+       1|.o.|1  O:-0.4375
+        +---+    :1.5
+         ABC
+
+         ABC    B3
+        +---+
+       3|.X.|3  X:1.828125
+       2|OXX|2  O:-0.75
+       1|.o.|1   :1.078125
+        +---+   ->.328125
+         ABC
+    */
+
+	var score = 0;
+    if (block.status=="alive")
+	{
+        score = block.Size();
+	}
+    else if (block.status=="dead")
+	{
+        score = - block.Size();
+	}
+    else
+	{
+        var liberties = float(this.Block_Liberties(block));
+        //grant half liberty for each neightbour stone in atari
+        for (var block2 in this.Iterate_Neighbour_Blocks(block))
+		{
+            if (block2.color==other_side[block.color] && (this.Block_Liberties(block2)==1))
+			{
+                for (var stone in block.neighbour)
+				{
+                    if (stone in block2.stones)
+					{
+                        liberties = liberties + 0.5;
+					}
+				}
+			}
+		}
+        var liberty_ratio = liberties / block.Max_Liberties();
+        score = block.Size() * normal_stone_value_ratio * (1 - (1-liberty_ratio)**2); //TODO: what is the ** operator?
+	}
+    return score;
+};
+
+Board.prototype.Score_Block = function(block)
+{
+    /*Score block.
+       All blocks whose status we know will get full score.
+       White/black blocks will be scored by separate method and
+       then we change sign if block was for other side.
+    */
+	var score = 0;
+    if (block.color==EMPTY)
+	{
+        if (block.status==this.side + " territory")
+		{
+            score = block.Size();
+		}
+        else if (block.status==other_side[this.side] + " territory")
+		{
+            score = -block.Size();
+		}
+        else //empty block with unknown status
+		{
+            score = 0;
+		}
+	}
+    else
+	{
+        if (block.color==this.side)
+		{
+            score = this.Score_Stone_Block(block);
+		}
+        else //block.color==other_side[self.side]
+		{
+			score = -this.Score_Stone_Block(block);
+		}
+	}
+    return score;
+};
+
+Board.prototype.Score_Position = function()
+{
+    /* Score position.
+       Analyze position and then sum score for all blocks.
+       All blocks whose status we know will get full score.
+       Returned score is from side to move viewpoint.
+    */
+    var score = 0;
+    this.Analyze_Unconditional_Status();
+    for (block in this.Iterate_Blocks(BLACK+WHITE+EMPTY))
+	{
+        score = score + this.Score_Block(block);
+	}
+    return score;
+};
+
+Board.prototype.Unconditional_Score = function(color)
+{
+    var score = 0;
+    this.Analyze_Unconditional_Status();
+    for (var block in this.Iterate_Blocks(WHITE+BLACK+EMPTY))
+	{
+        if ((block.status == (color + " territory")) || (block.color == color && block.status == "alive") || (block.color == other_side[color] && block.status == "dead"))
+		{
+            score = score + block.Size();
+		}
+	}
+    return score;
+};
+
+Board.prototype.toString = function()
+{
+    /* Convert position to string suitable for printing to screen.
+       Returns board as string.
+    */
+    var s = this.side + " to move:\n";
+    s = s + "Captured stones: ";
+    s = s + "White: " + this.captures[WHITE].toString();
+    s = s + " Black: " + this.captures[BLACK].toString() + "\n";
+    var board_x_coords = "   " + x_coords_string[:this.size]; //TODO: No idea what this is trying to do
+    s = s + board_x_coords + "\n";
+    s = s + "  +" + "-"*this.size + "+\n";
+
+	var board_y_coord = "";
+    for (var y in range(this.size, 0, -1)) //TODO: what is range()?
+	{
+        if (y < 10)
+		{
+            board_y_coord = " " + y.toString();
+		}
+        else
+		{
+            board_y_coord = y.toString();
+		}
+        var line = board_y_coord + "|";
+        for (var x in range(1, self.size+1)) //TODO: I'm uncertain about this loop as well.
+		{
+            line = line + this.goban[x,y];
+		}
+        s = s + line + "|" + board_y_coord + "\n";
+	}
+    s = s + "  +" + "-"*this.size + "+\n";
+    s = s + board_x_coords + "\n";
+    return s;
+};
+
+Board.prototype.As_String_With_Unconditional_Status = function()
+{
+    /*Convert position to string suitable for printing to screen.
+       
+       Each position gets corresponding character as defined here:
+       Empty          : .
+       Black          : X
+       White          : O
+       Alive black    : &
+       Alive white    : @
+       Dead black     : x
+       Dead white     : o
+       White territory: =
+       Black territory: :
+       
+       Returns board as string.
+    */
+	color_and_status_to_character = { //TODO: syntax for js anonymous method?
+       EMPTY + "unknown"            : EMPTY,
+       BLACK + "unknown"            : BLACK,
+       WHITE + "unknown"            : WHITE,
+       BLACK + "alive"              : "&",
+       WHITE + "alive"              : "@",
+       BLACK + "dead"               : "x",
+       WHITE + "dead"               : "o",
+       EMPTY + WHITE + " territory" : "=",
+       EMPTY + BLACK + " territory" : ":"
+    }
+    this.Analyze_Unconditional_Status();
+    var s = this.side + " to move:\n";
+    s = s + "Captured stones: ";
+    s = s + "White: " + this.captures[WHITE].toString();
+    s = s + " Black: " + this.captures[BLACK].toString() + "\n";
+    var board_x_coords = "   " + x_coords[:this.size].toString(); //TODO: not sure about this syntax
+    s = s + board_x_coords + "\n";
+    s = s + "  +" + "-"*this.size + "+\n";
+    for (var y in range(this.size, 0, -1)) //TODO: range?
+	{
+		var board_y_coord = "";
+        if (y < 10)
+		{
+            board_y_coord = " " + y.toString();
+		}
+        else
+		{
+            board_y_coord = y.toString();
+		}
+        var line = board_y_coord + "|";
+        for (var x in range(1, this.size+1)) //TODO: range?
+		{
+            var pos_as_character = color_and_status_to_character([this.goban[x,y] + this.blocks[x,y].status]);
+            line = line + pos_as_character;
+		}
+        s = s + line + "|" + board_y_coord + "\n";
+	}
+    s = s + "  +" + "-"*this.size + "+\n";
+    s = s + board_x_coords + "\n";
+    return s;
 };
