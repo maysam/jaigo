@@ -1991,3 +1991,345 @@ Game.prototype.Make_Move = function(move)
 	}
     return this.current_board;
 };
+
+Game.prototype.Undo_Move = function()
+{
+    /*undo latest move and return current board
+       or return None if at beginning.
+       Update repetition history and make previous position current.
+    */
+    if (!this.move_history) ? return null;
+    var last_move = this.move_history.pop();
+    if (last_move!=PASS_MOVE)
+	{
+        this.position_seen.splice([this.current_board.key()], 1)
+	}
+    var last_undo_log = this.undo_history.pop();
+    this.current_board.Undo_Move(last_undo_log);
+    return this.current_board;
+};
+
+Game.prototype.Iterate_Moves = function()
+{
+    /* Go through all legal moves including pass move
+    */
+    yield PASS_MOVE; //TODO: replace yield
+    for (var move in this.current_board.Iterate_Goban())
+	{
+        if (this.Legal_Move(move))
+		{
+            yield move;
+		}
+	}
+};
+
+Game.prototype.List_Moves = function()
+{
+    /* return all legal moves including pass move
+    */
+    var all_moves = [PASS_MOVE];
+    for (var move in this.current_board.Ierate_Goban())
+	{
+        if this.Legal_Move(move) ? all_moves.push(move);
+	}
+    return all_moves;
+};
+
+Game.prototype.Score_Move = function(move)
+{
+    /* Score position after move
+       and go through moves that capture block that is part of move if any.
+       Return best score from these.
+    */
+    this.Make_Move(move);
+    var cboard = this.current_board;
+    var best_score = cboard.Score_Position();
+    if (move!=PASS_MOVE)
+	{
+        var block = cboard.blocks[move];
+        var liberties = cboard.List_Block_Liberties(block);
+        //Check if this group is now in atari.
+        if (liberties.length()==1)
+		{
+            var move2 = liberties[0];
+            if (this.Make_Move(move2))
+			{
+                //get score from our viewpoint: negative of opponent score
+                var score = -cboard.Score_Position();
+                if (score > best_score)
+				{
+                   best_score = score;
+				}
+                this.Undo_Move();
+			}
+		}
+        else
+		{
+            //Check if some our neighbour group is in atari instead.
+            for (var stone in cboard.Iterate_Neighbour(move))
+			{
+                var block = cboard.blocks[stone];
+                if (block.color==cboard.side && cboard.Block_Liberties(block)==1)
+				{
+                    //make_move later changes block.neighbour dictionary in some cases so this is needed
+                    for (var block2 in list(cboard.Iterate_Neighbour_Blocks(block))) // TODO: what is list()?
+					{
+                        var liberties = cboard.List_Block_Liberties(block2);
+                        if (liberties.length()==1)
+						{
+                            var move2 = liberties[0];
+                            if (this.Make_Move(move2))
+							{
+                                //get score from our viewpoint: negative of opponent score
+                                var score = -cboard.Score_Position();
+                                if (score > best_score) ? best_score = score;
+                                this.Undo_Move();
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+    this.Undo_Move();
+    return best_score;
+};
+
+Game.prototype.Select_Scored_Move = function(remove_opponent_dead, pass_allowed) //TODO: is this a matching pattern, or an optional argument, or an initial assignment. I assume it's the last.
+
+{
+	remove_opponent_dead = false;
+	pass_allowed = true;
+    /* Go through all legal moves.
+       Keep track of best score and all moves that achieve it.
+       Select one move from best moves and return it.
+    */
+    var territory_moves_forbidden = pass_allowed;
+    var base_score = this.current_board.Score_Position();
+    if (debug_flag)
+	{
+        //print "?", base_score
+	}
+    //if abs(base_score)==self.size**2:
+    //    import pdb; pdb.set_trace()
+    var has_unknown_status_block = this.current_board.Has_Block_Status(WHITE+BLACK+EMPTY, "unknown"); //TODO: not sure how this call works
+    var has_opponent_dead_block = this.current_board.Has_Block_Status(other_side[this.current_board.side], "dead");
+    //has unsettled blocks
+    if (has_unknown_status_block) ? pass_allowed = false;
+    //dead removal has been requested and there are dead opponent stones
+    if (remove_opponent_dead && has_opponent_dead_block)
+	{
+        territory_moves_forbidden = false;
+        pass_allowed = false;
+	}
+    if (territory_moves_forbidden)
+	{
+        forbidden_moves = this.current_board.Territory_As_Dict();
+	}
+    else
+	{
+        forbidden_moves = [];
+	}
+    var best_score = WORST_SCORE;
+    var best_moves = [];
+    for(var move in this.Iterate_Moves())
+	{
+        if (move in forbidden_moves) ? continue;
+        score = -this.Score_Move(move) - base_score;
+        //self.make_move(move)
+        //get score from our viewpoint: negative of opponent score
+        //score = -self.current_board.score_position() - base_score
+        //score = -self.score_position() - base_score
+        if (debug_flag)
+		{
+            //print score, move_as_string(move, self.size)
+		}
+        //self.undo_move()
+        //Give pass move slight bonus so its preferred among do nothing moves
+        if (move==PASS_MOVE)
+		{
+            if (!pass_allowed) ? continue;
+            score = score + 0.001;
+		}
+        if (score >= best_score)
+		{
+            if (score > best_score)
+			{
+               best_score = score;
+               best_moves = [];
+			}
+            best_moves.push(move);
+		}
+	}
+    if (debug_flag)
+	{	
+        //print "!", best_score, map(lambda m,s=self.size:move_as_string(m, s), best_moves)
+	}
+    if (best_moves.length()==0) ? return PASS_MOVE;
+    return random.choice(best_moves); //TODO: what is random.choice?
+};
+
+Game.prototype.Place_Free_Handicap = function(count)
+{
+     var result = [];
+     var move_candidates = [];
+     for (var move in this.current_board.Iterate_Goban())
+	{
+         if (this.current_board.Is_3x3_Empty(move))
+		{
+             move_candidates.push(move);
+		}
+	}
+    while (result.length() < count)
+	{
+		if (this.current_board.side==WHITE)
+		{
+             this.Make_Move(PASS_MOVE);
+		}
+         if (move_candidates)
+		{
+             move = random.choice(move_candidates); //TODO: what is random.choice()?
+		}
+        else
+		{
+             move = PASS_MOVE;
+		}
+        //check if heuristics is correct, if not, then we use normal move generation routine
+        var current_score = this.current_board.Score_Position();
+        var score_diff = -this.Score_Move(move) - current_score;
+        //0.001: because floating point math is inaccurate
+        if (score_diff + 0.001 < normal_stone_value_ratio)
+		{
+             if (debug_flag)
+			{
+                 //print self.current_board
+                 //print move, score_diff
+			}
+            move = this.Select_Scored_Move(pass_allowed=false);
+		}
+        if (this.make_move(move)) ? result.push(move);
+        if (move in move_candidates)
+		{
+             move_candidates.remove(move);
+		}
+	}
+    return result;
+};
+
+Game.prototype.Final_Status_List = function(status)
+{
+    /* list blocks with given color and status
+    */
+    var result_list = [];
+    this.current_board.Analyze_Unconditional_Status();
+    for (var block in this.current_board.Iterate_Blocks(WHITE+BLACK))
+	{
+        if (block.status==status)
+		{
+            result_list.push(block.Get_Origin());
+		}
+	}
+    return result_list;
+};
+
+Game.prototype.Select_Random_Move = function()
+{
+    /* return randomly selected move from all legal moves
+    */
+    return random.choice(this.list_moves()) //TODO: what is random.choice()?
+};
+
+Game.prototype.Select_Random_No_Eye_Fill_Move = function()
+{
+    /* return randomly selected move from all legal moves but don't fill our own eyes
+       not that this doesn't make difference between true 1 space eye and 1 space false eye
+    */
+    var all_moves = [];
+    var eye_moves = [];
+    var capture_or_defence_moves = [];
+    var make_eye_moves = [];
+    var remove_liberty = [];
+    var board = this.current_board;
+    for (var move in board.Iterate_Goban())
+	{
+        if (this.Legal_Move(move))
+		{
+            for (var pos in board.Iterate_Neighbour(move))
+			{
+                if (board.goban[pos]!=board.side)
+				{
+                    all_moves.push(move);
+                    break;
+				}
+            	else
+				{
+                	eye_moves.push(move);
+				}
+			}
+            for (var pos in board.Iterate_Neighbour(move))
+			{
+                if (board.goban[pos]!=EMPTY and board.liberties(pos)==1)
+				{
+                	capture_or_defence_moves.push(move);
+                    break;
+				}
+			}
+			for (var pos in board.Iterate_Neighbour(move))
+			{			
+                if (board.goban[pos]==EMPTY)
+				{
+    				for (var pos2 in board.Iterate_Neighbour(move))
+					{
+                        if (pos2!=move && board.goban[pos2]!=board.side)
+						{
+                            break;
+						}
+	                    else
+						{
+	                        make_eye_moves.append(move)
+						}
+					}
+				}
+			}
+            for (var pos in board.Iterate_Neighbour(move))
+			{
+                if (board.goban[pos]==other_side[board.side])
+				{
+    				for (var pos2 in board.Iterate_Neighbour(move))
+					{
+                        if (board.goban[pos2]==board.side)
+						{
+                            remove_liberty.push(move);
+						}
+                        break;
+					}
+                    break;
+				}
+			}
+		}
+	}
+	//TODO: are these conditionals syntax correct?
+    if (capture_or_defence_moves) ? return random.choice(capture_or_defence_moves); //TODO: random.choice?
+    if (make_eye_moves) ? return random.choice(make_eye_moves);
+    if (remove_liberty) ? return random.choice(remove_liberty);
+    if (all_moves)
+	{
+ 		return random.choice(all_moves);
+	}
+    else
+	{
+        //if len(eye_moves)>=6:
+        //    return random.choice(eye_moves)
+        return PASS_MOVE;
+	}
+};
+
+Game.prototype.Generate_Move = function(remove_opponent_dead, pass_allowed) //TODO: is this a matching pattern, or an optional argument, or an initial assignment. I assume it's the last.
+{
+	remove_opponent_dead = false;
+	pass_allowed;
+    /* generate move using scored move generator
+    */
+    //return self.select_random_move()
+    return this.Select_Scored_Move(remove_opponent_dead, pass_allowed);
+};
