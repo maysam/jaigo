@@ -11,18 +11,36 @@ var BOTH = BLACK + WHITE;
 
 other_side = {BLACK: WHITE, WHITE: BLACK};
 
-function Move(x, y) {
+/* Douglas Crockford's prototypal
+   inheritance fn */
+function object(o) {
+    function F() {}
+    F.prototype = o;
+    return new F();
+}
+function Pair(x, y) {
     this.x = x;
     this.y = y;
-    Move.prototype.equals = function (move) {
-	for (e in move) {
-	    if (this[e] != move[e]) return false;
-        }
-	return true;
-    };
+}
+deepValueEquality = function (other) {
+    for (e in other) {
+	if (this[e] != other[e]) return false;
+    }
+    return true;
+};
+Pair.prototype.equals = deepValueEquality;
+function move(x, y) {
+    return object(new Pair(x, y));
 }
 
-PASS_MOVE = new Move(-1, -1);
+function contains(sequence, quarry, eq) {
+    for (var x in sequence) {
+	if (eq(quarry, x)) return true;
+    }
+    return false;
+}
+
+PASS_MOVE = move(-1, -1);
 
 function move_as_string(move, board_size)
 {
@@ -45,7 +63,7 @@ function string_as_move(m, size)
     }
     x = x_coords_string.indexOf(m.charAt(0));
     y = m.charAt(1);
-    return new Move(x,y);
+    return move(x,y);
 }
 
 /* Block class
@@ -234,10 +252,11 @@ Board.prototype.Iterate_Neighbour = function(pos)
        up, right, down, left
        Example usage: see legal_move method
     */
-    var x, y = pos;
-    for (var x2,y2 in ((x,y+1), (x+1,y), (x,y-1), (x-1,y)))
+    var x = pos.x;
+    var y = pos.y;
+    for (var x2y2 in [new Pair(x,y+1), new Pair(x+1,y), new Pair(x,y-1), new Pair(x-1,y)])
 	{
-    	if (1<=x2<=this.board_size and 1<=y2<=this.board_size)
+    	if (1 <= x2y2.x && x2y2.x <= this.board_size && 1 <= x2y2.y && x2y2.y <= this.board_size)
 		{
         	//TODO: yield (x2, y2);
 		}
@@ -250,10 +269,11 @@ Board.prototype.Iterate_Diagonal_Neighbour = function(pos)
        NE, SE, SW, NW
        Example usage: see analyse_eye_point method
     */
-    var x, y = pos;
-    for (var x2,y2 in ((x+1,y+1), (x+1,y-1), (x-1,y-1), (x-1,y+1)))
+    var x = pos.x;
+    var y = pos.y;
+    for (var x2y2 in [new Pair(x+1,y+1), new Pair(x+1,y-1), new Pair(x-1,y-1), new Pair(x-1,y+1)])
 	{
-        if (1<=x2<=this.board_size and 1<=y2<=this.board_size)
+        if (1 <= x2y2.x && x2y2.x <= this.board_size && 1 <= x2y2.y && x2y2.y <=this.board_size)
 		{	
 		    //TODO: yield (x2, y2);
 		}
@@ -296,7 +316,7 @@ Board.prototype.Iterate_Neighbour_Eye_Blocks = function(eye)
 	   Then go through all neighbour positions and add new blocks.
 	   Return once for each new block
 	*/
-	var blocks_seen = eye.parts[:]; //TODO: what the heck is [:]?
+        var blocks_seen = object(eye.parts);
 	for (var block in eye.parts)
 	{
 		for (var pos in block.neighbour)
@@ -384,13 +404,15 @@ Board.prototype.List_Empty_3x3_Neighbour = function(pos)
             diagonal_neighbour_list.append(pos2);
 		}
 	}            
-    return neighbour_list, diagonal_neighbour_list
+    return new Pair(neighbour_list, diagonal_neighbour_list);
 };
 
 Board.prototype.Is_3x3_Empty = function(pos)
 {
-    if this.goban[pos]!= EMPTY ? return false;
-    var neighbour_list, diagonal_neighbour_list = this.List_Empty_3x3_Neighbour(pos);
+    if (this.goban[pos]!= EMPTY) return false;
+    var neighbors = this.List_Empty_3x3_Neighbour(pos);
+    var neighbour_list = neighbors.x;
+    var diagonal_neighbour_list = neighbors.y;
     if (neighbour_list.length==4 && diagonal_neighbour_list.length==4)
 	{
         return true;
@@ -422,7 +444,7 @@ Board.prototype.Simple_Same_Block = function(pos_list)
 			}
 		}
 	}    
-    var new_mark = 2 //When stones are added they get by default value True (==1)
+    var new_mark = 2; //When stones are added they get by default value True (==1)
     this.flood_mark(temp_block, pos_list[0], new_mark);
     for (var pos in pos_list)
 	{
@@ -450,7 +472,7 @@ Board.prototype.Add_Stone = function(color, pos)
     var old_block = this.blocks[pos];
     old_color = old_block.color;
     old_block.Remove_Stone(pos);
-    if (old_block.Size()==0)
+    if (old_block.Size() === 0)
 	{
         this.block_list.Remove(old_block);
 	}
@@ -527,7 +549,7 @@ Board.prototype.Add_Stone = function(color, pos)
         for (var pos2 in split_list)
 		{
             var other_block = this.blocks[pos2];
-            if (other_block.stones[pos2]==0)
+            if (other_block.stones[pos2] === 0)
 			{
                 last_old_mark = last_old_mark + 1;
                 this.Flood_Mark(other_block, pos2, last_old_mark);
@@ -572,7 +594,7 @@ Board.prototype.Combine_Blocks = function(new_block, other_block)
     /*add all stones from other block to new block
        make board positions to point at new block
     */
-    if (new_block==other_block) ? return new_block;
+    if (new_block==other_block) return new_block;
     if (new_block.Size() < other_block.Size())
 	{
         //Optimization: for example if new_block size is one as is usually case and other_block is most of board as is often case when combining empty point to mostly empty board.
@@ -615,7 +637,7 @@ Board.prototype.Flood_Mark = function(block, start_pos, mark)
     while (to_mark) //TODO: what will a javascript while do when given to_mark?
 	{
         var pos = to_mark.pop();
-        if (block.stones[pos]==mark) ? continue;
+        if (block.stones[pos]==mark) continue;
         block.stones[pos] = mark;
         for (var pos2 in this.Iterate_Neighbour(pos))
 		{
@@ -692,12 +714,12 @@ Board.prototype.Liberties = function(pos)
     return this.Block_Liberties(this.blocks[pos]);
 };
 
-Board.prototype.Initialize_Undo_Log()
+Board.prototype.Initialize_Undo_Log = function()
 {
     /*Start new undo log
     */
     this.undo_log = [];
-}
+};
 
 Board.prototype.Add_Undo_Info = function(method, color, pos)
 {
@@ -705,10 +727,10 @@ Board.prototype.Add_Undo_Info = function(method, color, pos)
        at start of log.
        Its added to start because changes are undone in reverse direction.
     */
-    this.undo_log.insert(0, (method, color, pos)); //TODO: what is the js insert equiv?
+    this.undo_log.splice(0, 0, [method, color, pos]);
 };
 
-Board.prototype.Apply_Undo_Info(method, color, pos)
+Board.prototype.Apply_Undo_Info = function(method, color, pos)
 {
     /*Apply given change to undo part of move.
     */
@@ -720,7 +742,7 @@ Board.prototype.Apply_Undo_Info(method, color, pos)
 	{
         this.Change_Block_Color(color, pos);
 	}
-}
+};
 
 Board.prototype.Legal_Move = function(move)
 {
@@ -731,13 +753,13 @@ Board.prototype.Legal_Move = function(move)
 	{
         return true;
 	}
-    if (this.goban.indexOf(move) == -1) ? return false;
-    if (self.goban[move]!=EMPTY) ? return false;
+    if (this.goban.indexOf(move) == -1) return false;
+    if (self.goban[move]!=EMPTY) return false;
     for (var pos in this.Iterate_Neighbour(move))
 	{
-        if (this.goban[pos]==EMPTY) ? return true;
-        if (this.goban[pos]==this.side && this.Liberties(pos)>1) ? return true;
-        if (this.goban[pos]==other_side[this.side] and this.Liberties(pos)==1) ? return true;
+        if (this.goban[pos]==EMPTY) return true;
+        if (this.goban[pos]==this.side && this.Liberties(pos)>1) return true;
+        if (this.goban[pos]==other_side[this.side] && this.Liberties(pos)==1) return true;
 	}
     return false;
 };
@@ -750,7 +772,7 @@ Board.prototype.Make_Move = function(move)
        Then we make move and remove captured opponent groups if there are any.
        While making move record what is needed to undo the move.
     */
-    this.Initialize_Undo_Log()
+    this.Initialize_Undo_Log();
     if (move==PASS_MOVE)
 	{
         this.Change_Side();
@@ -758,12 +780,12 @@ Board.prototype.Make_Move = function(move)
 	}
     if (this.Legal_Move(move))
 	{
-        this.Add_Stone(this.side, move)
-        this.Add_Undo_Info("add_stone", EMPTY, move)
+	this.Add_Stone(this.side, move);
+	this.Add_Undo_Info("add_stone", EMPTY, move);
         var remove_color = other_side[this.side];
         for (var pos in this.Iterate_Neighbour(move))
 		{
-            if (this.goban[pos]==remove_color && this.Liberties(pos)==0)
+            if (this.goban[pos] == remove_color && this.Liberties(pos) === 0)
 			{
                 this.Remove_Block(pos);
                 this.Add_Undo_Info("change_block_color", remove_color, pos);
@@ -780,9 +802,12 @@ Board.prototype.Undo_Move = function(undo_log)
 	/*Undo move using undo_log.
 	*/
     this.Change_Side();
-    for (var method, color, pos in undo_log) //TODO: can you iterate in js like this? If not, what object is being pulled from undo_log?
+    for (var method_color_pos in undo_log)
 	{
-        this.Apply_Undo_Info(method, color, pos);
+	    this.Apply_Undo_Info(
+				 method_color_pos[0],
+				 method_color_pos[1],
+				 method_color_pos[2]);
 	}
 };
 
@@ -830,22 +855,22 @@ Board.prototype.Analyse_Eye_Point = function(pos, other_color)
 	}
     for (var pos2 in this.Iterate_Neighbour(pos))
 	{
-        if this.goban[pos2]==other_color ? return null;
+	    if (this.goban[pos2]==other_color) return null;
 	}
     var total_count = 0;
     var other_count = 0;
     for (var pos2 in this.Iterate_Diagonal_Neighbour(pos))
 	{
         total_count = total_count + 1;
-        if (this.goban[pos2]==other_color) ? other_count = other_count + 1;
+        if (this.goban[pos2]==other_color) other_count = other_count + 1;
 	}
     if (total_count==4)
 	{
-        if (other_count > 1) ? return false : return true;
+	    return (!(other_count > 1));
 	}
     else
 	{
-        if (other_count > 0) ? return false : return true;
+	    return (!(other_count > 0));
 	}
 };
 
@@ -873,18 +898,18 @@ Board.prototype.Analyse_Opponent_Stone_As_Eye_Point = function(pos)
     for (var pos2 in this.Iterate_Diagonal_Neighbour(pos))
 	{
         total_count = total_count + 1;
-        if (this.goban[pos2]==color and this.blocks[pos2].status=="alive")
+        if (this.goban[pos2]==color && this.blocks[pos2].status=="alive")
 		{
             other_count = other_count + 1;
 		}
 	}
     if (total_count==4)
 	{
-        if (other_count > 1) ? return false : return true;
+	    return (!(other_count > 1));
 	}
     else
 	{
-        if (other_count > 0) ? return false : return true;
+	    return (!(other_count > 0));
 	}
 };
 
@@ -1200,20 +1225,20 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
     var eye_list = [];
     var not_ok_eye_list = []; //these might still contain dead groups if totally inside live group
     var eye_colors = EMPTY + other_side[color]; //TODO: I don't understand this assignment
-    for (block in self.iterate_blocks(EMPTY+WHITE+BLACK))
+    for (var block in self.iterate_blocks(EMPTY+WHITE+BLACK))
 {
         block.eye = null;
 }
     for (block in this.Iterate_Blocks(eye_colors))
 	{
-        if (block.eye) ? continue; //TODO: not sure how js will evaluate that conditional
+        if (block.eye) continue; //TODO: not sure how js will evaluate that conditional
         var current_eye = new Eye();
         eye_list.push(current_eye);
         var blocks_to_process = [block];
         while (blocks_to_process) //TODO: not sure how js will evaluate this conditional
 		{
             var block2 = blocks_to_process.pop();
-            if (block2.eye) ? continue;
+            if (block2.eye) continue;
             block2.eye = current_eye;
             current_eye.parts.push(block2);
             for (var pos in block2.neighbour)
@@ -1234,19 +1259,19 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
         eye_is_ok = false;
         for (var stone in eye.Iterate_Stones())
 		{
-            if (this.goban[stone]!=EMPTY) ? continue;
+            if (this.goban[stone]!=EMPTY) continue;
             eye_is_ok = true;
             var our_blocks = [];
             for (var pos in this.Iterate_Neighbour(stone))
 			{
                 var block = this.blocks[pos];
-                if (block.color==color && (our_blocks.indexOf(block) != -1))
+                if (block.color == color && (our_blocks.indexOf(block) !== -1))
 				{
                     our_blocks.push(block);
 				}
 			}
             //list of blocks different than earlier
-            if ((prev_our_blocks!=null) && (prev_our_blocks != our_blocks))
+            if ((prev_our_blocks !== null) && (prev_our_blocks != our_blocks))
 			{
                 var ok_our_blocks = [];
                 for (var block in our_blocks)
@@ -1296,10 +1321,10 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
         for(var block in this.Iterate_Blocks(color))
 		{
             //not really needed but short and probably useful optimization
-            if (block.eye_count < 2) ? continue;
+            if (block.eye_count < 2) continue;
             //count eyes
             var block_eye_list = [];
-            for (stone in block.neighbour)
+            for (var stone in block.neighbour)
 			{
                 var eye = this.blocks[stone].eye;
                 if (eye && block_eye_list.indexOf(eye) == -1) //TODO: how will js evaluate 'eye' in conditional? what is the point of using eye?
@@ -1311,7 +1336,7 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
             block.eye_count = 0;
             for (var eye in block_eye_list)
 			{
-                if (var block in eye.our_blocks)
+			    if (contains(eye.our_blocks, block, deepValueEquality))
 				{
                     block.eye_count = block.eye_count + 1;
 				}
@@ -1350,7 +1375,7 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
 			}
             eye_list = ok_eye_list;
 		}
-        if (changed_count == 0)
+        if (changed_count === 0)
 		{
             break;
 		}
@@ -1376,7 +1401,7 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
 	}
     for (eye_group in not_ok_eye_list)
 	{
-        if (eye_group.dead_analysis_done) ? continue;
+        if (eye_group.dead_analysis_done) continue;
         eye_group.dead_analysis_done = true;
         var true_eye_list = [];
         var false_eye_list = [];
@@ -1387,7 +1412,7 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
         var has_unconditional_neighbour_block = false;
         var maybe_dead_group = new Eye();
         var blocks_analysed = [];
-        var blocks_to_analyse = eye_group.parts[:]; //TODO: what is [:]?
+        var blocks_to_analyse = object(eye_group.parts);
         while ((blocks_to_analyse.length > 0) && two_eyes_impossible)
 		{
             var block = blocks_to_analyse.pop();
@@ -1424,18 +1449,18 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
 				{
                     continue;
 				}
-                if (eye_type==null)
+                if (eye_type === null)
 				{
                     continue;
 				}
-                if (eye_type==true)
+                if (eye_type === true)
 				{
-                    if (true_eye_list.length == 2)
+                    if (true_eye_list.length === 2)
 					{
                         two_eyes_impossible = false;
                         break;
 					}
-                    else if (true_eye_list.length == 1)
+                    else if (true_eye_list.length === 1)
 					{
                         if (this.Are_Adjacent_Points(pos, true_eye_list[0]))
 						{
@@ -1490,7 +1515,7 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
                     eye_block.Remove_Stone(eye);
 				}
                 //Split group by eyes.
-                var new_mark = 2 //When stones are added they get by default value true (==1)
+                var new_mark = 2; //When stones are added they get by default value true (==1)
                 for (var eye in both_eye_list)
 				{
                     for (var pos in this.Iterate_Neighbour(eye))
@@ -1594,7 +1619,7 @@ Board.prototype.Has_Block_Status = function(colors, status)
 {
     for (var block in this.Iterate_Blocks(colors))
 	{
-        if (block.status==status) ? return true;
+        if (block.status==status) return true;
 	}
     return false;
 };
@@ -1723,7 +1748,7 @@ Board.prototype.Score_Stone_Block = function(block)
 			}
 		}
         var liberty_ratio = liberties / block.Max_Liberties();
-        score = block.Size() * normal_stone_value_ratio * (1 - (1-liberty_ratio)**2); //TODO: what is the ** operator?
+        score = block.Size() * normal_stone_value_ratio * (1 - pow(1-liberty_ratio, 2));
 	}
     return score;
 };
