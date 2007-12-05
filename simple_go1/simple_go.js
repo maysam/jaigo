@@ -1915,3 +1915,79 @@ Board.prototype.As_String_With_Unconditional_Status = function()
     s = s + board_x_coords + "\n";
     return s;
 };
+
+/* Game class: record and move generation
+
+   Attributes:
+   size: board size
+   current_board: current board position
+   move_history: past moves made
+   undo_history: undo info for each past move
+   position_seen: keeps track of position seen: this is used for super-ko detection
+*/
+
+function Game(size)
+{
+        /*Initialize game:
+           argument: size
+        */
+        this.size = size;
+        this.current_board = new Board(size);
+        this.move_history = [];
+        this.undo_history = [];
+        this.position_seen = [];
+        this.position_seen[this.current_board.Key()] = true;
+};
+
+Game.prototype.Make_Unchecked_Move = function(move)
+{
+    /* This is utility method.
+       This does not check legality.
+       It makes move in current_board and returns undo log and also key of new board
+    */
+    this.current_board.Make_Move(move);
+    var undo_log = this.current_board.undo_log;
+    var board_key = this.current_board.Key();
+    return undo_log, board_key; //TODO: can a return work with a tuple like this?
+};
+
+Game.prototype.Legal_Move = function(move)
+{
+    /* check whether move is legal
+       return truth value
+       first check move legality on current board
+       then check for repetition (situational super-ko)
+    */
+
+    if (move==PASS_MOVE) ? return true;
+    if (!this.current_board.Legal_Move(move)) ? return false;
+    var undo_log, board_key = this.Make_Unchecked_Move(move); //TODO: going back to the earlier question on returning a tuple, does this assignment work?
+    this.current_board.Undo_Move(undo_log);
+    if(var board_key in this.position_seen) ? return false;
+    return true;
+};
+
+Game.prototype.Make_Move = function(move)
+{
+    /* make given move and return new board
+       or return None if move is illegal
+       First check move legality.
+       This checks for move legality for itself to avoid extra make_move/make_undo.
+       This is a bit more complex but maybe 2-3x faster.
+       Then make move and update history.
+    */
+    if (!this.current_board.Legal_Move(move)) ? return null;
+    var undo_log, board_key = this.Make_Unchecked_Move(move); //TODO: see earlier question
+    if (move!=PASS_MOVE && (this.position_seen.indexOf(board_key) == -1))
+	{
+        this.current_board.Undo_Move(undo_log);
+        return null;
+	}
+    this.undo_history.Append(undo_log);
+    this.move_history.Append(move);
+    if (move!=PASS_MOVE)
+	{
+        this.position_seen[board_key] = true;
+	}
+    return this.current_board;
+};
