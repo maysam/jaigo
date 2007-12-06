@@ -1882,7 +1882,7 @@ Board.prototype.toString = function()
         var line = board_y_coord + "|";
         for (var x in range(1, self.size+1)) //TODO: I'm uncertain about this loop as well.
 		{
-            line = line + this.goban[x,y];
+            line = line + this.goban[x][y];
 		}
         s = s + line + "|" + board_y_coord + "\n";
 	}
@@ -1908,17 +1908,20 @@ Board.prototype.As_String_With_Unconditional_Status = function()
        
        Returns board as string.
     */
-	color_and_status_to_character = { //TODO: syntax for js anonymous method?
-       EMPTY + "unknown"            : EMPTY,
-       BLACK + "unknown"            : BLACK,
-       WHITE + "unknown"            : WHITE,
-       BLACK + "alive"              : "&",
-       WHITE + "alive"              : "@",
-       BLACK + "dead"               : "x",
-       WHITE + "dead"               : "o",
-       EMPTY + WHITE + " territory" : "=",
-       EMPTY + BLACK + " territory" : ":"
-    }
+    var color_and_status_to_character =
+      function () {
+	var c = {};
+	c[EMPTY + "unknown"] = EMPTY;
+	c[BLACK + "unknown"] = BLACK;
+	c[WHITE + "unknown"] = WHITE;
+	c[BLACK + "alive"] = "&";
+	c[WHITE + "alive"] = "@";
+	c[BLACK + "dead"] = "x";
+	c[WHITE + "dead"] = "o";
+	c[EMPTY + WHITE + " territory"] = "=";
+	c[EMPTY + BLACK + " territory"] = ":";
+	return c;
+      }();
     this.Analyze_Unconditional_Status();
     var s = this.side + " to move:\n";
     s = s + "Captured stones: ";
@@ -1941,7 +1944,7 @@ Board.prototype.As_String_With_Unconditional_Status = function()
         var line = board_y_coord + "|";
         for (var x in range(1, this.size+1)) //TODO: range?
 		{
-            var pos_as_character = color_and_status_to_character([this.goban[x,y] + this.blocks[x,y].status]);
+		    var pos_as_character = color_and_status_to_character[this.goban[x][y] + this.blocks[x][y].status];
             line = line + pos_as_character;
 		}
         s = s + line + "|" + board_y_coord + "\n";
@@ -1972,18 +1975,18 @@ function Game(size)
         this.undo_history = [];
         this.position_seen = [];
         this.position_seen[this.current_board.Key()] = true;
-};
+}
 
-Game.prototype.Make_Unchecked_Move = function(move)
+Game.prototype.Make_Unchecked_Move = function(m)
 {
     /* This is utility method.
        This does not check legality.
        It makes move in current_board and returns undo log and also key of new board
     */
-    this.current_board.Make_Move(move);
+    this.current_board.Make_Move(m);
     var undo_log = this.current_board.undo_log;
     var board_key = this.current_board.Key();
-    return undo_log, board_key; //TODO: can a return work with a tuple like this?
+    return move(undo_log, board_key);
 };
 
 Game.prototype.Legal_Move = function(move)
@@ -2002,7 +2005,7 @@ Game.prototype.Legal_Move = function(move)
     }
     var undo_log, board_key = this.Make_Unchecked_Move(move); //TODO: going back to the earlier question on returning a tuple, does this assignment work?
     this.current_board.Undo_Move(undo_log);
-    if(var board_key in this.position_seen) {
+    if (contains(position_seen, board_key, deepValueEquality)) {
 	return false;
     }
     return true;
@@ -2047,7 +2050,7 @@ Game.prototype.Undo_Move = function()
     var last_move = this.move_history.pop();
     if (last_move!=PASS_MOVE)
 	{
-        this.position_seen.splice([this.current_board.key()], 1)
+	    this.position_seen.splice(this.current_board.key(), 1);
 	}
     var last_undo_log = this.undo_history.pop();
     this.current_board.Undo_Move(last_undo_log);
@@ -2058,12 +2061,12 @@ Game.prototype.Iterate_Moves = function()
 {
     /* Go through all legal moves including pass move
     */
-    yield PASS_MOVE; //TODO: replace yield
+    //TODO: yield PASS_MOVE;
     for (var move in this.current_board.Iterate_Goban())
 	{
         if (this.Legal_Move(move))
 		{
-            yield move;
+		    //TODO: yield move;
 		}
 	}
 };
@@ -2164,26 +2167,26 @@ Game.prototype.Select_Scored_Move = function(remove_opponent_dead, pass_allowed)
     var has_unknown_status_block = this.current_board.Has_Block_Status(WHITE+BLACK+EMPTY, "unknown"); //TODO: not sure how this call works
     var has_opponent_dead_block = this.current_board.Has_Block_Status(other_side[this.current_board.side], "dead");
     //has unsettled blocks
-    if (has_unknown_status_block) ? pass_allowed = false;
+	if (has_unknown_status_block) {
+	    pass_allowed = false;
+	}
     //dead removal has been requested and there are dead opponent stones
     if (remove_opponent_dead && has_opponent_dead_block)
 	{
         territory_moves_forbidden = false;
         pass_allowed = false;
 	}
-    if (territory_moves_forbidden)
-	{
-        forbidden_moves = this.current_board.Territory_As_Dict();
-	}
-    else
-	{
-        forbidden_moves = [];
-	}
+    forbidden_moves =
+	territory_moves_forbidden ?
+        this.current_board.Territory_As_Dict() :
+	[];
     var best_score = WORST_SCORE;
     var best_moves = [];
     for(var move in this.Iterate_Moves())
 	{
-        if (move in forbidden_moves) ? continue;
+	    if (move in forbidden_moves) {
+		continue;
+	    }
         score = -this.Score_Move(move) - base_score;
         //self.make_move(move)
         //get score from our viewpoint: negative of opponent score
@@ -2197,7 +2200,9 @@ Game.prototype.Select_Scored_Move = function(remove_opponent_dead, pass_allowed)
         //Give pass move slight bonus so its preferred among do nothing moves
         if (move==PASS_MOVE)
 		{
-            if (!pass_allowed) ? continue;
+		    if (!pass_allowed) {
+			continue;
+		    }
             score = score + 0.001;
 		}
         if (score >= best_score)
@@ -2214,7 +2219,9 @@ Game.prototype.Select_Scored_Move = function(remove_opponent_dead, pass_allowed)
 	{	
         //print "!", best_score, map(lambda m,s=self.size:move_as_string(m, s), best_moves)
 	}
-    if (best_moves.length()==0) ? return PASS_MOVE;
+	if (best_moves.length() === 0) {
+	    return PASS_MOVE;
+	}
     return random.choice(best_moves); //TODO: what is random.choice?
 };
 
@@ -2256,7 +2263,9 @@ Game.prototype.Place_Free_Handicap = function(count)
 			}
             move = this.Select_Scored_Move(pass_allowed=false);
 		}
-        if (this.make_move(move)) ? result.push(move);
+		if (this.make_move(move)) {
+		    result.push(move);
+		}
         if (move in move_candidates)
 		{
              move_candidates.remove(move);
@@ -2285,7 +2294,7 @@ Game.prototype.Select_Random_Move = function()
 {
     /* return randomly selected move from all legal moves
     */
-    return random.choice(this.list_moves()) //TODO: what is random.choice()?
+    return random.choice(this.list_moves()); //TODO: what is random.choice()?
 };
 
 Game.prototype.Select_Random_No_Eye_Fill_Move = function()
@@ -2317,7 +2326,7 @@ Game.prototype.Select_Random_No_Eye_Fill_Move = function()
 			}
             for (var pos in board.Iterate_Neighbour(move))
 			{
-                if (board.goban[pos]!=EMPTY and board.liberties(pos)==1)
+                if (board.goban[pos] != EMPTY && board.liberties(pos) === 1)
 				{
                 	capture_or_defence_moves.push(move);
                     break;
@@ -2335,7 +2344,7 @@ Game.prototype.Select_Random_No_Eye_Fill_Move = function()
 						}
 	                    else
 						{
-	                        make_eye_moves.append(move)
+						    make_eye_moves.append(move);
 						}
 					}
 				}
@@ -2358,9 +2367,15 @@ Game.prototype.Select_Random_No_Eye_Fill_Move = function()
 		}
 	}
 	//TODO: are these conditionals syntax correct?
-    if (capture_or_defence_moves) ? return random.choice(capture_or_defence_moves); //TODO: random.choice?
-    if (make_eye_moves) ? return random.choice(make_eye_moves);
-    if (remove_liberty) ? return random.choice(remove_liberty);
+    if (capture_or_defence_moves) {
+	return random.choice(capture_or_defence_moves); //TODO: random.choice?
+    }
+    if (make_eye_moves) {
+	return random.choice(make_eye_moves);
+    }
+    if (remove_liberty) {
+	return random.choice(remove_liberty);
+    }
     if (all_moves)
 	{
  		return random.choice(all_moves);
