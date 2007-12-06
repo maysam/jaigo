@@ -24,7 +24,9 @@ function Pair(x, y) {
 }
 deepValueEquality = function (other) {
     for (e in other) {
-	if (this[e] != other[e]) return false;
+	if (this[e] != other[e]) {
+	    return false;
+	}
     }
     return true;
 };
@@ -35,7 +37,9 @@ function move(x, y) {
 
 function contains(sequence, quarry, eq) {
     for (var x in sequence) {
-	if (eq(quarry, x)) return true;
+	if (eq(quarry, x)) {
+	    return true;
+	}
     }
     return false;
 }
@@ -409,7 +413,9 @@ Board.prototype.List_Empty_3x3_Neighbour = function(pos)
 
 Board.prototype.Is_3x3_Empty = function(pos)
 {
-    if (this.goban[pos]!= EMPTY) return false;
+    if (this.goban[pos]!= EMPTY) {
+	return false;
+    }
     var neighbors = this.List_Empty_3x3_Neighbour(pos);
     var neighbour_list = neighbors.x;
     var diagonal_neighbour_list = neighbors.y;
@@ -594,7 +600,9 @@ Board.prototype.Combine_Blocks = function(new_block, other_block)
     /*add all stones from other block to new block
        make board positions to point at new block
     */
-    if (new_block==other_block) return new_block;
+    if (new_block==other_block) {
+	return new_block;
+    }
     if (new_block.Size() < other_block.Size())
 	{
         //Optimization: for example if new_block size is one as is usually case and other_block is most of board as is often case when combining empty point to mostly empty board.
@@ -637,7 +645,9 @@ Board.prototype.Flood_Mark = function(block, start_pos, mark)
     while (to_mark) //TODO: what will a javascript while do when given to_mark?
 	{
         var pos = to_mark.pop();
-        if (block.stones[pos]==mark) continue;
+        if (block.stones[pos]==mark) {
+	    continue;
+	}
         block.stones[pos] = mark;
         for (var pos2 in this.Iterate_Neighbour(pos))
 		{
@@ -753,13 +763,23 @@ Board.prototype.Legal_Move = function(move)
 	{
         return true;
 	}
-    if (this.goban.indexOf(move) == -1) return false;
-    if (self.goban[move]!=EMPTY) return false;
+    if (this.goban.indexOf(move) == -1) {
+	return false;
+    }
+    if (self.goban[move]!=EMPTY) {
+	return false;
+    }
     for (var pos in this.Iterate_Neighbour(move))
 	{
-        if (this.goban[pos]==EMPTY) return true;
-        if (this.goban[pos]==this.side && this.Liberties(pos)>1) return true;
-        if (this.goban[pos]==other_side[this.side] && this.Liberties(pos)==1) return true;
+	    if (this.goban[pos]==EMPTY) {
+		return true;
+	    }
+	    if (this.goban[pos]==this.side && this.Liberties(pos)>1) {
+		return true;
+	    }
+	    if (this.goban[pos]==other_side[this.side] && this.Liberties(pos)==1) {
+		return true;
+	    }
 	}
     return false;
 };
@@ -855,15 +875,18 @@ Board.prototype.Analyse_Eye_Point = function(pos, other_color)
 	}
     for (var pos2 in this.Iterate_Neighbour(pos))
 	{
-	    if (this.goban[pos2]==other_color) return null;
+	    if (this.goban[pos2]==other_color) {
+		return null;
+	    }
 	}
     var total_count = 0;
     var other_count = 0;
-    for (var pos2 in this.Iterate_Diagonal_Neighbour(pos))
-	{
+    for (var pos2 in this.Iterate_Diagonal_Neighbour(pos)) {
         total_count = total_count + 1;
-        if (this.goban[pos2]==other_color) other_count = other_count + 1;
+        if (this.goban[pos2]==other_color) {
+	    other_count = other_count + 1;
 	}
+    }
     if (total_count==4)
 	{
 	    return (!(other_count > 1));
@@ -1231,14 +1254,18 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
 }
     for (block in this.Iterate_Blocks(eye_colors))
 	{
-        if (block.eye) continue; //TODO: not sure how js will evaluate that conditional
+	    if (block.eye) {
+		continue; //TODO: not sure how js will evaluate that conditional
+	    }
         var current_eye = new Eye();
         eye_list.push(current_eye);
         var blocks_to_process = [block];
         while (blocks_to_process) //TODO: not sure how js will evaluate this conditional
 		{
             var block2 = blocks_to_process.pop();
-            if (block2.eye) continue;
+            if (block2.eye) {
+		continue;
+	    }
             block2.eye = current_eye;
             current_eye.parts.push(block2);
             for (var pos in block2.neighbour)
@@ -1259,7 +1286,9 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
         eye_is_ok = false;
         for (var stone in eye.Iterate_Stones())
 		{
-            if (this.goban[stone]!=EMPTY) continue;
+		    if (this.goban[stone]!=EMPTY) {
+			continue;
+		    }
             eye_is_ok = true;
             var our_blocks = [];
             for (var pos in this.Iterate_Neighbour(stone))
@@ -1281,7 +1310,7 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
                         ok_our_blocks.push(block);
 					}
 				}
-                our_blocks = ok_our_blocks
+                our_blocks = ok_our_blocks;
 			}
             //this empty point was not adjacent to our block or there is no block that has all empty points adjacent to it
             if (!our_blocks)
@@ -1321,7 +1350,9 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
         for(var block in this.Iterate_Blocks(color))
 		{
             //not really needed but short and probably useful optimization
-            if (block.eye_count < 2) continue;
+		    if (block.eye_count < 2) {
+			continue;
+		    }
             //count eyes
             var block_eye_list = [];
             for (var stone in block.neighbour)
@@ -1401,7 +1432,9 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
 	}
     for (eye_group in not_ok_eye_list)
 	{
-        if (eye_group.dead_analysis_done) continue;
+	    if (eye_group.dead_analysis_done) {
+		continue;
+	    }
         eye_group.dead_analysis_done = true;
         var true_eye_list = [];
         var false_eye_list = [];
@@ -1545,7 +1578,7 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
                 //main false eye loop: at end of loop check if changes
                 while (true)
 				{
-                    var changed_count = 0
+				    var changed_count = 0;
                     //Remove actual false eyes from list.
                     for (block in stone_block_list)
 					{
@@ -1556,7 +1589,7 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
                              both_eye_list.remove(eye);
                              //combine this block and eye into other blocks by 'filling' false eye
                              block.Add_Stone(eye);
-                             for (var block2 in stone_block_list[:]) //TODO: no idea what [:] means
+                             for (var block2 in object(stone_block_list))
 							{
                                  if ((block!=block2) && (block2.neighbour.indexOf(eye) != -1))
 								{
@@ -1569,7 +1602,7 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
                              break; //we have changed stone_block_list, restart
 						}
 					}
-                    if (changed_count.length == 0)
+                    if (changed_count.length === 0)
 					{
                         break;
 					}
@@ -1619,7 +1652,9 @@ Board.prototype.Has_Block_Status = function(colors, status)
 {
     for (var block in this.Iterate_Blocks(colors))
 	{
-        if (block.status==status) return true;
+	    if (block.status==status) {
+		return true;
+	    }
 	}
     return false;
 };
@@ -1732,7 +1767,7 @@ Board.prototype.Score_Stone_Block = function(block)
 	}
     else
 	{
-        var liberties = float(this.Block_Liberties(block));
+        var liberties = this.Block_Liberties(block);
         //grant half liberty for each neightbour stone in atari
         for (var block2 in this.Iterate_Neighbour_Blocks(block))
 		{
@@ -1829,7 +1864,7 @@ Board.prototype.toString = function()
     s = s + "Captured stones: ";
     s = s + "White: " + this.captures[WHITE].toString();
     s = s + " Black: " + this.captures[BLACK].toString() + "\n";
-    var board_x_coords = "   " + x_coords_string[:this.size]; //TODO: No idea what this is trying to do
+    var board_x_coords = "   " + x_coords_string.slice(0, this.size);
     s = s + board_x_coords + "\n";
     s = s + "  +" + "-"*this.size + "+\n";
 
@@ -1889,7 +1924,7 @@ Board.prototype.As_String_With_Unconditional_Status = function()
     s = s + "Captured stones: ";
     s = s + "White: " + this.captures[WHITE].toString();
     s = s + " Black: " + this.captures[BLACK].toString() + "\n";
-    var board_x_coords = "   " + x_coords[:this.size].toString(); //TODO: not sure about this syntax
+	var board_x_coords = "   " + x_coords.slice(0, this.size).toString(); //TODO: not sure about this syntax
     s = s + board_x_coords + "\n";
     s = s + "  +" + "-"*this.size + "+\n";
     for (var y in range(this.size, 0, -1)) //TODO: range?
@@ -1959,11 +1994,17 @@ Game.prototype.Legal_Move = function(move)
        then check for repetition (situational super-ko)
     */
 
-    if (move==PASS_MOVE) ? return true;
-    if (!this.current_board.Legal_Move(move)) ? return false;
+    if (move==PASS_MOVE) {
+	return true;
+    }
+    if (!this.current_board.Legal_Move(move)) {
+	return false;
+    }
     var undo_log, board_key = this.Make_Unchecked_Move(move); //TODO: going back to the earlier question on returning a tuple, does this assignment work?
     this.current_board.Undo_Move(undo_log);
-    if(var board_key in this.position_seen) ? return false;
+    if(var board_key in this.position_seen) {
+	return false;
+    }
     return true;
 };
 
@@ -1976,7 +2017,9 @@ Game.prototype.Make_Move = function(move)
        This is a bit more complex but maybe 2-3x faster.
        Then make move and update history.
     */
-    if (!this.current_board.Legal_Move(move)) ? return null;
+    if (!this.current_board.Legal_Move(move)) {
+	return null;
+    }
     var undo_log, board_key = this.Make_Unchecked_Move(move); //TODO: see earlier question
     if (move!=PASS_MOVE && (this.position_seen.indexOf(board_key) == -1))
 	{
@@ -1998,7 +2041,9 @@ Game.prototype.Undo_Move = function()
        or return None if at beginning.
        Update repetition history and make previous position current.
     */
-    if (!this.move_history) ? return null;
+    if (!this.move_history) {
+	return null;
+    }
     var last_move = this.move_history.pop();
     if (last_move!=PASS_MOVE)
 	{
@@ -2030,7 +2075,9 @@ Game.prototype.List_Moves = function()
     var all_moves = [PASS_MOVE];
     for (var move in this.current_board.Ierate_Goban())
 	{
-        if this.Legal_Move(move) ? all_moves.push(move);
+	    if (this.Legal_Move(move)) {
+		    all_moves.push(move);
+		}
 	}
     return all_moves;
 };
@@ -2082,7 +2129,9 @@ Game.prototype.Score_Move = function(move)
 							{
                                 //get score from our viewpoint: negative of opponent score
                                 var score = -cboard.Score_Position();
-                                if (score > best_score) ? best_score = score;
+                                if (score > best_score) {
+				    best_score = score;
+				}
                                 this.Undo_Move();
 							}
 						}
