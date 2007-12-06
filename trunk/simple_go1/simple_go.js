@@ -1659,7 +1659,7 @@ Board.prototype.Has_Block_Status = function(colors, status)
     return false;
 };
 
-Board.prototpe.Territory_As_Dict = function()
+Board.prototype.Territory_As_Dict = function()
 {
     var territory = []; //TODO: Do we need to define our own javascript dictionary object?
     for (var block in this.Iterate_Blocks(EMPTY))
