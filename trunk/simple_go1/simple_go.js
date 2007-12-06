@@ -1661,7 +1661,7 @@ Board.prototype.Has_Block_Status = function(colors, status)
 
 Board.prototype.Territory_As_Dict = function()
 {
-    var territory = []; //TODO: Do we need to define our own javascript dictionary object?
+    var territory = [];
     for (var block in this.Iterate_Blocks(EMPTY))
 	{
         if ((block.status==(WHITE + " territory")) || (block.status==(BLACK + " territory")))
@@ -2396,4 +2396,31 @@ Game.prototype.Generate_Move = function(remove_opponent_dead, pass_allowed) //TO
     */
     //return self.select_random_move()
     return this.Select_Scored_Move(remove_opponent_dead, pass_allowed);
+};
+
+function main()
+{
+    /* Play game against itself on 5x5 board.
+       Print all positions and moves made while playing.
+    */
+    //random.seed(1)
+    size = 19
+    g = new Game(size)
+    while (true)
+	{
+        var move = g.Generate_Move();
+        g.Make_Move(move);
+        //print move_as_string(move, g.size)
+        //print g.current_board
+        //print g.current_board.as_string_with_unconditional_status()
+        //print g.current_board.score_position()
+        //import pdb; pdb.set_trace()
+        //if last 2 moves are pass moves: exit loop
+        //if len(g.move_history)==10:
+        //    break
+        if (g.move_history.length()>=2 && g.move_history[-1]==PASS_MOVE && g.move_history[-2]==PASS_MOVE)
+		{
+            break;
+		}
+	}
 };
