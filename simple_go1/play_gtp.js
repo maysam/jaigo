@@ -180,3 +180,112 @@ GTP_player.prototype.Genmove = function(color)
 {
     return this.Ok(this.Genmove_Plain(color, remove_opponent_dead=false, pass_allowed=true));
 };
+
+GTP_player.prototype.Play_Plain = function(color, move)
+{
+    this.Check_Side2Move(color);
+    this.engine.Make_Move(String_As_Move(move.toUpperCase(), this.engine.size));
+    log(this.engine.current_board.toString());
+    log(this.engine.current_board.As_String_With_Unconditional_Status());
+    log("move: " + move.toString() + "\n");
+    log("score: " + (this.Final_Score_As_String(), this.engine.current_board.Unconditional_Score(WHITE), this.engine.current_board.Unconditional_Score(BLACK)) + " unconditional score: W:%i B:%i\n");
+};
+
+GTP_player.Play = function(color, move)
+{
+    return this.Ok(this.Play_Plain(color, move));
+};
+
+GTP_player.Place_Free_Handicap = function(count)
+{
+    this.handicap = count;
+    var result = [];
+    for (move in this.engine.Place_Free_Handicap(count))
+	{
+        move = Move_As_String(move, this.engine.size)
+        result.push(move);
+	}
+    return this.Ok(string.join(result)); //TODO: what is string.join doing here?
+};
+
+GTP_player.Set_Free_Handicap = function(stones)
+{
+    this.handicap = stones.length;
+    for (i in range(stones.length)) //TODO: what does range() do?
+	{
+        if (i)
+		{
+			this.Play_Plain("white", "PASS");
+		}
+        this.Play_Plain("black", stones[i]);
+	}
+    return this.Ok("");
+};
+
+GTP_player.Final_Status_List = function(status)
+{
+    var lst = this.engine.Final_Status_List(status);
+    var str_lst = [];
+    for (pos in lst)
+	{
+        str_lst.push(Move_As_String(pos, this.engine.size));
+	}
+    return this.Ok(string.join(str_lst, "\n")); //TODO: what is string.join doing here?
+};
+
+GTP_player.Final_Score_As_String = function()
+{
+    var score = this.engine.current_board.Score_Position();
+	var result = "";
+    if (this.engine.current_board.side==BLACK)
+	{
+        score = -score;
+	}
+    score = score + this.komi + this.handicap;
+    if (score>=0)
+	{
+        result = "W+" + score + ".1f";
+	}
+    else
+	{
+        result = "B+" + -score + ".1f";
+	}
+    return result;
+};
+
+GTP_player.Final_Score = function()
+{
+    return this.Ok(this.Final_Score_As_String());
+};
+
+GTP_player.Genmove_Cleanup = function(color)
+{
+    return this.Ok(this.Genmove_Plain(color, remove_opponent_dead=true)); //TODO: how to handle byref params?
+};
+
+GPT_player.Showboard = function()
+{
+    return this.Ok(this.engine.current_board.toString())''
+};
+
+GTP_player.List_Commands = function()
+{
+	//TODO: what does string.join do?
+    var result = string.join(("list_commands",
+                          "boardsize",
+                          "name",
+                          "version",
+                          "quit",
+                          "clear_board",
+                          "place_free_handicap",
+                          "set_free_handicap",
+                          "play",
+                          "final_status_list",
+                          "kgs-genmove_cleanup",
+                          "showboard",
+                          "protocol_version",
+                          "komi",
+                          "final_score",
+                          ), "\n")
+    return this.Ok(result);
+};
