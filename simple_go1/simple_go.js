@@ -62,7 +62,7 @@ function range(begin, end, step) {
     }
     var a = [];
     var c = 0;
-    for (var i = begin; i < end; i += step) {
+    for (var i = begin; i != end; i += step) {
 	a[c++] = i;
     }
     return a;
@@ -381,11 +381,11 @@ Board.prototype.each_Neighbour_Eye_Blocks = function(eye)
 	    var block = eye.parts[b];
 	    for (var p in block.neighbour) {
 		var pos = block.neighbour[p];
-		if(blocks_seen.indexOf(this.blocks[pos]) == -1) {
-		    if (f(block) === Board.prototype.each_Neighbour_Eye_Blocks['break']) {
+		var block2 = this.blocks[pos];
+		if(blocks_seen.indexOf(block2) === -1) {
+		    if (f(block2) === Board.prototype.each_Neighbour_Eye_Blocks['break']) {
 			return;
 		    }
-		    //TODO: yield block2;
 		    blocks_seen.push(block2);
 		}
 	    }
@@ -1950,7 +1950,7 @@ Board.prototype.As_String_With_Unconditional_Status = function()
 	var board_x_coords = "   " + x_coords.slice(0, this.size).toString(); //TODO: not sure about this syntax
     s = s + board_x_coords + "\n";
     s = s + "  +" + "-"*this.size + "+\n";
-    for (var y in range(this.size, 0, -1)) //TODO: range?
+    for (var y in range(this.size, 0, -1))
 	{
 		var board_y_coord = "";
         if (y < 10)
@@ -1962,7 +1962,7 @@ Board.prototype.As_String_With_Unconditional_Status = function()
             board_y_coord = y.toString();
 		}
         var line = board_y_coord + "|";
-        for (var x in range(1, this.size+1)) //TODO: range?
+        for (var x in range(1, this.size+1))
 		{
 		    var pos_as_character = color_and_status_to_character[this.goban[x][y] + this.blocks[x][y].status];
             line = line + pos_as_character;
@@ -2140,7 +2140,6 @@ Game.prototype.Score_Move = function(move)
 		    if (block.color==cboard.side && cboard.Block_Liberties(block) === 1) {
 			//make_move later changes block.neighbour dictionary in some cases so this is needed
 			cboard.each_Neighbour_Blocks(block)(function (block2) {
-				// TODO: what is list()?
 				var liberties = cboard.List_Block_Liberties(block2);
 				if (liberties.length() === 1) {
 				    var move2 = liberties[0];
