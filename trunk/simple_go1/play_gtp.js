@@ -25,7 +25,7 @@ function coords_to_sgf(size, board_coords)
 	{
         sgffirst = letter;
 	}
-    sgfsecond = chr(ord("a") + int(size) - int(digits));
+    sgfsecond = chr(ord("a") + size - digits);
     return sgffirst + sgfsecond;
 };
 
@@ -304,16 +304,15 @@ GTP_player.prototype.Relay_Cmd_And_Reply = function()
 		case "version": result = "= " + this.version + "\n\n";
     	case "name": result = "= " + this.name + "\n\n";
      	case "protocol_version": result = "= 2\n\n";
-     	case "komi": this.komi = float(cmd_lst[1]); //TODO: cast to float?
-        			result = "=\n\n";
+     	case "komi": this.komi = cmd_lst[1]; result = "=\n\n";
      	case "genmove_white": result = this.Genmove("white");
      	case "genmove_black": result = this.Genmove("black");
  		case "genmove": result = this.Genmove(cmd_lst[1]);
-    	case "boardsize": result = this.Boardsize(int(cmd_lst[1])); //TODO: cast to int?
+    	case "boardsize": result = this.Boardsize(cmd_lst[1]);
     	case "list_commands": result = this.List_Commands();
  		case "play": result = this.Play(cmd_lst[1], cmd_lst[2]);
     	case "clear_board": result = this.Clear_Board();
-		case "place_free_handicap": result = this.Place_Free_Handicap(int(cmd_lst[1])); //TODO: cast to ing?
+		case "place_free_handicap": result = this.Place_Free_Handicap(cmd_lst[1]);
 		case "set_free_handicap": result = this.Set_Free_Handicap(cmd_lst.substr(1));
 		case "final_status_list": result = this.Final_Status_List(cmd_lst[1]);
 		case "kgs-genmove_cleanup": result = this.Genmove_Cleanup(cmd_lst[1]);

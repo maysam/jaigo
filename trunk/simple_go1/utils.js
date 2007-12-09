@@ -15,7 +15,6 @@ function Diagram2Game(str)
         else if (line[0] in string.digits) //TODO: string.digits?
 		{
             var y, line, rest = string.split(line, "|"); //TODO: tricky assignment. don't know if js can do this.
-            y = int(y);
             for (var x in range(line.length())) //TODO: does range have a js equiv.?
 			{
                 var stone = line[x];
