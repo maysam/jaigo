@@ -45,6 +45,7 @@ function move(x, y) {
 }
 
 function contains(sequence, quarry, eq) {
+    eq = eq || deepValueEquality;
     for (var x in sequence) {
 	if (eq(quarry, sequence[x])) {
 	    return true;
@@ -262,15 +263,34 @@ function Board(board_size)
 
 Board.prototype.each_Goban = function()
 {
-    /*This goes through all positions in goban
-       Example usage: see above __init__ method
-    */
-    for (var x in range(1, this.board_size+1)) {
-	for (var y in range(1, this.board_size+1)) {
-	    return [x, y];
+    return function(f) {
+	/*This goes through all positions in goban
+	  Example usage: see above __init__ method
+	*/
+	for (var x in range(1, this.board_size+1)) {
+	    for (var y in range(1, this.board_size+1)) {
+		if (f([x, y]) === Board.prototype.each_Goban['break']) {
+		    break;
+		}
+	    }
+	}
+    };
+};
+Board.prototype.each_Goban['continue'] = true;
+Board.prototype.each_Goban['break'] = false;
+
+Board.prototype.iterate = function(pairs, f) {
+    for (var p in pairs) {
+	var pair = pairs[p];
+	if (1 <= pair.x & pair.x <= this.board_size && 1 <= pair.y && pair.y <= this.board_size) {
+	    if (f(pair) === Board.prototype.iterate['break']) {
+		return;
+	    }
 	}
     }
 };
+Board.prototype.iterate['continue'] = true;
+Board.prototype.iterate['break'] = false;
 
 Board.prototype.each_Neighbour = function(pos)
 {
@@ -281,82 +301,99 @@ Board.prototype.each_Neighbour = function(pos)
 	*/
 	var x = pos.x;
 	var y = pos.y;
-	for (var x2y2 in [new Pair(x,y+1), new Pair(x+1,y), new Pair(x,y-1), new Pair(x-1,y)]) {
-	    if (1 <= x2y2.x && x2y2.x <= this.board_size && 1 <= x2y2.y && x2y2.y <= this.board_size) {
-        	f(x2y2);
-	    }
-	}
+	this.iterate(
+		     [new Pair(x,y+1), new Pair(x+1,y), new Pair(x,y-1), new Pair(x-1,y)],
+		     function (p) {
+			 return f(p) === Board.prototype.each_Neighbour['break'] ? Board.prototype.iterate['break'] : Board.prototype.iterate['continue']});
     };
 };
 Board.prototype.each_Neighbour['continue'] = true;
 Board.prototype.each_Neighbour['break'] = false;
 
-Board.prototype.Iterate_Diagonal_Neighbour = function(pos)
+Board.prototype.each_Diagonal_Neighbour = function(pos)
 {
-    /*This goes through all neighbour positions in clockwise:
-       NE, SE, SW, NW
-       Example usage: see analyse_eye_point method
-    */
-    var x = pos.x;
-    var y = pos.y;
-    for (var x2y2 in [new Pair(x+1,y+1), new Pair(x+1,y-1), new Pair(x-1,y-1), new Pair(x-1,y+1)])
-	{
-        if (1 <= x2y2.x && x2y2.x <= this.board_size && 1 <= x2y2.y && x2y2.y <=this.board_size)
-		{	
-		    //TODO: yield (x2, y2);
-		}
-	}
+    return function(f) {
+	/*This goes through all neighbour positions in clockwise:
+	  NE, SE, SW, NW
+	  Example usage: see analyse_eye_point method
+	*/
+	var x = pos.x;
+	var y = pos.y;
+	this.iterate(
+		     [new Pair(x+1,y+1), new Pair(x+1,y-1), new Pair(x-1,y-1), new Pair(x-1,y+1)],
+		     function (p) {
+			 return f(p) === Board.prototype.each_Diagonal_Neighbor['break'] ? Board.prototype.iterate['break'] : Board.prototype.iterate['continue']});
+    };
 };
+Board.prototype.each_Diagonal_Neighbour['continue'] = true;
+Board.prototype.each_Diagonal_Neighbour['break'] = false;
 
-Board.prototype.Iterate_Blocks = function(colors)
+Board.prototype.each_Blocks = function(colors)
 {
-    /*This goes through all distinct blocks on board with given colors.
-       Example usage: see analyze_unconditionally_alive
-    */
-    for (var block in this.block_list)
-	{
-        if (block.color in colors)
-		{
-		    //TODO: yield block;
+    return function(f) {
+	/*This goes through all distinct blocks on board with given colors.
+	  Example usage: see analyze_unconditionally_alive
+	*/
+	for (var b in this.block_list) {
+	    var block = this.block_list[b];
+	    if (block.color in colors) {
+		if (f(block) === Board.prototype.each_Blocks['break']) {
+		    break;
 		}
+	    }
 	}
+    };
 };
+Board.prototype.each_Blocks['continue'] = true;
+Board.prototype.each_Blocks['break'] = false;
 
-Board.prototype.Iterate_Neighbour_Blocks = function(block)
+Board.prototype.each_Neighbour_Blocks = function(block)
 {
-    /*Go through all neighbour positions and add new blocks.
-       Return once for each new block
-    */
-    var blocks_seen = [];
-    for (var stone in block.neighbour)
-	{
-		if(blocks_seen.indexOf(this.blocks[stone]) == -1)
-		{
+    return function(f) {
+	/*Go through all neighbour positions and add new blocks.
+	  Return once for each new block
+	*/
+	var blocks_seen = [];
+	for (var s in block.neighbour) {
+	    var stone = block.neighbour[s];
+	    var block2 = this.blocks[stone];
+	    if (!contains(blocks_seen, block2)) {
+		if (f(block2) === Board.prototype.each_Neighbour_Blocks['break']) {
+		    return;
+		}
+		blocks_seen.push(block2);
+	    }
+	}
+    };
+};
+Board.prototype.each_Neighbour_Blocks['continue'] = true;
+Board.prototype.each_Neighbour_Blocks['break'] = false;
+
+Board.prototype.each_Neighbour_Eye_Blocks = function(eye)
+{
+    return function(f) {
+	/*First copy eye blocks to list of blocks seen
+	  Then go through all neighbour positions and add new blocks.
+	  Return once for each new block
+	*/
+        var blocks_seen = object(eye.parts);
+	for (var b in eye.parts) {
+	    var block = eye.parts[b];
+	    for (var p in block.neighbour) {
+		var pos = block.neighbour[p];
+		if(blocks_seen.indexOf(this.blocks[pos]) == -1) {
+		    if (f(block) === Board.prototype.each_Neighbour_Eye_Blocks['break']) {
+			return;
+		    }
 		    //TODO: yield block2;
 		    blocks_seen.push(block2);
 		}
+	    }
 	}
+    };
 };
-
-Board.prototype.Iterate_Neighbour_Eye_Blocks = function(eye)
-{
-	/*First copy eye blocks to list of blocks seen
-	   Then go through all neighbour positions and add new blocks.
-	   Return once for each new block
-	*/
-        var blocks_seen = object(eye.parts);
-	for (var block in eye.parts)
-	{
-		for (var pos in block.neighbour)
-		{
-			if(blocks_seen.indexOf(this.blocks[pos]) == -1)
-			{
-			    //TODO: yield block2;
-			    blocks_seen.push(block2);
-			}
-		}
-	}
-};
+Board.prototype.each_Neighbour_Eye_Blocks['continue'] = true;
+Board.prototype.each_Neighbour_Eye_Blocks['break'] = false;
 
 Board.prototype.Init_Hash = function()
 {
@@ -423,13 +460,12 @@ Board.prototype.List_Empty_3x3_Neighbour = function(pos)
     //check diagonal neighbour positions first
     //this is done to ensure that empty block is/will not splitted
     var diagonal_neighbour_list = [];
-    for (var pos2 in this.iterate_diagonal_neighbour(pos))
-	{
-        if (this.goban[pos2]==EMPTY)
+    this.each_diagonal_neighbour(pos)(function (pos2) {
+	    if (this.goban[pos2]==EMPTY)
 		{
-            diagonal_neighbour_list.append(pos2);
+		    diagonal_neighbour_list.append(pos2);
 		}
-	}            
+	});
     return new Pair(neighbour_list, diagonal_neighbour_list);
 };
 
@@ -544,14 +580,12 @@ Board.prototype.Add_Stone = function(color, pos)
         this.each_Neighbour(pos)(function (pos2) {
 		if (old_block.stones.indexOf(pos2) == -1) //this if is slight optimization: can't be neighbour if belongs to block
 		    {
-			for (var pos3 in this.Iterate_Neighbour(pos2))
-			    {
-				if (pos3 in old_block.stones)
-				    {
-					//yes, pos2 is neighbour
-					return this.each_Neighbour['break'];
-				    }
-			    }
+			this.each_Neighbour(pos2)(function (pos3) {
+				if (contains(old_block.stones, pos3)) {
+				    //yes, pos2 is neighbour
+				    return this.each_Neighbour['break'];
+				}
+			    });
 		    }
 		else //no, it's not neighbour
 		    {
@@ -799,7 +833,9 @@ Board.prototype.Legal_Move = function(move)
 		return this.each_Neighbour['break'];
 	    }
 	});
-    if (result !== undefined) return result;
+    if (result !== undefined) {
+	return result;
+    }
 
     return false;
 };
@@ -899,12 +935,12 @@ Board.prototype.Analyse_Eye_Point = function(pos, other_color)
 	});
     var total_count = 0;
     var other_count = 0;
-    for (var pos2 in this.Iterate_Diagonal_Neighbour(pos)) {
-        total_count = total_count + 1;
-        if (this.goban[pos2]==other_color) {
-	    other_count = other_count + 1;
-	}
-    }
+    this.each_Diagonal_Neighbour(pos)(function (pos2) {
+	    total_count = total_count + 1;
+	    if (this.goban[pos2]==other_color) {
+		other_count = other_count + 1;
+	    }
+	});
     if (total_count==4)
 	{
 	    return (!(other_count > 1));
@@ -936,14 +972,13 @@ Board.prototype.Analyse_Opponent_Stone_As_Eye_Point = function(pos)
     var total_count = 0;
     var other_count = 0;
     var color = this.goban[pos];
-    for (var pos2 in this.Iterate_Diagonal_Neighbour(pos))
-	{
-        total_count = total_count + 1;
-        if (this.goban[pos2]==color && this.blocks[pos2].status=="alive")
+    this.each_Diagonal_Neighbour(pos)(function (pos2) {
+	    total_count = total_count + 1;
+	    if (this.goban[pos2]==color && this.blocks[pos2].status=="alive")
 		{
-            other_count = other_count + 1;
+		    other_count = other_count + 1;
 		}
-	}
+	});
     if (total_count==4)
 	{
 	    return (!(other_count > 1));
@@ -1266,37 +1301,36 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
     var eye_list = [];
     var not_ok_eye_list = []; //these might still contain dead groups if totally inside live group
     var eye_colors = EMPTY + other_side[color]; //TODO: I don't understand this assignment
-    for (var block in self.iterate_blocks(EMPTY+WHITE+BLACK))
-{
-        block.eye = null;
-}
-    for (block in this.Iterate_Blocks(eye_colors))
-	{
+    this.each_blocks(EMPTY+WHITE+BLACK)(function (block) {
+	    block.eye = null;
+	});
+    this.each_Blocks(eye_colors)(function (block) {
 	    if (block.eye) {
-		continue; //TODO: not sure how js will evaluate that conditional
+		//TODO: not sure how js will evaluate that conditional
+		return this.each_Blocks['continue'];
 	    }
-        var current_eye = new Eye();
-        eye_list.push(current_eye);
-        var blocks_to_process = [block];
-        while (blocks_to_process) //TODO: not sure how js will evaluate this conditional
+	    var current_eye = new Eye();
+	    eye_list.push(current_eye);
+	    var blocks_to_process = [block];
+	    while (blocks_to_process) //TODO: not sure how js will evaluate this conditional
 		{
-            var block2 = blocks_to_process.pop();
-            if (block2.eye) {
-		continue;
-	    }
-            block2.eye = current_eye;
-            current_eye.parts.push(block2);
-            for (var pos in block2.neighbour)
+		    var block2 = blocks_to_process.pop();
+		    if (block2.eye) {
+			continue;
+		    }
+		    block2.eye = current_eye;
+		    current_eye.parts.push(block2);
+		    for (var pos in block2.neighbour)
 			{
-                var block3 = this.blocks[pos];
-                if (block3.color in eye_colors && !block3.eye)
+			    var block3 = this.blocks[pos];
+			    if (block3.color in eye_colors && !block3.eye)
 				{
-                    blocks_to_process.push(block3);
+				    blocks_to_process.push(block3);
 				}
 			}
 		}
-	}
-	//check that all empty points are adjacent to our color
+	});
+    //check that all empty points are adjacent to our color
     var ok_eye_list = [];
     for (var eye in eye_list)
 	{
@@ -1350,86 +1384,76 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
     eye_list = ok_eye_list;
 
     //first we assume all blocks to be ok
-    for (var block in this.Iterate_Blocks(color))
-	{
-        block.eye_count = 2;
-	}
+    this.each_Blocks(color)(function (block) {
+	    block.eye_count = 2;
+	});
     //main loop: at end of loop check if changes
-    while (true)
-	{
+    while (true) {
         var changed_count = 0;
-        for(var block in this.Iterate_Blocks(color))
-		{
-            //not really needed but short and probably useful optimization
-		    if (block.eye_count < 2) {
-			continue;
-		    }
-            //count eyes
-            var block_eye_list = [];
-            for (var stone in block.neighbour)
-			{
-                var eye = this.blocks[stone].eye;
-                if (eye && block_eye_list.indexOf(eye) == -1) //TODO: how will js evaluate 'eye' in conditional? what is the point of using eye?
-				{ 
-					block_eye_list.push(eye);
-				}
-			}
-            //count only those eyespaces which have empty point(s) adjacent to this block
-            block.eye_count = 0;
-            for (var eye in block_eye_list)
-			{
-			    if (contains(eye.our_blocks, block, deepValueEquality))
-				{
-                    block.eye_count = block.eye_count + 1;
-				}
-			}
-            if (block.eye_count < 2)
-			{
-                changed_count = changed_count + 1;
-			}
+        this.each_Blocks(color)(function (block) {
+		//not really needed but short and probably useful optimization
+		if (block.eye_count < 2) {
+		    return this.each_Blocks['continue'];
 		}
+		//count eyes
+		var block_eye_list = [];
+		for (var stone in block.neighbour)
+		    {
+			var eye = this.blocks[stone].eye;
+			if (eye && block_eye_list.indexOf(eye) == -1) //TODO: how will js evaluate 'eye' in conditional? what is the point of using eye?
+			    { 
+				block_eye_list.push(eye);
+			    }
+		    }
+		//count only those eyespaces which have empty point(s) adjacent to this block
+		block.eye_count = 0;
+		for (var eye in block_eye_list)
+		    {
+			if (contains(eye.our_blocks, block, deepValueEquality))
+			    {
+				block.eye_count = block.eye_count + 1;
+			    }
+		    }
+		if (block.eye_count < 2)
+		    {
+			changed_count = changed_count + 1;
+		    }
+	    });
         //check eyes for required all groups 2 eyes
         var ok_eye_list = [];
-        for (var eye in eye_list)
-		{
+        for (var eye in eye_list) {
             eye_is_ok = true;
-            for (var block in this.Iterate_Neighbour_Eye_Blocks(eye))
-			{
-                if (block.eye_count < 2)
-				{
-                    eye_is_ok = false;
-                    break;
-				}
-			}
-            if (eye_is_ok)
-			{
-                ok_eye_list.push(eye);
-			}
-            else
-			{
-                changed_count = changed_count + 1;
-                not_ok_eye_list.push(eye);
-                //remove reference to eye that is not ok
-                for (block in eye.parts)
-				{
-                    block.eye = null;
-				}
-			}
-            eye_list = ok_eye_list;
+            this.each_Neighbour_Eye_Blocks(eye)(function (block) {
+		    if (block.eye_count < 2) {
+			eye_is_ok = false;
+			return each_Neighbour_Eye_Blocks['break'];
+		    }
+		});
+	    if (eye_is_ok) {
+		ok_eye_list.push(eye);
+	    }
+	    else {
+		changed_count = changed_count + 1;
+		not_ok_eye_list.push(eye);
+		//remove reference to eye that is not ok
+		for (var b in eye.parts) {
+		    var block = eye.parts[b];
+		    block.eye = null;
 		}
-        if (changed_count === 0)
-		{
+	    }
+	    eye_list = ok_eye_list;
+	}
+        if (changed_count === 0) {
             break;
-		}
 	}
+    }
     //mark alive and dead blocks
-    for (var block in this.Iterate_Blocks(color))
-	{
-        if (block.eye_count >= 2)
+    this.each_Blocks(color)(function(block) {
+	    if (block.eye_count >= 2)
 		{
-            block.status = "alive";
+		    block.status = "alive";
 		}
-	}
+	});
     for (var eye in eye_list)
 	{
         eye.Mark_Status(color);
@@ -1584,32 +1608,27 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
 					});
 				}
                 //main false eye loop: at end of loop check if changes
-                while (true)
-				{
-				    var changed_count = 0;
+                while (true) {
+		    var changed_count = 0;
                     //Remove actual false eyes from list.
-                    for (block in stone_block_list)
-					{
-                        if (block.neighbour.length==1)
-						{
-                             var neighbour_list = block.neighbour.keys();
-                             var eye = neighbour_list[0];
-                             both_eye_list.remove(eye);
-                             //combine this block and eye into other blocks by 'filling' false eye
-                             block.Add_Stone(eye);
-                             for (var block2 in object(stone_block_list))
-							{
-                                 if ((block!=block2) && (block2.neighbour.indexOf(eye) != -1))
-								{
-                                    block.Add_Block(block2);
-										stone_block_list.splice(stone_block_list.indexOf(block2),1);
-								}
-							}
-                            block.neighbour.splice(block.neighbor.indexOf(eye),1);
-                             changed_count = changed_count + 1;
-                             break; //we have changed stone_block_list, restart
-						}
-					}
+		    for (var block in stone_block_list) {
+			if (block.neighbour.length==1) {
+			    var neighbour_list = block.neighbour.keys();
+			    var eye = neighbour_list[0];
+			    both_eye_list.remove(eye);
+			    //combine this block and eye into other blocks by 'filling' false eye
+			    block.Add_Stone(eye);
+			    for (var block2 in object(stone_block_list)) {
+				if ((block!=block2) && (block2.neighbour.indexOf(eye) != -1)) {
+				    block.Add_Block(block2);
+				    stone_block_list.splice(stone_block_list.indexOf(block2),1);
+				}
+			    }
+			    block.neighbour.splice(block.neighbor.indexOf(eye),1);
+			    changed_count = changed_count + 1;
+			    break; //we have changed stone_block_list, restart
+			}
+		    }
                     if (changed_count.length === 0)
 					{
                         break;
@@ -1642,41 +1661,40 @@ Board.prototype.Analyze_Unconditional_Status = function()
     /*Analyze unconditional status for each color separately
     */
     //Initialize status to unknown for all blocks
-    for (var block in this.Iterate_Blocks(BLACK+WHITE+EMPTY)) //TODO: What does this argument resolve to in py?
-	{
-        block.status = "unknown";
-	}
+    //TODO: What does this argument resolve to in py?
+    this.each_Blocks(BLACK+WHITE+EMPTY)(function (block) {
+	    block.status = "unknown";
+	});
     //import pdb; pdb.set_trace()
     this.Analyze_Color_Unconditional_Status(BLACK);
     this.Analyze_Color_Unconditional_Status(WHITE);
     //cleanup
-    for (var block in this.Iterate_Blocks(BLACK+WHITE+EMPTY))
-	{
-        block.eye = null;
-	}
+    this.each_Blocks(BLACK+WHITE+EMPTY)(function (block) {
+	    block.eye = null;
+	});
 };
 
 Board.prototype.Has_Block_Status = function(colors, status)
 {
-    for (var block in this.Iterate_Blocks(colors))
-	{
+    var result;
+    this.each_Blocks(colors)(function (block) {
 	    if (block.status==status) {
-		return true;
+		result = true;
+		return this.each_Blocks['break'];
 	    }
-	}
-    return false;
+	});
+    return result || false;
 };
 
 Board.prototype.Territory_As_Dict = function()
 {
     var territory = [];
-    for (var block in this.Iterate_Blocks(EMPTY))
-	{
-        if ((block.status==(WHITE + " territory")) || (block.status==(BLACK + " territory")))
+    this.each_Blocks(EMPTY)(function (block) {
+	    if ((block.status==(WHITE + " territory")) || (block.status==(BLACK + " territory")))
 		{
-            territory.Update(block.stones);
+		    territory.Update(block.stones);
 		}
-	}
+	});
     return territory;
 };
 
@@ -1777,19 +1795,15 @@ Board.prototype.Score_Stone_Block = function(block)
 	{
         var liberties = this.Block_Liberties(block);
         //grant half liberty for each neightbour stone in atari
-        for (var block2 in this.Iterate_Neighbour_Blocks(block))
-		{
-            if (block2.color==other_side[block.color] && (this.Block_Liberties(block2)==1))
-			{
-                for (var stone in block.neighbour)
-				{
-                    if (stone in block2.stones)
-					{
-                        liberties = liberties + 0.5;
-					}
-				}
+        this.each_Neighbour_Blocks(block)(function (block2) {
+		if (block2.color==other_side[block.color] && (this.Block_Liberties(block2)==1)) {
+		    for (var stone in block.neighbour) {
+			if (stone in block2.stones) {
+			    liberties = liberties + 0.5;
 			}
+		    }
 		}
+	    });
         var liberty_ratio = liberties / block.Max_Liberties();
         score = block.Size() * normal_stone_value_ratio * (1 - pow(1-liberty_ratio, 2));
 	}
@@ -1842,10 +1856,9 @@ Board.prototype.Score_Position = function()
     */
     var score = 0;
     this.Analyze_Unconditional_Status();
-    for (block in this.Iterate_Blocks(BLACK+WHITE+EMPTY))
-	{
-        score = score + this.Score_Block(block);
-	}
+    this.each_Blocks(BLACK+WHITE+EMPTY)(function (block) {
+	    score = score + this.Score_Block(block);
+	});
     return score;
 };
 
@@ -1853,13 +1866,12 @@ Board.prototype.Unconditional_Score = function(color)
 {
     var score = 0;
     this.Analyze_Unconditional_Status();
-    for (var block in this.Iterate_Blocks(WHITE+BLACK+EMPTY))
-	{
-        if ((block.status == (color + " territory")) || (block.color == color && block.status == "alive") || (block.color == other_side[color] && block.status == "dead"))
+    this.each_Blocks(WHITE+BLACK+EMPTY)(function (block) {
+	    if ((block.status == (color + " territory")) || (block.color == color && block.status == "alive") || (block.color == other_side[color] && block.status == "dead"))
 		{
-            score = score + block.Size();
+		    score = score + block.Size();
 		}
-	}
+	});
     return score;
 };
 
@@ -2065,18 +2077,23 @@ Game.prototype.Undo_Move = function()
     return this.current_board;
 };
 
-Game.prototype.Iterate_Moves = function()
+Game.prototype.each_Moves = function()
 {
-    /* Go through all legal moves including pass move
-    */
-    //TODO: yield PASS_MOVE;
-    this.current_board.each_Goban(function (move) {
-	    if (this.Legal_Move(move))
-		{
-		    //TODO: yield move;
+    return function(f) {
+	/* Go through all legal moves including pass move
+	 */
+	f(PASS_MOVE);
+	this.current_board.each_Goban(function (move) {
+		if (this.Legal_Move(move)) {
+		    if (f(move) === Game.prototype.each_Moves['break']) {
+			return this.current_board.each_Goban['break'];
+		    }
 		}
-	});
+	    });
+    };
 };
+Game.prototype.each_Moves['continue'] = true;
+Game.prototype.each_Moves['break'] = false;
 
 Game.prototype.List_Moves = function()
 {
@@ -2101,54 +2118,46 @@ Game.prototype.Score_Move = function(move)
     this.Make_Move(move);
     var cboard = this.current_board;
     var best_score = cboard.Score_Position();
-    if (move!=PASS_MOVE)
-	{
+    if (move!=PASS_MOVE) {
         var block = cboard.blocks[move];
         var liberties = cboard.List_Block_Liberties(block);
         //Check if this group is now in atari.
-        if (liberties.length()==1)
-		{
+        if (liberties.length()==1) {
             var move2 = liberties[0];
-            if (this.Make_Move(move2))
-			{
+            if (this.Make_Move(move2)) {
                 //get score from our viewpoint: negative of opponent score
                 var score = -cboard.Score_Position();
-                if (score > best_score)
-				{
-                   best_score = score;
-				}
+                if (score > best_score) {
+		    best_score = score;
+		}
                 this.Undo_Move();
-			}
-		}
-        else
-		{
-            //Check if some our neighbour group is in atari instead.
-		    cboard.each_Neighbour(move)(function (stone) {
-			    var block = cboard.blocks[stone];
-			    if (block.color==cboard.side && cboard.Block_Liberties(block)==1)
-				{
-				    //make_move later changes block.neighbour dictionary in some cases so this is needed
-				    for (var block2 in list(cboard.Iterate_Neighbour_Blocks(block))) // TODO: what is list()?
-					{
-					    var liberties = cboard.List_Block_Liberties(block2);
-					    if (liberties.length()==1)
-						{
-						    var move2 = liberties[0];
-						    if (this.Make_Move(move2))
-							{
-							    //get score from our viewpoint: negative of opponent score
-							    var score = -cboard.Score_Position();
-							    if (score > best_score) {
-								best_score = score;
-							    }
-							    this.Undo_Move();
-							}
-						}
-					}
-				}
-			});
-		}
+	    }
 	}
+        else {
+	    //Check if some our neighbour group is in atari instead.
+	    cboard.each_Neighbour(move)(function (stone) {
+		    var block = cboard.blocks[stone];
+		    if (block.color==cboard.side && cboard.Block_Liberties(block) === 1) {
+			//make_move later changes block.neighbour dictionary in some cases so this is needed
+			cboard.each_Neighbour_Blocks(block)(function (block2) {
+				// TODO: what is list()?
+				var liberties = cboard.List_Block_Liberties(block2);
+				if (liberties.length() === 1) {
+				    var move2 = liberties[0];
+				    if (this.Make_Move(move2)) {
+					//get score from our viewpoint: negative of opponent score
+					var score = -cboard.Score_Position();
+					if (score > best_score) {
+					    best_score = score;
+					}
+					this.Undo_Move();
+				    }
+				}
+			    });
+		    }
+		});
+	}
+    }
     this.Undo_Move();
     return best_score;
 };
@@ -2188,40 +2197,39 @@ Game.prototype.Select_Scored_Move = function(remove_opponent_dead, pass_allowed)
 	[];
     var best_score = WORST_SCORE;
     var best_moves = [];
-    for(var move in this.Iterate_Moves())
-	{
-	    if (move in forbidden_moves) {
-		continue;
-	    }
-        score = -this.Score_Move(move) - base_score;
-        //self.make_move(move)
-        //get score from our viewpoint: negative of opponent score
-        //score = -self.current_board.score_position() - base_score
-        //score = -self.score_position() - base_score
-        if (debug_flag)
-		{
-            //print score, move_as_string(move, self.size)
+	this.each_Moves()(function (move) {
+		if (move in forbidden_moves) {
+		    return this.each_Moves['continue'];
 		}
-        //self.undo_move()
-        //Give pass move slight bonus so its preferred among do nothing moves
-        if (move==PASS_MOVE)
-		{
-		    if (!pass_allowed) {
-			continue;
+		score = -this.Score_Move(move) - base_score;
+		//self.make_move(move)
+		//get score from our viewpoint: negative of opponent score
+		//score = -self.current_board.score_position() - base_score
+		//score = -self.score_position() - base_score
+		if (debug_flag)
+		    {
+			//print score, move_as_string(move, self.size)
 		    }
-            score = score + 0.001;
-		}
-        if (score >= best_score)
-		{
-            if (score > best_score)
-			{
-               best_score = score;
-               best_moves = [];
+		//self.undo_move()
+		//Give pass move slight bonus so its preferred among do nothing moves
+		if (move==PASS_MOVE)
+		    {
+			if (!pass_allowed) {
+			    return this.each_Moves['continue'];
 			}
-            best_moves.push(move);
-		}
-	}
-    if (debug_flag)
+			score = score + 0.001;
+		    }
+		if (score >= best_score)
+		    {
+			if (score > best_score)
+			    {
+				best_score = score;
+				best_moves = [];
+			    }
+			best_moves.push(move);
+		    }
+	    });
+	if (debug_flag)
 	{	
         //print "!", best_score, map(lambda m,s=self.size:move_as_string(m, s), best_moves)
 	}
@@ -2284,13 +2292,12 @@ Game.prototype.Final_Status_List = function(status)
     */
     var result_list = [];
     this.current_board.Analyze_Unconditional_Status();
-    for (var block in this.current_board.Iterate_Blocks(WHITE+BLACK))
-	{
-        if (block.status==status)
+    this.current_board.each_Blocks(WHITE+BLACK)(function (block) {
+	    if (block.status==status)
 		{
-            result_list.push(block.Get_Origin());
+		    result_list.push(block.Get_Origin());
 		}
-	}
+	});
     return result_list;
 };
 
@@ -2343,7 +2350,7 @@ Game.prototype.Select_Random_No_Eye_Fill_Move = function()
 		    });
 		board.each_Neighbour(move)(function (pos) {
 			if (board.goban[pos]==other_side[board.side]) {
-			    board.Iterate_Neighbour(move)(function (pos2) {
+			    board.each_Neighbour(move)(function (pos2) {
 				    if (board.goban[pos2]==board.side) {
 					remove_liberty.push(move);
 				    }
