@@ -1,4 +1,7 @@
-#summary Notes regarding the algorithms, data structures, and sundry in jaigo for [http://docs.google.com/PresentationEditor?id=dgk2kqwp_171cqpccwft# presentation].
+#summary Notes regarding the algorithms, data structures, and sundry in jaigo for presentation.
+
+= Presentation Slides =
+[http://docs.google.com/PresentationEditor?id=dgk2kqwp_171cqpccwft Jaigo: Javascript-based Artificially Intelligent Go Opponent]
 
 = Interaction/UI = 
 
