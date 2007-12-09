@@ -6,7 +6,7 @@ function log(s)
     //fp = open("game2.log", "a")
     //fp.write(s)
     //fp.close()
-};
+}
 
 function coords_to_sgf(size, board_coords)
 {
@@ -27,7 +27,7 @@ function coords_to_sgf(size, board_coords)
 	}
     sgfsecond = chr(ord("a") + size - digits);
     return sgffirst + sgfsecond;
-};
+}
 
 function GTP_controller(infile, outfile)
 {
@@ -51,7 +51,7 @@ function GTP_controller(infile, outfile)
 	}
 */
 	//this.log_fp = open(log_name, "w");
-};
+}
 
 GTP_controller.prototype.Get_Cmd = function()
 {
@@ -76,7 +76,7 @@ GTP_controller.prototype.Get_Cmd = function()
 	    break;
 	}
 	return result;
-};        
+};      
 
 GTP_controller.Set_Result = function(result)
 {
@@ -110,7 +110,7 @@ function GTP_player()
 	        break
 	self.log_fp = open(log_name, "w")
 */
-};
+}
 
 GTP_player.prototype.Ok = function(result=null)
 {
@@ -265,7 +265,7 @@ GTP_player.prototype.Genmove_Cleanup = function(color)
 
 GPT_player.prototype.Showboard = function()
 {
-    return this.Ok(this.engine.current_board.toString())''
+    return this.Ok(this.engine.current_board.toString());
 };
 
 GTP_player.prototype.List_Commands = function()

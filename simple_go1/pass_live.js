@@ -1,16 +1,16 @@
 function Pass_Live()
 {
-	this.start_no = long(sys.argv[1]);
-	this.end_no = long(sys.argv[2]);
+	this.start_no = sys.argv[1]; //TODO: sys.argv?
+	this.end_no = sys.argv[2];
 
 	this.fp = null;//open("pass_live.log", "w") //TODO: figure out where to store a log. in a parent document tag?
 	this.size = 6;
 	this.limit = 12;
-	this.bits = size**2;
+	this.bits = size * size;
 
-	//print "Running with size %i with stone limit at %i" % (size, limit)
-	//print "from position %s to position %s" % (start_no, end_no)
-	//print "Result to screen and to pass_live.log"
+	Debug_Output("Running with size " + size + " with stone limit at " + limit);
+	Debug_Output("from position " + start_no + " to position " + end_no);
+	Debug_Output("Result to screen and to pass_live.log");
 	
 	var simple_board2 = this.Create_Board(size);
 	var no = start_no;
@@ -26,7 +26,7 @@ function Pass_Live()
 		}
 	    if (no%100==0)
 		{
-	        //sys.stderr.write("%i\r" % no); //TODO: replace sys.stderr
+	        Debug_Output(no + "\\r");
 		}
 	    if (bit_count<=limit)
 		{
@@ -63,8 +63,9 @@ function Pass_Live()
                 //fp.write(str(b))
                 //fp.write("\n")
                 //fp.flush()
-                //print no, bit_count
-                //print b
+                Debug_Output(no);
+				Debug_Output(bit_count);
+                Debug_Output(b);
 			}
 		}
 	    no = no + 1;
