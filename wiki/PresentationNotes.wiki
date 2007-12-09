@@ -1,4 +1,4 @@
-#summary Notes regarding the algorithms, data structures, and sundry in jaigo of academic interest.
+#summary Notes regarding the algorithms, data structures, and sundry in jaigo for [http://docs.google.com/PresentationEditor?id=dgk2kqwp_171cqpccwft# presentation].
 
 = Interaction/UI = 
 
