@@ -179,7 +179,8 @@ function Eye()
     this.parts = [];	
 }
 
-Eye.prototype.Iterate_Stones = function()
+Eye.prototype.Iterate_Stones = function() { alert('use Each_Stones instead.'); };
+Eye.prototype.Each_Stones = function(f)
 {
     /*Go through all stones in all blocks in eye
     */
@@ -187,8 +188,7 @@ Eye.prototype.Iterate_Stones = function()
 	{
 		for (var stone in block.stones)
 		{
-		    //TODO: yield stone; is there a javascript equiv to the yield keyword? http://www.network-theory.co.uk/docs/pylang/yieldstatement.html
-		    // JavaScript doesn't have generators. They're coming in ECMAScript 4 (http://www.ecmascript.org/es4/spec/overview.pdf)
+		    f(block.stones[stone]);
 		}
 	}	
 };
@@ -1309,42 +1309,35 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
 	{
         var prev_our_blocks = null;
         eye_is_ok = false;
-        for (var stone in eye.Iterate_Stones())
-		{
-		    if (this.goban[stone]!=EMPTY) {
-			continue;
-		    }
-            eye_is_ok = true;
-            var our_blocks = [];
-            for (var pos in this.Iterate_Neighbour(stone))
-			{
-                var block = this.blocks[pos];
-                if (block.color == color && (our_blocks.indexOf(block) !== -1))
-				{
-                    our_blocks.push(block);
-				}
-			}
-            //list of blocks different than earlier
-            if ((prev_our_blocks !== null) && (prev_our_blocks != our_blocks))
-			{
-                var ok_our_blocks = [];
-                for (var block in our_blocks)
-				{
-                    if (block in prev_our_blocks)
-					{
-                        ok_our_blocks.push(block);
-					}
-				}
-                our_blocks = ok_our_blocks;
-			}
-            //this empty point was not adjacent to our block or there is no block that has all empty points adjacent to it
-            if (!our_blocks)
-			{
-                eye_is_ok = false;
-                break;
-			}                
-            prev_our_blocks = our_blocks;
+	eye.Each_Stones(function (stone) {
+		if (this.goban[stone]!=EMPTY) {
+		    continue;
 		}
+		eye_is_ok = true;
+		var our_blocks = [];
+		for (var pos in this.Iterate_Neighbour(stone)) {
+		    var block = this.blocks[pos];
+		    if (block.color == color && (our_blocks.indexOf(block) !== -1)) {
+			our_blocks.push(block);
+		    }
+		}
+		//list of blocks different than earlier
+		if ((prev_our_blocks !== null) && (prev_our_blocks != our_blocks)) {
+		    var ok_our_blocks = [];
+		    for (var block in our_blocks) {
+			if (block in prev_our_blocks) {
+			    ok_our_blocks.push(block);
+			}
+		    }
+		    our_blocks = ok_our_blocks;
+		}
+		//this empty point was not adjacent to our block or there is no block that has all empty points adjacent to it
+		if (!our_blocks) {
+		    eye_is_ok = false;
+		    break;
+		}                
+		prev_our_blocks = our_blocks;
+	    });
         if (eye_is_ok)
 		{
             ok_eye_list.push(eye);
