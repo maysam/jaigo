@@ -12,3 +12,13 @@ Representing the board turns out to be the most difficult part of writing a go e
 
 = Engine choice =
 What is the engine with the smallest expression in javascript and the highest kyu ranking?
+
+== SimpleGo v1 ==
+== SimpleGO v3 ==
+== Crawler ==
+== TinyGo ==
+
+= Size =
+~76KB, unoptimized.
+
+= Speed =
