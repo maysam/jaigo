@@ -36,5 +36,10 @@ function Diagram2Game(str)
 function Test_Unconditional(str)
 {
     var g = Diagram2Game(str)
-    //print g.current_board.as_string_with_unconditional_status()
+    Debug_Output(g.current_board.as_string_with_unconditional_status());
+};
+
+function Debug_Output(output)
+{
+	document.body.debug_output.value += output + "\\n";
 };
