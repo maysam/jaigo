@@ -23,8 +23,17 @@ function Pair(x, y) {
     this.y = y;
 }
 deepValueEquality = function (other) {
-    for (e in other) {
-	if (this[e] != other[e]) {
+    var a = this;
+    var b = other;
+    if (arguments.length == 2) {
+	a = arguments[0];
+	b = arguments[1];
+    }
+    if (!(a instanceof Object)) {
+	return a === b;
+    }
+    for (var e in b) {
+	if (a[e] != b[e]) {
 	    return false;
 	}
     }
@@ -37,7 +46,7 @@ function move(x, y) {
 
 function contains(sequence, quarry, eq) {
     for (var x in sequence) {
-	if (eq(quarry, x)) {
+	if (eq(quarry, sequence[x])) {
 	    return true;
 	}
     }
@@ -57,6 +66,8 @@ function range(begin, end, step) {
     }
     return a;
 }
+
+
 
 PASS_MOVE = move(-1, -1);
 
