@@ -27,7 +27,8 @@ function Test_Speed(n)
 	}
     var t1 = new Date();
     t_elapsed = t1-t0;
-    alert(t_elapsed, n/t_elapsed); //TODO: figure out how to report on a test.
+    Debug_Output(t_elapsed);
+ 	Debug_Output(n/t_elapsed);
 };
 
 function Test_Position(diagram, ok_result)
@@ -58,8 +59,8 @@ function Test_Position(diagram, ok_result)
 	{
 		return;
 	}
-    alert(ok_result); //TODO: figure out how to report on test
-	alert(test_result);
+    Debug_Output(ok_result);
+	Debug_Output(test_result);
     throw new EvalError("unconditional test failed");
 };
 
@@ -94,4 +95,4 @@ function Test_All()
 	 +---------+
 	  ABCDEFGHJ
 	");
-};``
+};
