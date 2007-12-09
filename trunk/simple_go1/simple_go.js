@@ -179,19 +179,22 @@ function Eye()
     this.parts = [];	
 }
 
-Eye.prototype.Iterate_Stones = function() { alert('use Each_Stones instead.'); };
-Eye.prototype.Each_Stones = function(f)
+Eye.prototype.each_Stones = function(f)
 {
     /*Go through all stones in all blocks in eye
     */
-    for (var block in this.parts)
-	{
-		for (var stone in block.stones)
-		{
-		    f(block.stones[stone]);
-		}
-	}	
+    for (var b in this.parts) {
+	var block = this.parts[b];
+	for (var s in block.stones) {
+	    var stone = block.stones[s];
+	    if (f(stone) === Eye.prototype.each_Stones['break']) {
+		return;
+	    }
+	}
+    }	
 };
+Eye.prototype.each_Stones['continue'] = true;
+Eye.prototype.each_Stones['break'] = false;
 
 Eye.prototype.Mark_Status = function(live_color)
 {
@@ -243,54 +246,50 @@ function Board(board_size)
 	this.goban = []; //actual board
 	this.init_hash();
 	//Create and initialize board as empty board_size*board_size
-	for (var pos in this.Iterate_Goban())
-	{
+	this.each_Goban(function (pos) {
 		//can't use set_goban method here, because goban doesn't yet really exists
-	    this.goban[pos] = EMPTY;
-	    this.current_hash = this.current_hash ^ this.board_hash_values[EMPTY][pos];
-	}
+		this.goban[pos] = EMPTY;
+		this.current_hash = this.current_hash ^ this.board_hash_values[EMPTY][pos];});
 	this.blocks = []; //blocks dictionary
 	//Create and initialize one whole board empty block
 	var new_block = new Block(EMPTY);
-	for (pos in self.iterate_goban()) //TODO: again here.
-	{
+	this.each_goban(function (pos) {
 	    new_block.add_stone(pos);
-	    this.blocks[pos] = new_block;
-	}
+	    this.blocks[pos] = new_block;});
 	this.block_list = [new_block];
 	this.chains = [];
 }
 
-Board.prototype.Iterate_Goban = function()
+Board.prototype.each_Goban = function()
 {
     /*This goes through all positions in goban
        Example usage: see above __init__ method
     */
-    for (var x in range(1, this.board_size+1)) //TODO: what is range?
-	{
-		for (var y in range(1, this.board_size+1))
-		{
-			//TODO: yield x, y;
-		}
+    for (var x in range(1, this.board_size+1)) {
+	for (var y in range(1, this.board_size+1)) {
+	    return [x, y];
 	}
+    }
 };
 
-Board.prototype.Iterate_Neighbour = function(pos)
+Board.prototype.each_Neighbour = function(pos)
 {
-    /*This goes through all neighbour positions in clockwise:
-       up, right, down, left
-       Example usage: see legal_move method
-    */
-    var x = pos.x;
-    var y = pos.y;
-    for (var x2y2 in [new Pair(x,y+1), new Pair(x+1,y), new Pair(x,y-1), new Pair(x-1,y)])
-	{
-    	if (1 <= x2y2.x && x2y2.x <= this.board_size && 1 <= x2y2.y && x2y2.y <= this.board_size)
-		{
-        	//TODO: yield (x2, y2);
-		}
+    return function(f) {
+	/*This goes through all neighbour positions in clockwise:
+	  up, right, down, left
+	  Example usage: see legal_move method
+	*/
+	var x = pos.x;
+	var y = pos.y;
+	for (var x2y2 in [new Pair(x,y+1), new Pair(x+1,y), new Pair(x,y-1), new Pair(x-1,y)]) {
+	    if (1 <= x2y2.x && x2y2.x <= this.board_size && 1 <= x2y2.y && x2y2.y <= this.board_size) {
+        	f(x2y2);
+	    }
 	}
+    };
 };
+Board.prototype.each_Neighbour['continue'] = true;
+Board.prototype.each_Neighbour['break'] = false;
 
 Board.prototype.Iterate_Diagonal_Neighbour = function(pos)
 {
@@ -363,15 +362,13 @@ Board.prototype.Init_Hash = function()
 {
     /*Individual number for every possible color and position combination */
     this.board_hash_values = [];
-    for (var color in EMPTY+WHITE+BLACK)
-	{
-        for (var pos in this.iterate_goban())
-		{
+    for (var color in EMPTY+WHITE+BLACK) {
+	this.each_goban(function (pos) {
 		this.board_hash_values[color] = [];
         	this.board_hash_values[color][pos] = Math.floor(Math.random() * (Number.MAX_VALUE - Number.MIN_VALUE + 1)) + Number.MIN_VALUE; //TODO: check to make sure this returns a random int in [-max, max]
-		}
+	    });
     	this.current_hash = 0;
-	}
+    }
 };
 
     Board.prototype.Set_Goban = function(color, pos)
@@ -402,27 +399,27 @@ Board.prototype.Are_Adjacent_Points = function(pos1, pos2)
     /*Tests whether pos1 and pos2 are adjacent.
        Returns True or False.
     */
-    for (var pos in this.iterate_neighbour(pos1))
-	{
-    	if (pos==pos2)
-		{
-            return true;
-		}    
-		return false;
-	}
+    var result;
+    this.each_Neighbour(pos1)(function (pos) {
+	    if (pos.equals(pos2)) {
+		result = true;
+		return this.each_Neighbor['break'];
+	    }
+	    result = false;
+	    return this.each_Neighbour['continue'];
+	});
+    return result;
 };
 
 Board.prototype.List_Empty_3x3_Neighbour = function(pos)
 {
     //check normal neighbour positions first
     var neighbour_list = [];
-    for (var pos2 in this.iterate_neighbour(pos))
-	{
-        if (this.goban[pos2]==EMPTY)
-		{
-            neighbour_list.append(pos2);
-		}
-	}
+    this.each_Neighbour(pos)(function (pos2) {
+	    if (this.goban[pos2]==EMPTY) {
+		neighbour_list.append(pos2);
+	    }
+	});
     //check diagonal neighbour positions first
     //this is done to ensure that empty block is/will not splitted
     var diagonal_neighbour_list = [];
@@ -467,13 +464,11 @@ Board.prototype.Simple_Same_Block = function(pos_list)
     for (var pos in pos_list)
 	{
         temp_block.Add_Stone(pos);
-        for (var pos2 in this.Iterate_Neighbour(pos))
-		{
-            if (this.goban[pos2]==color)
-			{
-                temp_block.Add_Stone(pos2);
-			}
+        this.each_Neighbour(pos)(function (pos2) {
+		if (this.goban[pos2]==color) {
+		    temp_block.Add_Stone(pos2);
 		}
+	    });
 	}    
     var new_mark = 2; //When stones are added they get by default value True (==1)
     this.flood_mark(temp_block, pos_list[0], new_mark);
@@ -529,48 +524,44 @@ Board.prototype.Add_Stone = function(color, pos)
 
     //combine and split blocks as needed
     var split_list = [];
-    for (var pos2 in this.iterate_neighbour(pos))
-	{
-    	var other_block = this.blocks[pos2];
-        if (this.goban[pos2]==color)
-		{
-            new_block = this.Combine_Blocks(new_block, other_block);
+    this.each_neighbour(pos)(function (pos2) {
+	    var other_block = this.blocks[pos2];
+	    if (this.goban[pos2]==color) {
+		new_block = this.Combine_Blocks(new_block, other_block);
+	    }
+	    else {
+		new_block.neighbour[pos2] = true;
+		if (this.goban[pos2]==old_color) {
+		    split_list.push(pos2);
 		}
-        else
-		{
-            new_block.neighbour[pos2] = true;
-            if (this.goban[pos2]==old_color)
-			{
-                split_list.push(pos2);
-			}
-		}
-	}    
+	    }
+	});
     //If these splits are actually trivially same: do update fast
     if (this.Simple_Same_Block(split_list))
 	{
         old_block.neighbour[pos] = true;
         //are pos neighbour positions also neighbour to reduced old_block?
-        for (var pos2 in this.Iterate_Neighbour(pos))
-		{
-            if (old_block.stones.indexOf(pos2) == -1) //this if is slight optimization: can't be neighbour if belongs to block
-			{
-                for (var pos3 in this.Iterate_Neighbour(pos2))
-				{
-                    if (pos3 in old_block.stones)
-					{
-                        break; //yes, pos2 is neighbour
-					}
-				}
-			}
-            else //no, it's not neighbour
-			{
+        this.each_Neighbour(pos)(function (pos2) {
+		if (old_block.stones.indexOf(pos2) == -1) //this if is slight optimization: can't be neighbour if belongs to block
+		    {
+			for (var pos3 in this.Iterate_Neighbour(pos2))
+			    {
+				if (pos3 in old_block.stones)
+				    {
+					//yes, pos2 is neighbour
+					return this.each_Neighbour['break'];
+				    }
+			    }
+		    }
+		else //no, it's not neighbour
+		    {
 	         	//was it neighbour to old_block? remove it if it is
 	         	if (pos2 in old_block.neighbour)
-				{
-	            	oldblock.neighbour.splice(old_block.neighbour.indexOf(pos2),1);
-				}
-			}
-		}
+			    {
+				oldblock.neighbour.splice(old_block.neighbour.indexOf(pos2),1);
+			    }
+		    }
+	    });
 	}
     else
 	{
@@ -674,13 +665,12 @@ Board.prototype.Flood_Mark = function(block, start_pos, mark)
 	    continue;
 	}
         block.stones[pos] = mark;
-        for (var pos2 in this.Iterate_Neighbour(pos))
-		{
-            if (pos2 in block.stones)
-			{
-                to_mark.push(pos2);
-			}
-		}
+        this.each_Neighbour(pos)(function (pos2) {
+		if (pos2 in block.stones)
+		    {
+			to_mark.push(pos2);
+		    }
+	    });
 	}
 };
 
@@ -691,13 +681,12 @@ Board.prototype.Calculate_Neighbour = function(block)
     block.neighbour = [];
     for (var stone in block.stones)
 	{
-        for (var pos in this.Iterate_Neighbour(stone))
-		{
-            if (block.stones.indexOf(pos) == -1)
+	    this.each_Neighbour(stone)(function (pos) {
+		    if (block.stones.indexOf(pos) == -1)
 			{
-                block.neighbour[pos] = true;
+			    block.neighbour[pos] = true;
 			}
-		}
+		});
 	}
 };
 
@@ -794,18 +783,24 @@ Board.prototype.Legal_Move = function(move)
     if (self.goban[move]!=EMPTY) {
 	return false;
     }
-    for (var pos in this.Iterate_Neighbour(move))
-	{
+
+    var result;
+    this.each_Neighbour(move)(function (pos) {
 	    if (this.goban[pos]==EMPTY) {
-		return true;
+		result = true;
+		return this.each_Neighbour['break'];
 	    }
 	    if (this.goban[pos]==this.side && this.Liberties(pos)>1) {
-		return true;
+		result = true;
+		return this.each_Neighbour['break'];
 	    }
 	    if (this.goban[pos]==other_side[this.side] && this.Liberties(pos)==1) {
-		return true;
+		result = true;
+		return this.each_Neighbour['break'];
 	    }
-	}
+	});
+    if (result !== undefined) return result;
+
     return false;
 };
 
@@ -828,14 +823,13 @@ Board.prototype.Make_Move = function(move)
 	this.Add_Stone(this.side, move);
 	this.Add_Undo_Info("add_stone", EMPTY, move);
         var remove_color = other_side[this.side];
-        for (var pos in this.Iterate_Neighbour(move))
-		{
-            if (this.goban[pos] == remove_color && this.Liberties(pos) === 0)
-			{
-                this.Remove_Block(pos);
-                this.Add_Undo_Info("change_block_color", remove_color, pos);
-			}
-		}
+        this.each_Neighbour(move)(function (pos) {
+		if (this.goban[pos] == remove_color && this.Liberties(pos) === 0)
+		    {
+			this.Remove_Block(pos);
+			this.Add_Undo_Info("change_block_color", remove_color, pos);
+		    }
+	    });
         this.Change_Side();
         return move;
 	}
@@ -898,12 +892,11 @@ Board.prototype.Analyse_Eye_Point = function(pos, other_color)
 	{
         return null;
 	}
-    for (var pos2 in this.Iterate_Neighbour(pos))
-	{
+    this.each_Neighbour(pos)(function (pos2) {
 	    if (this.goban[pos2]==other_color) {
 		return null;
 	    }
-	}
+	});
     var total_count = 0;
     var other_count = 0;
     for (var pos2 in this.Iterate_Diagonal_Neighbour(pos)) {
@@ -1309,18 +1302,18 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
 	{
         var prev_our_blocks = null;
         eye_is_ok = false;
-	eye.Each_Stones(function (stone) {
+	eye.each_Stones(function (stone) {
 		if (this.goban[stone]!=EMPTY) {
-		    continue;
+		    return eye.each_Stones['continue'];
 		}
 		eye_is_ok = true;
 		var our_blocks = [];
-		for (var pos in this.Iterate_Neighbour(stone)) {
-		    var block = this.blocks[pos];
-		    if (block.color == color && (our_blocks.indexOf(block) !== -1)) {
-			our_blocks.push(block);
-		    }
-		}
+		this.each_Neighbour(stone)(function (pos) {
+			var block = this.blocks[pos];
+			if (block.color == color && (our_blocks.indexOf(block) !== -1)) {
+			    our_blocks.push(block);
+			}
+		    });
 		//list of blocks different than earlier
 		if ((prev_our_blocks !== null) && (prev_our_blocks != our_blocks)) {
 		    var ok_our_blocks = [];
@@ -1334,7 +1327,7 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
 		//this empty point was not adjacent to our block or there is no block that has all empty points adjacent to it
 		if (!our_blocks) {
 		    eye_is_ok = false;
-		    break;
+		    return eye.each_Stones['break'];
 		}                
 		prev_our_blocks = our_blocks;
 	    });
@@ -1569,29 +1562,26 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
                 var new_mark = 2; //When stones are added they get by default value true (==1)
                 for (var eye in both_eye_list)
 				{
-                    for (var pos in this.Iterate_Neighbour(eye))
-					{
-                        if (eye_block.stones.indexOf(pos) != -1)
-						{
-                            this.Flood_Mark(eye_block, pos, new_mark);
-                            var splitted_block = this.split_marked_group(eye_block, new_mark);
-                            stone_block_list.push(splitted_block);
-						}
-					}
+				    this.each_Neighbour(eye)(function (pos) {
+					    if (eye_block.stones.indexOf(pos) != -1) {
+						this.Flood_Mark(eye_block, pos, new_mark);
+						var splitted_block = this.split_marked_group(eye_block, new_mark);
+						stone_block_list.push(splitted_block);
+					    }
+					});
 				}
                 //Add eyes to block neighbour.
                 for (var eye in both_eye_list)
 				{
-                    for (var pos in this.Iterate_Neighbour(eye))
-					{
-                        for (var block in stone_block_list)
+				    this.each_Neighbour(eye)(function (pos) {
+					    for (var block in stone_block_list)
 						{
-                            if (block.stones.indexOf(pos) != -1)
+						    if (block.stones.indexOf(pos) != -1)
 							{
-                                block.neighbour[eye] = true;
+							    block.neighbour[eye] = true;
 							}
 						}
-					}
+					});
 				}
                 //main false eye loop: at end of loop check if changes
                 while (true)
@@ -2080,13 +2070,12 @@ Game.prototype.Iterate_Moves = function()
     /* Go through all legal moves including pass move
     */
     //TODO: yield PASS_MOVE;
-    for (var move in this.current_board.Iterate_Goban())
-	{
-        if (this.Legal_Move(move))
+    this.current_board.each_Goban(function (move) {
+	    if (this.Legal_Move(move))
 		{
 		    //TODO: yield move;
 		}
-	}
+	});
 };
 
 Game.prototype.List_Moves = function()
@@ -2134,31 +2123,30 @@ Game.prototype.Score_Move = function(move)
         else
 		{
             //Check if some our neighbour group is in atari instead.
-            for (var stone in cboard.Iterate_Neighbour(move))
-			{
-                var block = cboard.blocks[stone];
-                if (block.color==cboard.side && cboard.Block_Liberties(block)==1)
+		    cboard.each_Neighbour(move)(function (stone) {
+			    var block = cboard.blocks[stone];
+			    if (block.color==cboard.side && cboard.Block_Liberties(block)==1)
 				{
-                    //make_move later changes block.neighbour dictionary in some cases so this is needed
-                    for (var block2 in list(cboard.Iterate_Neighbour_Blocks(block))) // TODO: what is list()?
+				    //make_move later changes block.neighbour dictionary in some cases so this is needed
+				    for (var block2 in list(cboard.Iterate_Neighbour_Blocks(block))) // TODO: what is list()?
 					{
-                        var liberties = cboard.List_Block_Liberties(block2);
-                        if (liberties.length()==1)
+					    var liberties = cboard.List_Block_Liberties(block2);
+					    if (liberties.length()==1)
 						{
-                            var move2 = liberties[0];
-                            if (this.Make_Move(move2))
+						    var move2 = liberties[0];
+						    if (this.Make_Move(move2))
 							{
-                                //get score from our viewpoint: negative of opponent score
-                                var score = -cboard.Score_Position();
-                                if (score > best_score) {
-				    best_score = score;
-				}
-                                this.Undo_Move();
+							    //get score from our viewpoint: negative of opponent score
+							    var score = -cboard.Score_Position();
+							    if (score > best_score) {
+								best_score = score;
+							    }
+							    this.Undo_Move();
 							}
 						}
 					}
 				}
-			}
+			});
 		}
 	}
     this.Undo_Move();
@@ -2247,14 +2235,12 @@ Game.prototype.Place_Free_Handicap = function(count)
 {
      var result = [];
      var move_candidates = [];
-     for (var move in this.current_board.Iterate_Goban())
-	{
-         if (this.current_board.Is_3x3_Empty(move))
-		{
-             move_candidates.push(move);
-		}
-	}
-    while (result.length() < count)
+     this.current_board.each_Goban(function (move) {
+	     if (this.current_board.Is_3x3_Empty(move)) {
+		 move_candidates.push(move);
+	     }
+	 });
+     while (result.length() < count)
 	{
 		if (this.current_board.side==WHITE)
 		{
@@ -2326,65 +2312,49 @@ Game.prototype.Select_Random_No_Eye_Fill_Move = function()
     var make_eye_moves = [];
     var remove_liberty = [];
     var board = this.current_board;
-    for (var move in board.Iterate_Goban())
-	{
-        if (this.Legal_Move(move))
-		{
-            for (var pos in board.Iterate_Neighbour(move))
-			{
-                if (board.goban[pos]!=board.side)
-				{
-                    all_moves.push(move);
-                    break;
-				}
-            	else
-				{
-                	eye_moves.push(move);
-				}
+    board.each_Goban(function (move) {
+	    if (this.Legal_Move(move)) {
+		board.each_Neighbour(move)(function (pos) {
+			if (board.goban[pos]!=board.side) {
+			    all_moves.push(move);
+			    return board.each_Neighbour['break'];
 			}
-            for (var pos in board.Iterate_Neighbour(move))
-			{
-                if (board.goban[pos] != EMPTY && board.liberties(pos) === 1)
-				{
-                	capture_or_defence_moves.push(move);
-                    break;
-				}
+			else {
+			    eye_moves.push(move);
 			}
-			for (var pos in board.Iterate_Neighbour(move))
-			{			
-                if (board.goban[pos]==EMPTY)
-				{
-    				for (var pos2 in board.Iterate_Neighbour(move))
-					{
-                        if (pos2!=move && board.goban[pos2]!=board.side)
-						{
-                            break;
-						}
-	                    else
-						{
-						    make_eye_moves.append(move);
-						}
-					}
-				}
+		    });
+		board.each_Neighbour(move)(function (pos) {
+			if (board.goban[pos] != EMPTY && board.liberties(pos) === 1) {
+			    capture_or_defence_moves.push(move);
+			    return board.each_Neighbour['break'];
 			}
-            for (var pos in board.Iterate_Neighbour(move))
-			{
-                if (board.goban[pos]==other_side[board.side])
-				{
-    				for (var pos2 in board.Iterate_Neighbour(move))
-					{
-                        if (board.goban[pos2]==board.side)
-						{
-                            remove_liberty.push(move);
-						}
-                        break;
-					}
-                    break;
-				}
+		    });
+		board.each_Neighbour(move)(function (pos) {
+			if (board.goban[pos]==EMPTY) { 
+			    board.each_Neighbour(move)(function (pos2) {
+				    if (pos2!=move && board.goban[pos2]!=board.side) {
+					return board.each_Neighbour['break'];
+				    }
+				    else {
+					make_eye_moves.append(move);
+				    }
+				});
 			}
-		}
-	}
-	//TODO: are these conditionals syntax correct?
+		    });
+		board.each_Neighbour(move)(function (pos) {
+			if (board.goban[pos]==other_side[board.side]) {
+			    board.Iterate_Neighbour(move)(function (pos2) {
+				    if (board.goban[pos2]==board.side) {
+					remove_liberty.push(move);
+				    }
+				    return board.each_Neighbour['break'];
+				});
+			    return board.each_Neighbour['break'];
+			}
+		    });
+	    }
+	});
+    //TODO: are these conditionals syntax correct?
     if (capture_or_defence_moves) {
 	return random.choice(capture_or_defence_moves); //TODO: random.choice?
     }
@@ -2422,8 +2392,8 @@ function main()
        Print all positions and moves made while playing.
     */
     //random.seed(1)
-    size = 19
-    g = new Game(size)
+    size = 19;
+    g = new Game(size);
     while (true)
 	{
         var move = g.Generate_Move();
