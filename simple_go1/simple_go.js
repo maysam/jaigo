@@ -44,6 +44,20 @@ function contains(sequence, quarry, eq) {
     return false;
 }
 
+function range(begin, end, step) {
+    step = step || 1;
+    if (arguments.length == 1) {
+	end = arguments[0];
+	begin = 0;
+    }
+    var a = [];
+    var c = 0;
+    for (var i = begin; i < end; i += step) {
+	a[c++] = i;
+    }
+    return a;
+}
+
 PASS_MOVE = move(-1, -1);
 
 function move_as_string(move, board_size)
