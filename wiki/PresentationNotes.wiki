@@ -11,7 +11,11 @@
   * Capture (the state of a chain with no liberties; captured chains are removed from the board)
   * Suicide (capturing your own chain)
   * Ko rule (no cycles shorter than 3 turns permitted)
-  * Turn (start the game by placing a stone, or pass or place a stone at a liberty)
+  * Turn (pass or place a stone)
+
+Objective: control more area or territory than opponent
+
+zero-sum, perfect information, partisan (some moves are available to one player but not the other), deterministic strategy game
 
 = Interaction/UI = 
 
