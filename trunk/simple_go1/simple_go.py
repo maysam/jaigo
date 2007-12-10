@@ -1,4 +1,4 @@
-#Simple Go playing program
+s#Simple Go playing program
 #Goals are:
 #1) Easy to understand:
 #   If fully understanding GnuGo could be considered advanced,

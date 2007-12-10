@@ -162,7 +162,7 @@ Block.prototype.Add_Block = function(other_block)
     */
     this.stones.Update(other_block.stones);
     this.neighbour.Update(other_block.neighbour);
-	//TODO: not sure if this subobject method syntax is correct
+    //TODO: not sure if this subobject method syntax is correct
 };
 
 Block.prototype.Mark_Stones = function(mark)
@@ -231,22 +231,22 @@ Eye.prototype.Mark_Status = function(live_color)
            All opposite colored blocks are marked dead.
            Empty blocks are marked as territory for live_color.
 	*/
-	for (var block in this.parts)
+	for (var b in this.parts)
 	{
-		switch (block.color)
-		{
-			//note: status is not a reserved word in javascript.
-		        //TODO: Also, is block an instance of Block, and if so, does it need to be declared/instantiated differently?
-			case live_color:
-				block.status = "alive";
-			break;
-			case other_side[live_color]:
-				block.status = "dead";
-			break;
-			default:
-				block.status = live_color + " territory";
-			break;
-		}
+	    var block = this.parts[b];
+	    switch (block.color) {
+		//note: status is not a reserved word in javascript.
+		//TODO: Also, is block an instance of Block, and if so, does it need to be declared/instantiated differently?
+	    case live_color:
+		block.status = "alive";
+		break;
+	    case other_side[live_color]:
+		block.status = "dead";
+		break;
+	    default:
+		block.status = live_color + " territory";
+		break;
+	    }
 	}
 };
 
@@ -703,14 +703,14 @@ Board.prototype.Split_Marked_Group = function(block, mark)
        Return splitted group.
     */
     var new_block = new Block(block.color);
-    for (var stone in block.stones) //TODO: is this right for block.stones.items(), which in py returns a tuple of values stored in stones?
-	{
-        if (stone.mark==mark) //TODO: does the stones object have this property?
-		{
-            block.Remove_Stone(stone);
-            new_block.Add_Stone(stone);
-		}
-	}
+    for (var s in block.stones) {
+	var stone = block.stones[s];
+        if (stone.mark === mark) //TODO: does the stones object have this property?
+	    {
+		block.Remove_Stone(stone);
+		new_block.Add_Stone(stone);
+	    }
+    }
     return new_block;
 };
 
@@ -2416,8 +2416,12 @@ Game.prototype.Select_Random_No_Eye_Fill_Move = function()
 
 Game.prototype.Generate_Move = function(remove_opponent_dead, pass_allowed) //TODO: is this a matching pattern, or an optional argument, or an initial assignment. I assume it's the last.
 {
-	remove_opponent_dead = false;
-	pass_allowed;
+    if (arguments.length < 2) {
+	if (arguments.length < 1) {
+	    remove_opponent_dead = false;
+	}
+	pass_allowed = true;
+    }
     /* generate move using scored move generator
     */
     //return self.select_random_move()
