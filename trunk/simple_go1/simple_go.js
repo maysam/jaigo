@@ -68,6 +68,34 @@ function range(begin, end, step) {
     return a;
 }
 
+function randint(min, max) {
+    // result is distributed pretty evenly between
+    // min + 1 and max - 1, tailing off at
+    // min and max. I don't think this can be
+    // explained by uneven distribution of
+    // floating point numbers on [0, 1] or
+    // the definition of round (towards +inf).
+    var result;
+    if (min < 0 && max >= 0) {
+	var a = -min / 2;
+	var b = max / 2;
+	var c = a + b;
+	if (Math.random() < Math.min(a / c, b / c)) {
+	    result = randint(min, 0);
+	}
+	else {
+	    result = randint(0, max);
+	}
+    }
+    else {
+	result = Math.random() * (max - min) + min;
+    }
+    return Math.round(result);
+}
+
+function randomchoice(seq) {
+    return seq[randint(0, seq.length)];
+}
 
 
 PASS_MOVE = move(-1, -1);
@@ -402,7 +430,7 @@ Board.prototype.Init_Hash = function()
     for (var color in EMPTY+WHITE+BLACK) {
 	this.each_goban(function (pos) {
 		this.board_hash_values[color] = [];
-        	this.board_hash_values[color][pos] = Math.floor(Math.random() * (Number.MAX_VALUE - Number.MIN_VALUE + 1)) + Number.MIN_VALUE; //TODO: check to make sure this returns a random int in [-max, max]
+        	this.board_hash_values[color][pos] = randint(-Number.MAX_VALUE, Number.MAX_VALUE);
 	    });
     	this.current_hash = 0;
     }
@@ -1889,7 +1917,7 @@ Board.prototype.toString = function()
     s = s + "  +" + "-"*this.size + "+\n";
 
 	var board_y_coord = "";
-    for (var y in range(this.size, 0, -1)) //TODO: what is range()?
+    for (var y in range(this.size, 0, -1))
 	{
         if (y < 10)
 		{
@@ -2023,7 +2051,9 @@ Game.prototype.Legal_Move = function(move)
     if (!this.current_board.Legal_Move(move)) {
 	return false;
     }
-    var undo_log, board_key = this.Make_Unchecked_Move(move); //TODO: going back to the earlier question on returning a tuple, does this assignment work?
+    var logkey = this.Make_Unchecked_Move(move);
+    var undo_log = logkey[0];
+    var board_key = logkey[1];
     this.current_board.Undo_Move(undo_log);
     if (contains(position_seen, board_key, deepValueEquality)) {
 	return false;
@@ -2043,7 +2073,9 @@ Game.prototype.Make_Move = function(move)
     if (!this.current_board.Legal_Move(move)) {
 	return null;
     }
-    var undo_log, board_key = this.Make_Unchecked_Move(move); //TODO: see earlier question
+    var logkey = this.Make_Unchecked_Move(move);
+    var undo_log = logkey[0];
+    var board_key = logkey[1];
     if (move!=PASS_MOVE && (this.position_seen.indexOf(board_key) == -1))
 	{
         this.current_board.Undo_Move(undo_log);
@@ -2235,7 +2267,7 @@ Game.prototype.Select_Scored_Move = function(remove_opponent_dead, pass_allowed)
 	if (best_moves.length() === 0) {
 	    return PASS_MOVE;
 	}
-    return random.choice(best_moves); //TODO: what is random.choice?
+	return randomchoice(best_moves);
 };
 
 Game.prototype.Place_Free_Handicap = function(count)
@@ -2255,7 +2287,7 @@ Game.prototype.Place_Free_Handicap = function(count)
 		}
          if (move_candidates)
 		{
-             move = random.choice(move_candidates); //TODO: what is random.choice()?
+             move = randomchoice(move_candidates);
 		}
         else
 		{
@@ -2304,7 +2336,7 @@ Game.prototype.Select_Random_Move = function()
 {
     /* return randomly selected move from all legal moves
     */
-    return random.choice(this.list_moves()); //TODO: what is random.choice()?
+    return randomchoice(this.list_moves());
 };
 
 Game.prototype.Select_Random_No_Eye_Fill_Move = function()
@@ -2362,17 +2394,17 @@ Game.prototype.Select_Random_No_Eye_Fill_Move = function()
 	});
     //TODO: are these conditionals syntax correct?
     if (capture_or_defence_moves) {
-	return random.choice(capture_or_defence_moves); //TODO: random.choice?
+	return randomchoice(capture_or_defence_moves);
     }
     if (make_eye_moves) {
-	return random.choice(make_eye_moves);
+	return randomchoice(make_eye_moves);
     }
     if (remove_liberty) {
-	return random.choice(remove_liberty);
+	return randomchoice(remove_liberty);
     }
     if (all_moves)
 	{
- 		return random.choice(all_moves);
+ 		return randomchoice(all_moves);
 	}
     else
 	{
