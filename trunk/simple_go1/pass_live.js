@@ -8,9 +8,9 @@ function Pass_Live()
 	this.limit = 12;
 	this.bits = size * size;
 
-	Debug_Output("Running with size " + size + " with stone limit at " + limit);
-	Debug_Output("from position " + start_no + " to position " + end_no);
-	Debug_Output("Result to screen and to pass_live.log");
+	debug_output("Running with size " + size + " with stone limit at " + limit);
+	debug_output("from position " + start_no + " to position " + end_no);
+	debug_output("Result to screen and to pass_live.log");
 	
 	var simple_board2 = this.Create_Board(size);
 	var no = start_no;
@@ -26,7 +26,7 @@ function Pass_Live()
 		}
 	    if (no%100==0)
 		{
-	        Debug_Output(no + "\\r");
+	        debug_output(no + "\\r");
 		}
 	    if (bit_count<=limit)
 		{
@@ -63,9 +63,9 @@ function Pass_Live()
                 //fp.write(str(b))
                 //fp.write("\n")
                 //fp.flush()
-                Debug_Output(no);
-				Debug_Output(bit_count);
-                Debug_Output(b);
+                debug_output(no);
+				debug_output(bit_count);
+                debug_output(b);
 			}
 		}
 	    no = no + 1;

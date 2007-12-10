@@ -1,7 +1,12 @@
-function Diagram2Game(str)
+function debug_output(output)
+{
+	document.body.debug_output.value += output + "\\n";
+}
+
+function diagram2game(str)
 {
     var g = null;
-    for (var line in string.split(str, "\n")) //TODO: will string.split return a string array split by newlines?
+    for (line in string.split(str, "\n")) //TODO: will string.split return a string array split by newlines?
 	{
         //line = string.strip(line) TODO: does string.strip take out whitespace?
         if (line.length() > 0) 
@@ -15,7 +20,7 @@ function Diagram2Game(str)
         else if (line[0] in string.digits) //TODO: string.digits?
 		{
             var y, line, rest = string.split(line, "|"); //TODO: tricky assignment. don't know if js can do this.
-            for (var x in range(line.length())) //TODO: does range have a js equiv.?
+            for (x in range(line.length())) if (range(line.length).hasOwnProperty(x))
 			{
                 var stone = line[x];
                 x = x + 1;
@@ -31,15 +36,10 @@ function Diagram2Game(str)
 		}
 	}
     return g;
-};
+}
 
-function Test_Unconditional(str)
+function test_unconditional(str)
 {
-    var g = Diagram2Game(str)
-    Debug_Output(g.current_board.as_string_with_unconditional_status());
-};
-
-function Debug_Output(output)
-{
-	document.body.debug_output.value += output + "\\n";
-};
+    var g = diagram2game(str);
+    debug_output(g.current_board.As_String_With_Unconditional_Status());
+}
