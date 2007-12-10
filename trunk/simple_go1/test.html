@@ -2,19 +2,26 @@
 <HTML>
 	<HEAD>
 		<script language="javascript" src="simple_go.js" />
-		<script language="javascript" src="pass_live.js" />
 		<script language="javascript" src="play_gtp.js" />
 		<script language="javascript" src="utils.js" />
 		<script language="javascript" src="test.js" />
+		<script language="javascript">function play_gtp() { var player = new GTP_player(document.body.log_output, document.body.gtp_input, document.body.gtp_output); player.Loop();}
+		</script>
 		<TITLE>Test jaigo</TITLE>
 		</HEAD>
 	<BODY>
-		<textarea rows="22" cols="22" id="play_board">play text board</textarea>
+		<textarea rows="22" cols="22" id="play_board">test text board</textarea>
 		<textarea rows="22" cols="22" id="expected_board">expected text board</textarea>
-		<input type="button" value="Play!" onclick="main()" />
-		<input type="button" value="Test Board!" onclick="Test_Position(play_board, expected_board)" />		
-		<input type="button" value="Test All!" onclick="Test_All()" />
+		<input type="button" value="Test Board!" onclick="test_position(play_board, expected_board)" />		
+		<input type="button" value="Test All!" onclick="test_all()" />
 		<br />
+		<br />
+		<textarea rows= "2" cols="22" id="gtp_input">></textarea>
+		<textarea id="log_output">log output</textarea>		
+		<input type="button" value="Play!" onclick="play_gtp()" />
+		<br />	
+		<br />
+		<textarea id="gtp_output">gtp output</textarea>					
 		<textarea id="debug_output">debug output</textarea>
 	</BODY>
 </HTML>

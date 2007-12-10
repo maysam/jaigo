@@ -1,13 +1,5 @@
 var debug = 1;
 
-function log(s)
-{
-	//TODO: where to write game log?
-    //fp = open("game2.log", "a")
-    //fp.write(s)
-    //fp.close()
-}
-
 function coords_to_sgf(size, board_coords)
 {
     board_coords = board_coords.toLowerCase();
@@ -29,28 +21,18 @@ function coords_to_sgf(size, board_coords)
     return sgffirst + sgfsecond;
 }
 
-function GTP_controller(infile, outfile)
+function GTP_controller(log,infile, outfile)
 {
     /*
     # Class members:
+	#   log				File to display interaction in
     #   outfile         File to write to
     #   infile          File to read from
 	*/
 
-	this.infile  = infile;
-	this.outfile = outfile;
-	//TODO: figure out where to put out and in streams.
-	// total number of gtpb-logfiles
-/*	for (i in range(1000))
-	{	
-	    log_name = "gtpb%03i.log" % i;
-	    if (!os.path.exists(log_name))
-		{	
-	        break;
-		}
-	}
-*/
-	//this.log_fp = open(log_name, "w");
+	this.game_log = log;//document.body.log_output;
+	this.game_input = input;//document.body.gtp_input;
+	this.game_output = output;
 }
 
 GTP_controller.prototype.Get_Cmd = function()
@@ -58,21 +40,21 @@ GTP_controller.prototype.Get_Cmd = function()
 	var result = "";
 	while (true)
 	{
-	    var line = this.infile.readline(); //TODO: replace readline()
+	    var line = this.game_input.value; //read_game_input();
+		this.game_input.value = "";
 	    if (line.length < 1)
 		{
 			break;
 		}
-	    if (this.log_fp.length < 1) //TODO: replace log_fp
+	    if (this.game_log.length < 1) //TODO: replace log_fp
 		{
-	        this.log_fp.write(">" + line);
-	        this.log_fp.flush();
+	        this.game_log.value = ">" + line;
 		}
 	    if (line=="\n")
 		{
 	 		continue;
 		}
-	    result = result + line;
+	    result += line;
 	    break;
 	}
 	return result;
@@ -82,11 +64,9 @@ GTP_controller.Set_Result = function(result)
 {
 	if (debug)
 	{	
-	    this.log_fp.write("<"+result);
-	    this.log_fp.flush();
+        this.game_log.value += ">" + line;
 	}
-	this.outfile.write(result);
-	this.outfile.flush();
+	this.game_output.value += result;
 };
 
 /* Class members:
@@ -94,22 +74,14 @@ GTP_controller.Set_Result = function(result)
 #    master         GTP_controller
 */
 
-function GTP_player()
+function GTP_player(gtp_log, gtp_input, gtp_output)
 {
 	this.engine = new Game(19);
-	this.master = new GTP_controller(sys.stdin, sys.stdout); //TODO: replace stdin/out
+	this.master = new GTP_controller(gtp_log, gtp_input, gtp_output);
 	this.version = "0.1.0";
 	this.name = "jaigo: at end of game I will pass once your stones are so safe that you can pass FOREVER: my info contains links to my source code: ";
 	this.komi = 0.0;
 	this.handicap = 0;
-	// total number of gtpc-logfiles
-	//TODO: what to use for this?
-/*	for i in range(1000):
-	    log_name = "gtpc%03i.log" % i
-	    if not os.path.exists(log_name):
-	        break
-	self.log_fp = open(log_name, "w")
-*/
 }
 
 GTP_player.prototype.Ok = function(result)
@@ -186,10 +158,10 @@ GTP_player.prototype.Play_Plain = function(color, move)
 {
     this.Check_Side2Move(color);
     this.engine.Make_Move(string_as_move(move.toUpperCase(), this.engine.size));
-    log(this.engine.current_board.toString());
-    log(this.engine.current_board.As_String_With_Unconditional_Status());
-    log("move: " + move.toString() + "\n");
-    log("score: " + this.Final_Score_As_String() +  this.engine.current_board.Unconditional_Score(WHITE) +  this.engine.current_board.Unconditional_Score(BLACK) + " unconditional score: W: " + WHITE + " B: " + BLACK + "\n");
+    log_output(this.engine.current_board.toString());
+    log_output(this.engine.current_board.As_String_With_Unconditional_Status());
+    log_output("move: " + move.toString() + "\n");
+    log_output("score: " + this.Final_Score_As_String() +  this.engine.current_board.Unconditional_Score(WHITE) +  this.engine.current_board.Unconditional_Score(BLACK) + " unconditional score: W: " + WHITE + " B: " + BLACK + "\n");
 };
 
 GTP_player.prototype.Play = function(color, move)
@@ -327,7 +299,8 @@ GTP_player.prototype.Loop = function()
 	{
 		//traceback.print_exc(null, this.log_fp)
 		//this.log_fp.Flush();
+		debug_output(e.toString());
+		debug_output(e);
 		//raise
-		//TODO: come up with diagnostic
 	}
 };
