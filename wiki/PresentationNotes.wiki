@@ -3,6 +3,16 @@
 = Presentation Slides =
 [http://docs.google.com/PresentationEditor?id=dgk2kqwp_171cqpccwft Jaigo: Javascript-based Artificially Intelligent Go Opponent]
 
+= Go =
+Board (square grid, common sizes: 19, 13, 9)
+Stones (signify control by a player of a grid position)
+Liberties for c (unoccupied grid positions orthogonally adjacent to a stone of color c)
+Chains (contiguous extents of stones of the same color)
+Capture (the state of a chain with no liberties; captured chains are removed from the board)
+Suicide (capturing your own chain)
+Ko rule (no cycles shorter than 3 turns permitted)
+Turn (start the game by placing a stone, or pass or place a stone at a liberty)
+
 = Interaction/UI = 
 
 Output in GTP, so any GTP-compatible UI works.
