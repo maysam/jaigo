@@ -60,10 +60,9 @@ function range(begin, end, step) {
 	end = arguments[0];
 	begin = 0;
     }
-    var a = [];
-    var c = 0;
+    var a = {};
     for (var i = begin; i != end; i += step) {
-	a[c++] = i;
+	a[i] = i;
     }
     return a;
 }
@@ -162,7 +161,6 @@ Block.prototype.Add_Block = function(other_block)
     */
     this.stones.Update(other_block.stones);
     this.neighbour.Update(other_block.neighbour);
-    //TODO: not sure if this subobject method syntax is correct
 };
 
 Block.prototype.Mark_Stones = function(mark)
