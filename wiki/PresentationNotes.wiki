@@ -18,8 +18,14 @@ Objective: control more area or territory than opponent
 zero-sum, perfect information, partisan (some moves are available to one player but not the other), deterministic strategy game
 
 = Computer Go =
-search tree bf typically 150--250.
-endgames are PSPACE-hard
+Search tree bf typically 150--250.
+Endgames are PSPACE-hard.
+
+Known techniques:
+  * minimax (α-ß pruning, transposition tables, iterative deepening)
+  * monte carlo
+  * genetic algorithms
+  * neural networks
 
 = Interaction/UI = 
 
