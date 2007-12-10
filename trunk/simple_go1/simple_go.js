@@ -39,6 +39,7 @@ deepValueEquality = function (other) {
     }
     return true;
 };
+
 Pair.prototype.equals = deepValueEquality;
 function move(x, y) {
     return object(new Pair(x, y));
@@ -151,8 +152,7 @@ Block.prototype.Remove_Stone = function(position)
 {
     /*remove stone or empty point at given position
     */
-    this.stones[position] = false;
-	//TODO: this may not be equivalent to del self.stones[pos]
+    this.stones.splice(this.stones[position], 1);
 };
 
 Block.prototype.Add_Block = function(other_block)
@@ -234,7 +234,6 @@ Eye.prototype.Mark_Status = function(live_color)
 	    var block = this.parts[b];
 	    switch (block.color) {
 		//note: status is not a reserved word in javascript.
-		//TODO: Also, is block an instance of Block, and if so, does it need to be declared/instantiated differently?
 	    case live_color:
 		block.status = "alive";
 		break;
@@ -701,13 +700,14 @@ Board.prototype.Split_Marked_Group = function(block, mark)
        Return splitted group.
     */
     var new_block = new Block(block.color);
-    for (var s in block.stones) {
-	var stone = block.stones[s];
-        if (stone.mark === mark) //TODO: does the stones object have this property?
-	    {
-		block.Remove_Stone(stone);
-		new_block.Add_Stone(stone);
-	    }
+    for (var s in block.stones) 
+	{
+		var stone = block.stones[s];
+	    if (stone === mark)
+		{
+			block.Remove_Stone(stone);
+			new_block.Add_Stone(stone);
+		}
     }
     return new_block;
 };
@@ -818,7 +818,7 @@ Board.prototype.Apply_Undo_Info = function(method, color, pos)
 {
     /*Apply given change to undo part of move.
     */
-    if (method.name=="add_stone") //TODO: is method.name the property match?
+    if (method.name=="add_stone")
 	{
         this.Add_Stone(color, pos);
 	}
@@ -1332,13 +1332,12 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
 	});
     this.each_Blocks(eye_colors)(function (block) {
 	    if (block.eye) {
-		//TODO: not sure how js will evaluate that conditional
-		return this.each_Blocks['continue'];
+			return this.each_Blocks['continue'];
 	    }
 	    var current_eye = new Eye();
 	    eye_list.push(current_eye);
 	    var blocks_to_process = [block];
-	    while (blocks_to_process) //TODO: not sure how js will evaluate this conditional
+	    while (blocks_to_process) 
 		{
 		    var block2 = blocks_to_process.pop();
 		    if (block2.eye) {
@@ -1424,13 +1423,13 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
 		//count eyes
 		var block_eye_list = [];
 		for (var stone in block.neighbour)
-		    {
+		{
 			var eye = this.blocks[stone].eye;
-			if (eye && block_eye_list.indexOf(eye) == -1) //TODO: how will js evaluate 'eye' in conditional? what is the point of using eye?
-			    { 
+			if (eye && block_eye_list.indexOf(eye) == -1)
+		    { 
 				block_eye_list.push(eye);
-			    }
 		    }
+		}
 		//count only those eyespaces which have empty point(s) adjacent to this block
 		block.eye_count = 0;
 		for (var eye in block_eye_list)
@@ -1926,7 +1925,7 @@ Board.prototype.toString = function()
             board_y_coord = y.toString();
 		}
         var line = board_y_coord + "|";
-        for (var x in range(1, self.size+1)) //TODO: I'm uncertain about this loop as well.
+        for (var x in range(1, this.size+1))
 		{
             line = line + this.goban[x][y];
 		}
@@ -2191,11 +2190,15 @@ Game.prototype.Score_Move = function(move)
     return best_score;
 };
 
-Game.prototype.Select_Scored_Move = function(remove_opponent_dead, pass_allowed) //TODO: is this a matching pattern, or an optional argument, or an initial assignment. I assume it's the last.
-
-{
-	remove_opponent_dead = false;
-	pass_allowed = true;
+Game.prototype.Select_Scored_Move = function(remove_opponent_dead, pass_allowed) {
+    if (arguments.length < 2) 
+	{
+		if (arguments.length < 1) 
+		{
+	    	remove_opponent_dead = false;
+		}
+		pass_allowed = true;
+    }
     /* Go through all legal moves.
        Keep track of best score and all moves that achieve it.
        Select one move from best moves and return it.
@@ -2390,15 +2393,17 @@ Game.prototype.Select_Random_No_Eye_Fill_Move = function()
 		    });
 	    }
 	});
-    //TODO: are these conditionals syntax correct?
-    if (capture_or_defence_moves) {
-	return randomchoice(capture_or_defence_moves);
+    if (capture_or_defence_moves) 
+	{
+		return randomchoice(capture_or_defence_moves);
     }
-    if (make_eye_moves) {
-	return randomchoice(make_eye_moves);
+    if (make_eye_moves) 
+	{
+		return randomchoice(make_eye_moves);
     }
-    if (remove_liberty) {
-	return randomchoice(remove_liberty);
+    if (remove_liberty) 
+	{
+		return randomchoice(remove_liberty);
     }
     if (all_moves)
 	{
@@ -2412,13 +2417,15 @@ Game.prototype.Select_Random_No_Eye_Fill_Move = function()
 	}
 };
 
-Game.prototype.Generate_Move = function(remove_opponent_dead, pass_allowed) //TODO: is this a matching pattern, or an optional argument, or an initial assignment. I assume it's the last.
+Game.prototype.Generate_Move = function(remove_opponent_dead, pass_allowed) 
 {
-    if (arguments.length < 2) {
-	if (arguments.length < 1) {
-	    remove_opponent_dead = false;
-	}
-	pass_allowed = true;
+    if (arguments.length < 2) 
+	{
+		if (arguments.length < 1) 
+		{
+	    	remove_opponent_dead = false;
+		}
+		pass_allowed = true;
     }
     /* generate move using scored move generator
     */
