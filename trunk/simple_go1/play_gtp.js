@@ -112,9 +112,9 @@ function GTP_player()
 */
 }
 
-GTP_player.prototype.Ok = function(result=null)
+GTP_player.prototype.Ok = function(result)
 {
-    if (result==null)
+    if (result===null)
 	{
 		result = "";
 	}
@@ -147,7 +147,7 @@ GTP_player.prototype.Check_Side2Move = function(color)
 	var handicap_change = 0;
     if ((this.engine.current_board.side==BLACK) != (color[0].toUpperCase()=="B"))
 	{
-        if (this.handicap==0)
+        if (this.handicap===0)
 		{
             handicap_change = 2;
 		}
@@ -155,7 +155,7 @@ GTP_player.prototype.Check_Side2Move = function(color)
 		{
             handicap_change = 1;
 		}
-        if (color[0].toUpperCase()=="B")
+        if (color[0].toUpperCase()==="B")
 		{
             this.handicap = this.handicap + handicap_change;
 		}
@@ -167,11 +167,12 @@ GTP_player.prototype.Check_Side2Move = function(color)
 	}
 };
 
-GTP_player.prototype.Genmove_Plain = function(color, remove_opponent_dead=false, pass_allowed=true)
+GTP_player.prototype.Genmove_Plain = function(color, remove_opponent_dead, pass_allowed)
 {
     this.Check_Side2Move(color);
-    var move = this.engine.Generate_Move(remove_opponent_dead, pass_allowed);
-    move = Move_As_String(move, this.engine.size).
+    var move = PASS_MOVE;
+	move = this.engine.Generate_Move(remove_opponent_dead, pass_allowed);
+    move = move_as_string(move, this.engine.size);
     this.Play_Plain(color, move);
     return move;
 };
@@ -184,11 +185,11 @@ GTP_player.prototype.Genmove = function(color)
 GTP_player.prototype.Play_Plain = function(color, move)
 {
     this.Check_Side2Move(color);
-    this.engine.Make_Move(String_As_Move(move.toUpperCase(), this.engine.size));
+    this.engine.Make_Move(string_as_move(move.toUpperCase(), this.engine.size));
     log(this.engine.current_board.toString());
     log(this.engine.current_board.As_String_With_Unconditional_Status());
     log("move: " + move.toString() + "\n");
-    log("score: " + (this.Final_Score_As_String(), this.engine.current_board.Unconditional_Score(WHITE), this.engine.current_board.Unconditional_Score(BLACK)) + " unconditional score: W:%i B:%i\n");
+    log("score: " + this.Final_Score_As_String() +  this.engine.current_board.Unconditional_Score(WHITE) +  this.engine.current_board.Unconditional_Score(BLACK) + " unconditional score: W: " + WHITE + " B: " + BLACK + "\n");
 };
 
 GTP_player.prototype.Play = function(color, move)
@@ -200,9 +201,9 @@ GTP_player.Place_Free_Handicap = function(count)
 {
     this.handicap = count;
     var result = [];
-    for (move in this.engine.Place_Free_Handicap(count))
+    for (move in this.engine.Place_Free_Handicap(count)) if (this.engine.Place_Free_Handicap(count).hasOwnProperty(move))
 	{
-        move = Move_As_String(move, this.engine.size)
+        move = move_as_string(move, this.engine.size);
         result.push(move);
 	}
     return this.Ok(string.join(result)); //TODO: what is string.join doing here?
@@ -211,7 +212,7 @@ GTP_player.Place_Free_Handicap = function(count)
 GTP_player.prototype.Set_Free_Handicap = function(stones)
 {
     this.handicap = stones.length;
-    for (i in range(stones.length)) //TODO: what does range() do?
+    for (i in range(stones.length)) if (range(stones.length).hasOwnProperty(i))
 	{
         if (i)
 		{
@@ -226,11 +227,11 @@ GTP_player.prototype.Final_Status_List = function(status)
 {
     var lst = this.engine.Final_Status_List(status);
     var str_lst = [];
-    for (pos in lst)
+    for (pos in lst) if (lst.hasOwnProperty(pos))
 	{
-        str_lst.push(Move_As_String(pos, this.engine.size));
+        str_lst.push(move_as_string(pos, this.engine.size));
 	}
-    return this.Ok(string.join(str_lst, "\n")); //TODO: what is string.join doing here?
+    return this.Ok(string.join(str_lst, "\n"));
 };
 
 GTP_player.prototype.Final_Score_As_String = function()
@@ -270,23 +271,7 @@ GPT_player.prototype.Showboard = function()
 
 GTP_player.prototype.List_Commands = function()
 {
-	//TODO: what does string.join do?
-    var result = string.join(("list_commands",
-                          "boardsize",
-                          "name",
-                          "version",
-                          "quit",
-                          "clear_board",
-                          "place_free_handicap",
-                          "set_free_handicap",
-                          "play",
-                          "final_status_list",
-                          "kgs-genmove_cleanup",
-                          "showboard",
-                          "protocol_version",
-                          "komi",
-                          "final_score",
-                          ), "\n")
+    var result = string.join("list_commands", "boardsize", "name", "version", "quit", "clear_board", "place_free_handicap", "set_free_handicap", "play",  "final_status_list", "kgs-genmove_cleanup", "showboard", "protocol_version", "komi", "final_score", "\n");
     return this.Ok(result);
 };
 
@@ -301,28 +286,29 @@ GTP_player.prototype.Relay_Cmd_And_Reply = function()
     var cmd = cmd_lst[0];   //Ctrl-C cancelling shows "list index out of range" error here in the log (keep this comment)
     switch (cmd)
 	{
-		case "version": result = "= " + this.version + "\n\n";
-    	case "name": result = "= " + this.name + "\n\n";
-     	case "protocol_version": result = "= 2\n\n";
-     	case "komi": this.komi = cmd_lst[1]; result = "=\n\n";
-     	case "genmove_white": result = this.Genmove("white");
-     	case "genmove_black": result = this.Genmove("black");
- 		case "genmove": result = this.Genmove(cmd_lst[1]);
-    	case "boardsize": result = this.Boardsize(cmd_lst[1]);
-    	case "list_commands": result = this.List_Commands();
- 		case "play": result = this.Play(cmd_lst[1], cmd_lst[2]);
-    	case "clear_board": result = this.Clear_Board();
-		case "place_free_handicap": result = this.Place_Free_Handicap(cmd_lst[1]);
-		case "set_free_handicap": result = this.Set_Free_Handicap(cmd_lst.substr(1));
-		case "final_status_list": result = this.Final_Status_List(cmd_lst[1]);
-		case "kgs-genmove_cleanup": result = this.Genmove_Cleanup(cmd_lst[1]);
-		case "showboard": result = this.Showboard();
-		case "final_score": result = this.Final_Score();
-		case "quit": result = "=\n\n";
+		case "version": result = "= " + this.version + "\n\n"; break;
+    	case "name": result = "= " + this.name + "\n\n"; break;
+     	case "protocol_version": result = "= 2\n\n"; break;
+     	case "komi": this.komi = cmd_lst[1]; result = "=\n\n"; break;
+     	case "genmove_white": result = this.Genmove("white"); break;
+     	case "genmove_black": result = this.Genmove("black"); break;
+ 		case "genmove": result = this.Genmove(cmd_lst[1]); break;
+    	case "boardsize": result = this.Boardsize(cmd_lst[1]); break;
+    	case "list_commands": result = this.List_Commands(); break;
+ 		case "play": result = this.Play(cmd_lst[1], cmd_lst[2]); break;
+    	case "clear_board": result = this.Clear_Board(); break;
+		case "place_free_handicap": result = this.Place_Free_Handicap(cmd_lst[1]); break;
+		case "set_free_handicap": result = this.Set_Free_Handicap(cmd_lst.substr(1)); break;
+		case "final_status_list": result = this.Final_Status_List(cmd_lst[1]); break;
+		case "kgs-genmove_cleanup": result = this.Genmove_Cleanup(cmd_lst[1]); break;
+		case "showboard": result = this.Showboard(); break;
+		case "final_score": result = this.Final_Score(); break;
+		case "quit": result = "=\n\n"; break;
 		default:
 			this.log_fp.Write("Unhandled command:" + cmd_line); //TODO: refactor for log_fp
         	this.log_fp.Flush();
         	result = this.error("Unknown command");
+			break;
 	}
     this.master.Set_Result(result);
     return (cmd!="quit"); //TODO: what is this doing?
@@ -334,7 +320,7 @@ GTP_player.prototype.Loop = function()
 	{
 	    while (this.Relay_Cmd_And_Reply())
 		{
-			if(0==1) //noop
+			//if(1===1) //noop
 		}
 	}
 	catch (e)
