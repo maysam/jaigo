@@ -18,34 +18,59 @@ Objective: control more area or territory than opponent
 zero-sum, perfect information, partisan (some moves are available to one player but not the other), deterministic strategy game
 
 = Computer Go =
-Search tree bf typically 150--250.
+Search tree branching factory typically 150--250.
 Endgames are PSPACE-hard.
 
-Known techniques:
+== Known techniques ==
   * minimax (α-ß pruning, transposition tables, iterative deepening)
   * monte carlo
   * genetic algorithms
   * neural networks
 
-= Interaction/UI = 
+== Current Issues ==
+  * Finding a good evaluation function is hard. The human heuristics are vague, and when/how they get applied is even more vague.
+  * fight between optimizing the main loop (evaluating the board) vs optimizing the small loops (given a board evaluation, local tricks to improve evaluation function). GNUGO v Go++
+  * GA & NN seemed promising at first, but no commercial package uses them due to lack of speed.
+  * If all old techniques are inadequate and new techniques don't pan out, whither computer go?
 
-Output in [http://www.lysator.liu.se/~gunnar/gtp/ GTP], so any GTP-compatible UI works.
+= JAIGO =
 
-= Scoring =
+A javascript-based ai go agent.
+
+== Platform/Language ==
+Why javascript?
+  * Professional interest
+  * Widely-available
+  * No current go engine
+  * Runs on iPhone!
+
+== Interaction/UI ==
+
+Output in [http://www.lysator.liu.se/~gunnar/gtp/ GTP], so any GTP-compatible UI works. We are investigating two possible iPhone UI implementations. Current UI is a set of html input controls using GTP. 
+
+== Scoring ==
 The board is scored using [http://senseis.xmp.net/?BensonsAlgorithm Benson's Algorithm].
 
-= Board representation =
+== Board representation ==
 We have 3^361 board states, perhaps 10^768 games. Representing the board turns out to be the most difficult part of writing a go engine.
 
-= Engine choice =
-What is the engine with the smallest expression in javascript and the highest kyu ranking?
+== Engine choice ==
+Criteria: What is the engine with the smallest expression in javascript and the highest kyu ranking?
 
-== SimpleGo v1 ==
-== SimpleGO v3 ==
-== Crawler ==
-== TinyGo ==
+=== SimpleGo v1 ===
+50kyu
+greedy search
+=== SimpleGO v3 ===
+30kyu
+a-b pruned search
+=== Crawler ===
+?? (~30kyu)
+maintain line strength/shape
+=== TinyGo ===
+??
 
-= Size =
-~76KB, unoptimized.
+== Size ==
+jaigo v1 ~76KB, unoptimized. ~36k, partially optimized.
 
-= Speed =
+== Speed ==
+not yet measured.
