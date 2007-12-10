@@ -2129,7 +2129,7 @@ Game.prototype.List_Moves = function()
     /* return all legal moves including pass move
     */
     var all_moves = [PASS_MOVE];
-    for (var move in this.current_board.Ierate_Goban())
+    for (var move in this.current_board.Iterate_Goban())
 	{
 	    if (this.Legal_Move(move)) {
 		    all_moves.push(move);
@@ -2240,7 +2240,7 @@ Game.prototype.Select_Scored_Move = function(remove_opponent_dead, pass_allowed)
 		//score = -self.score_position() - base_score
 		if (debug_flag)
 		    {
-			//print score, move_as_string(move, self.size)
+			debug_output(score + move_as_string(move, self.size));
 		    }
 		//self.undo_move()
 		//Give pass move slight bonus so its preferred among do nothing moves
@@ -2263,7 +2263,7 @@ Game.prototype.Select_Scored_Move = function(remove_opponent_dead, pass_allowed)
 	    });
 	if (debug_flag)
 	{	
-        //print "!", best_score, map(lambda m,s=self.size:move_as_string(m, s), best_moves)
+        debug_output("!" + best_score + best_moves); //map(lambda m,s=self.size:move_as_string(m, s), best_moves));
 	}
 	if (best_moves.length() === 0) {
 	    return PASS_MOVE;
@@ -2445,14 +2445,11 @@ function main()
 	{
         var move = g.Generate_Move();
         g.Make_Move(move);
-        //print move_as_string(move, g.size)
-        //print g.current_board
-        //print g.current_board.as_string_with_unconditional_status()
-        //print g.current_board.score_position()
-        //import pdb; pdb.set_trace()
+        debug_output(move_as_string(move, g.size));
+        debug_output(g.current_board);
+        debug_output(g.current_board.as_string_with_unconditional_status());
+        debug_output(g.current_board.score_position());
         //if last 2 moves are pass moves: exit loop
-        //if len(g.move_history)==10:
-        //    break
         if (g.move_history.length()>=2 && g.move_history[-1]==PASS_MOVE && g.move_history[-2]==PASS_MOVE)
 		{
             break;
