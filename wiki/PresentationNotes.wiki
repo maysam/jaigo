@@ -40,9 +40,10 @@ A javascript-based ai go agent.
 == Platform/Language ==
 Why javascript?
   * Professional interest
-  * Widely-available
+  * Most widely-deployed cross-platform runtime
   * No current go engine
   * Runs on iPhone!
+  * ECMAScript 3 standard incredibly loose (so javascript can be used as functional or imperative language, making porting from python/java easy)
 
 == Interaction/UI ==
 
