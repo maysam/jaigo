@@ -61,7 +61,7 @@ Criteria: What is the engine with the smallest expression in javascript and the 
 
 === SimpleGo v1 ===
 50kyu
-greedy search
+greedy search (random move from list of moves with worst opponent score)
 === SimpleGO v3 ===
 30kyu
 a-b pruned search
