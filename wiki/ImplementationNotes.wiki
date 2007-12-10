@@ -5,8 +5,10 @@
 Targets [http://developer.apple.com/referencelibrary/AppleApplications/idxSafari-date.html#//apple_ref/doc/uid/TP30000943-TP30000418-TP30001042 Safari 3/Webkit x], using [http://developer.mozilla.org/en/docs/JavaScript Javascript 1.6].
 
 = Language References =
-  *[http://developer.apple.com/documentation/ScriptingAutomation/Conceptual/JSCodingGuide/index.html Apple's javascript guidelines]
-  *[http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference Javascript 1.5 Reference]
-
+  * [http://developer.apple.com/documentation/ScriptingAutomation/Conceptual/JSCodingGuide/index.html Apple's javascript guidelines]
+  * [http://www.jslint.com/lint.html JSLint rubric]
+  * Elements of JavaScript Style ([http://javascript.crockford.com/style1.html 1], [http://javascript.crockford.com/style2.html 2])
+  * [http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference Javascript 1.5 Reference]
+  * [http://www.lysator.liu.se/~gunnar/gtp/ Go Text Protocol]
 = Implementation Standards =
 Renamed all object methods to {{{Capital_Case}}}. Added all object methods to {{{Object.prototype.Method_Name}}}. 
