@@ -54,6 +54,8 @@ The board is scored using [http://senseis.xmp.net/?BensonsAlgorithm Benson's Alg
 == Board representation ==
 We have 3^361^ board states, perhaps 10^768^ games. Representing the board turns out to be the most difficult part of writing a go engine.
 
+Zobrist hashing: (reduce xor (map f board-positions)), f: (x, y, color) -> Z
+
 == Engine choice ==
 Criteria: What is the engine with the smallest expression in javascript and the highest kyu ranking?
 
