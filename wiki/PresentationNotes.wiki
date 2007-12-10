@@ -23,7 +23,7 @@ endgames are PSPACE-hard
 
 = Interaction/UI = 
 
-Output in GTP, so any GTP-compatible UI works.
+Output in [http://www.lysator.liu.se/~gunnar/gtp/ GTP], so any GTP-compatible UI works.
 
 = Scoring =
 The board is scored using [http://senseis.xmp.net/?BensonsAlgorithm Benson's Algorithm].
