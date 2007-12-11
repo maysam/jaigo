@@ -270,7 +270,7 @@ function Board(board_size)
 	this.captures[WHITE] = 0;
 	this.captures[BLACK] = 0;
 	this.goban = []; //actual board
-	this.init_hash();
+	this.Init_Hash();
 	//Create and initialize board as empty board_size*board_size
 	this.each_Goban(function (pos) {
 		//can't use set_goban method here, because goban doesn't yet really exists
@@ -280,7 +280,7 @@ function Board(board_size)
 	//Create and initialize one whole board empty block
 	var new_block = new Block(EMPTY);
 	this.each_goban(function (pos) {
-	    new_block.add_stone(pos);
+	    new_block.Add_Stone(pos);
 	    this.blocks[pos] = new_block;});
 	this.block_list = [new_block];
 	this.chains = [];
@@ -424,12 +424,12 @@ Board.prototype.Init_Hash = function()
 {
     /*Individual number for every possible color and position combination */
     this.board_hash_values = [];
-    for (var color in EMPTY+WHITE+BLACK) {
-	this.each_goban(function (pos) {
-		this.board_hash_values[color] = [];
-        	this.board_hash_values[color][pos] = randint(-Number.MAX_VALUE, Number.MAX_VALUE);
-	    });
-    	this.current_hash = 0;
+	for (var color in EMPTY+WHITE+BLACK) {
+		this.each_goban(function (pos) {
+			this.board_hash_values[color] = [];
+	    	this.board_hash_values[color][pos] = randint(-Number.MAX_VALUE, Number.MAX_VALUE);
+		});
+	   	this.current_hash = 0;
     }
 };
 
