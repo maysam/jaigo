@@ -1,26 +1,27 @@
 function debug_output(output)
 {
-	document.body.debug_output.value += output + "\\n";
+	document.body.debug_output.value += output + "\n";
 }
 
 function diagram2game(str)
 {
-    var g = null;
-    for (line in string.split(str, "\n")) //TODO: will string.split return a string array split by newlines?
+    var g;
+	var game_lines = str.split("\n");
+    for (line in game_lines) if (game_lines.hasOwnProperty(line))
 	{
         //line = string.strip(line) TODO: does string.strip take out whitespace?
-        if (line.length() > 0) 
+        if (!line) 
 		{
-			continue; //TODO: don't understand the flow here.
+			continue;
 		}
-        if (line[0]=="A" && !g) //TODO: not g???
+        if (g===undefined)
 		{
-            g = new Game(line.length());
+            g = new Game(line.length);
 		}
-        else if (line[0] in string.digits) //TODO: string.digits?
+        else if (line[0] < 19 && line[0] > 0)
 		{
-            var y, line, rest = string.split(line, "|"); //TODO: tricky assignment. don't know if js can do this.
-            for (x in range(line.length())) if (range(line.length).hasOwnProperty(x))
+            var y, line, rest = line.split("|"); //TODO: tricky assignment. don't know if js can do this.
+            for (x in range(line.length)) if (range(line.length).hasOwnProperty(x))
 			{
                 var stone = line[x];
                 x = x + 1;
