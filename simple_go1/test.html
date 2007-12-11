@@ -6,18 +6,18 @@
 		<script type="text/javascript" src="utils.js"></script>
 		<script type="text/javascript" src="test.js"></script>
 
-		<script language="javascript">function play_gtp() { var player = new GTP_player(document.getElementById(log_output), document.getElementById(gtp_input), document.getElementById(gtp_output)); player.Loop();}
+		<script language="javascript">function play_gtp() { var player = new GTP_player(document.getElementById('log_output'), document.getElementById('gtp_input'), document.getElementById('gtp_output')); player.Loop();}
 		</script>
 		<TITLE>Test jaigo</TITLE>
 		</HEAD>
 	<BODY>
 		<textarea rows="22" cols="22" id="play_board">test text board</textarea>
 		<textarea rows="22" cols="22" id="expected_board">expected text board</textarea>
-		<input type="button" value="Test Board!" onclick="test_position(document.getElementById(play_board).value, document.getElementById(expected_board).value);" />		
+		<input type="button" value="Test Board!" onclick="test_position(document.getElementById('play_board').value, document.getElementById('expected_board').value);" />		
 		<input type="button" value="Test All!" onclick="test_all();" />
 		<br />
 		<br />
-		<textarea rows= "2" cols="22" id="gtp_input">></textarea>
+		<textarea rows= "2" cols="22" id="gtp_input">&gt;</textarea>
 		<textarea id="log_output">log output</textarea>		
 		<input type="button" value="Play!" onclick="play_gtp();" />
 		<br />	
