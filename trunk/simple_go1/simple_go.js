@@ -55,14 +55,24 @@ function contains(sequence, quarry, eq) {
     return false;
 }
 
+function sgn(n) {
+    if (n > 0) return 1;
+    if (n < 0) return -1;
+    if (n === 0) return 0;
+}
+
 function range(begin, end, step) {
     step = step || 1;
     if (arguments.length == 1) {
 	end = arguments[0];
 	begin = 0;
     }
+    var direction = sgn(step);
+    if (begin != end && sgn(end - begin) != direction) {
+	throw new Error("inconsistent arguments <[begin, end) step>: <[" + begin + ", " + end + ") " + step + ">."); 
+    }
     var a = {};
-    for (var i = begin; i != end; i += step) {
+    for (var i = begin; i * direction < end * direction; i += step) {
 	a[i] = i;
     }
     return a;
@@ -279,7 +289,7 @@ function Board(board_size)
 	this.blocks = []; //blocks dictionary
 	//Create and initialize one whole board empty block
 	var new_block = new Block(EMPTY);
-	this.each_goban(function (pos) {
+	this.each_Goban(function (pos) {
 	    new_block.Add_Stone(pos);
 	    this.blocks[pos] = new_block;});
 	this.block_list = [new_block];
@@ -425,7 +435,7 @@ Board.prototype.Init_Hash = function()
     /*Individual number for every possible color and position combination */
     this.board_hash_values = [];
 	for (var color in EMPTY+WHITE+BLACK) {
-		this.each_goban(function (pos) {
+		this.each_Goban(function (pos) {
 			this.board_hash_values[color] = [];
 	    	this.board_hash_values[color][pos] = randint(-Number.MAX_VALUE, Number.MAX_VALUE);
 		});
@@ -1327,7 +1337,7 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
     var eye_list = [];
     var not_ok_eye_list = []; //these might still contain dead groups if totally inside live group
     var eye_colors = EMPTY + other_side[color]; //TODO: I don't understand this assignment
-    this.each_blocks(EMPTY+WHITE+BLACK)(function (block) {
+    this.each_Blocks(EMPTY+WHITE+BLACK)(function (block) {
 	    block.eye = null;
 	});
     this.each_Blocks(eye_colors)(function (block) {
@@ -1972,7 +1982,7 @@ Board.prototype.As_String_With_Unconditional_Status = function()
     s = s + "Captured stones: ";
     s = s + "White: " + this.captures[WHITE].toString();
     s = s + " Black: " + this.captures[BLACK].toString() + "\n";
-	var board_x_coords = "   " + x_coords.slice(0, this.size).toString(); //TODO: not sure about this syntax
+    var board_x_coords = "   " + x_coords_string.slice(0, this.size);
     s = s + board_x_coords + "\n";
     s = s + "  +" + "-"*this.size + "+\n";
     for (var y in range(this.size, 0, -1))
