@@ -269,19 +269,19 @@ Eye.prototype.Mark_Status = function(live_color)
    chains: connected group of stones
            This is for v0.2 or later. Not used currently.
 */
-function Board(board_size)
+function Board(size)
 { 
 	/*Initialize board:
            argument: size
 	*/
-	this.board_size = board_size;
+	this.size = size;
 	this.side = BLACK;
 	this.captures = [];
 	this.captures[WHITE] = 0;
 	this.captures[BLACK] = 0;
 	this.goban = []; //actual board
 	this.Init_Hash();
-	//Create and initialize board as empty board_size*board_size
+	//Create and initialize board as empty size*size
 	this.each_Goban(function (pos) {
 		//can't use set_goban method here, because goban doesn't yet really exists
 		this.goban[pos] = EMPTY;
@@ -296,20 +296,18 @@ function Board(board_size)
 	this.chains = [];
 }
 
-Board.prototype.each_Goban = function()
+Board.prototype.each_Goban = function(f)
 {
-    return function(f) {
-	/*This goes through all positions in goban
-	  Example usage: see above __init__ method
-	*/
-	for (var x in range(1, this.board_size+1)) {
-	    for (var y in range(1, this.board_size+1)) {
-		if (f([x, y]) === Board.prototype.each_Goban['break']) {
-		    break;
-		}
+    /*This goes through all positions in goban
+      Example usage: see above __init__ method
+    */
+    for (var x in range(1, this.size + 1)) {
+	for (var y in range(1, this.size + 1)) {
+	    if (f([x, y]) === Board.prototype.each_Goban['break']) {
+		break;
 	    }
 	}
-    };
+    }
 };
 Board.prototype.each_Goban['continue'] = true;
 Board.prototype.each_Goban['break'] = false;
@@ -317,7 +315,7 @@ Board.prototype.each_Goban['break'] = false;
 Board.prototype.iterate = function(pairs, f) {
     for (var p in pairs) {
 	var pair = pairs[p];
-	if (1 <= pair.x & pair.x <= this.board_size && 1 <= pair.y && pair.y <= this.board_size) {
+	if (1 <= pair.x & pair.x <= this.size && 1 <= pair.y && pair.y <= this.size) {
 	    if (f(pair) === Board.prototype.iterate['break']) {
 		return;
 	    }
@@ -433,13 +431,14 @@ Board.prototype.each_Neighbour_Eye_Blocks['break'] = false;
 Board.prototype.Init_Hash = function()
 {
     /*Individual number for every possible color and position combination */
-    this.board_hash_values = [];
-	for (var color in EMPTY+WHITE+BLACK) {
-		this.each_Goban(function (pos) {
-			this.board_hash_values[color] = [];
-	    	this.board_hash_values[color][pos] = randint(-Number.MAX_VALUE, Number.MAX_VALUE);
-		});
-	   	this.current_hash = 0;
+    var board = this; // helps with the each_Goban closure
+    board.board_hash_values = [];
+    for (var color in EMPTY+WHITE+BLACK) {
+	board.each_Goban(function (pos) {
+		board.board_hash_values[color] = [];
+	    	board.board_hash_values[color][pos] = randint(-Number.MAX_VALUE, Number.MAX_VALUE);
+	    });
+	board.current_hash = 0;
     }
 };
 
@@ -1937,7 +1936,7 @@ Board.prototype.toString = function()
         var line = board_y_coord + "|";
         for (var x in range(1, this.size+1))
 		{
-            line = line + this.goban[x][y];
+		    line = line + this.goban[[x, y]];
 		}
         s = s + line + "|" + board_y_coord + "\n";
 	}
@@ -1999,7 +1998,7 @@ Board.prototype.As_String_With_Unconditional_Status = function()
         var line = board_y_coord + "|";
         for (var x in range(1, this.size+1))
 		{
-		    var pos_as_character = color_and_status_to_character[this.goban[x][y] + this.blocks[x][y].status];
+		    var pos_as_character = color_and_status_to_character[this.goban[[x, y]] + this.blocks[x][y].status];
             line = line + pos_as_character;
 		}
         s = s + line + "|" + board_y_coord + "\n";
