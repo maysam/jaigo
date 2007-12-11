@@ -236,7 +236,7 @@ GTP_player.prototype.Genmove_Cleanup = function(color)
     return this.Ok(this.Genmove_Plain(color, remove_opponent_dead=true)); //TODO: how to handle byref params?
 };
 
-GPT_player.prototype.Showboard = function()
+GTP_player.prototype.Showboard = function()
 {
     return this.Ok(this.engine.current_board.toString());
 };
