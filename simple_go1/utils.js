@@ -1,6 +1,6 @@
 function debug_output(output)
 {
-	document.body.debug_output.value += output + "\n";
+    document.getElementById('debug_output').value += output + "\n";
 }
 
 function diagram2game(str)

@@ -28,28 +28,28 @@ function test_speed(n)
     var t1 = new Date();
     t_elapsed = t1-t0;
     debug_output(t_elapsed);
- 	debug_output(n/t_elapsed);
+    debug_output(n/t_elapsed);
 }
 
 function test_position(diagram, ok_result)
 {
     var g = diagram2game(diagram);
     var test_result = g.current_board.As_String_With_Unconditional_Status();
-    var board_pat //= re.compile(r".*?(\+.*\+)", re.DOTALL) //TODO: re.compile?
-    var m = board_pat.match(ok_result); //TODO: match()?
-	var ok_result_board;
+    var board_pat = /[\s\S]*?(\+[\s\S]*\+)/;
+    var m = board_pat(ok_result);
+    var ok_result_board;
     if (m)
 	{
-        ok_result_board = m.group(1); //TODO: group()?
+        ok_result_board = m[1];
 	}
     else
 	{
         ok_result_board = "1";
 	}
-    m = board_pat.match(test_result);
+    m = board_pat(test_result);
     if (m)
 	{
-        test_result_board = m.group(1);
+        test_result_board = m[1];
 	}
     else
 	{
@@ -60,7 +60,7 @@ function test_position(diagram, ok_result)
 		return;
 	}
     debug_output(ok_result);
-	debug_output(test_result);
+    debug_output(test_result);
     throw new EvalError("unconditional test failed");
 }
 
