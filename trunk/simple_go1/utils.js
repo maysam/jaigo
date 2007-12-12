@@ -7,7 +7,7 @@ function diagram2game(str)
 {
     var g;
 	var game_lines = str.split("\n");
-    for (line in game_lines) if (game_lines.hasOwnProperty(line))
+    for (line in game_lines) if (game_lines.hasOwnProperty(line)) //TODO: line doesn't seem to be grabbing the correct element from game_lines.
 	{
         //line = string.strip(line) TODO: does string.strip take out whitespace?
         if (!line) 
@@ -43,4 +43,12 @@ function test_unconditional(str)
 {
     var g = diagram2game(str);
     debug_output(g.current_board.As_String_With_Unconditional_Status());
+}
+
+String.prototype.Repeat = function(repetitions)
+{
+	var s = "";
+	t = this.toString();
+	while (--repetitions >= 0) s += t;
+	return s;
 }

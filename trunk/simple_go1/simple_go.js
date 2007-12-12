@@ -1966,28 +1966,29 @@ Board.prototype.As_String_With_Unconditional_Status = function()
        Returns board as string.
     */
     var color_and_status_to_character =
-      function () {
-	var c = {};
-	c[EMPTY + "unknown"] = EMPTY;
-	c[BLACK + "unknown"] = BLACK;
-	c[WHITE + "unknown"] = WHITE;
-	c[BLACK + "alive"] = "&";
-	c[WHITE + "alive"] = "@";
-	c[BLACK + "dead"] = "x";
-	c[WHITE + "dead"] = "o";
-	c[EMPTY + WHITE + " territory"] = "=";
-	c[EMPTY + BLACK + " territory"] = ":";
-	return c;
-      }();
+		function () {
+			var c = {};
+			c[EMPTY + "unknown"] = EMPTY;
+			c[BLACK + "unknown"] = BLACK;
+			c[WHITE + "unknown"] = WHITE;
+			c[BLACK + "alive"] = "&";
+			c[WHITE + "alive"] = "@";
+			c[BLACK + "dead"] = "x";
+			c[WHITE + "dead"] = "o";
+			c[EMPTY + WHITE + " territory"] = "=";
+			c[EMPTY + BLACK + " territory"] = ":";
+			return c;
+		}();
     this.Analyze_Unconditional_Status();
-    var s = this.side + " to move:\n";
+    var s = this.side + " to move:\n"; //TODO: if we print this out first, then when we compare boards, this stuff will be the first line compared?
     s = s + "Captured stones: ";
     s = s + "White: " + this.captures[WHITE].toString();
-    s = s + " Black: " + this.captures[BLACK].toString() + "\n";
+    s = s + " Black: " + this.captures[BLACK].toString() + "\n"; 
     var board_x_coords = "   " + x_coords_string.slice(0, this.size);
     s = s + board_x_coords + "\n";
-    s = s + "  +" + "-"*this.size + "+\n";
-    for (var y in range(this.size, 0, -1))
+    s = s + "  +" + "-".Repeat(this.size) + "+\n";
+
+    for (var y in range(this.size, 0, -1)) //TODO: do we need to strip whitespace chars from y?
 	{
 		var board_y_coord = "";
         if (y < 10)
@@ -2001,12 +2002,12 @@ Board.prototype.As_String_With_Unconditional_Status = function()
         var line = board_y_coord + "|";
         for (var x in range(1, this.size+1))
 		{
-		    var pos_as_character = color_and_status_to_character[this.goban[[x, y]] + this.blocks[[x,y]].status];
+		    var pos_as_character = color_and_status_to_character[this.goban[[x, y]] + this.blocks[[x,y]].status]; //TODO: I don't think this is the correct way to compose & call the color_and_status_to_character function.
 		    line = line + pos_as_character;
 		}
         s = s + line + "|" + board_y_coord + "\n";
 	}
-    s = s + "  +" + "-"*this.size + "+\n";
+    s = s + "  +" + "-".Repeat(this.size) + "+\n"; //TODO: print "-" board.size times (eg 19 -'s).
     s = s + board_x_coords + "\n";
     return s;
 };
