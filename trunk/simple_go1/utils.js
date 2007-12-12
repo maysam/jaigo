@@ -41,7 +41,10 @@ function diagram2game(str)
 		}
         else if (line[0] < 19 && line[0] > 0)
 		{
-            var y, line, rest = line.split("|"); //TODO: tricky assignment. don't know if js can do this.
+		    var splitted = line.split("|");
+		    var y = splitted[0];
+		    var line = splitted[1];
+		    var rest = splitted[2];
             for (x in range(line.length)) if (range(line.length).hasOwnProperty(x))
 			{
                 var stone = line[x];
