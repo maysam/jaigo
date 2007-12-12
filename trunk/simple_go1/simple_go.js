@@ -282,16 +282,17 @@ function Board(size)
 	this.goban = []; //actual board
 	this.Init_Hash();
 	//Create and initialize board as empty size*size
+	var board = this;
 	this.each_Goban(function (pos) {
 		//can't use set_goban method here, because goban doesn't yet really exists
-		this.goban[pos] = EMPTY;
-		this.current_hash = this.current_hash ^ this.board_hash_values[EMPTY][pos];});
+		board.goban[pos] = EMPTY;
+		board.current_hash = board.current_hash ^ board.board_hash_values[EMPTY][pos];});
 	this.blocks = []; //blocks dictionary
 	//Create and initialize one whole board empty block
 	var new_block = new Block(EMPTY);
 	this.each_Goban(function (pos) {
 	    new_block.Add_Stone(pos);
-	    this.blocks[pos] = new_block;});
+	    board.blocks[pos] = new_block;});
 	this.block_list = [new_block];
 	this.chains = [];
 }
@@ -432,10 +433,12 @@ Board.prototype.Init_Hash = function()
 {
     /*Individual number for every possible color and position combination */
     var board = this; // helps with the each_Goban closure
-    board.board_hash_values = [];
-    for (var color in EMPTY+WHITE+BLACK) {
+    board.board_hash_values = {};
+    var colors = EMPTY+WHITE+BLACK;
+    for (var c in colors) {
+	var color = colors[c];
 	board.each_Goban(function (pos) {
-		board.board_hash_values[color] = [];
+		board.board_hash_values[color] = {};
 	    	board.board_hash_values[color][pos] = randint(-Number.MAX_VALUE, Number.MAX_VALUE);
 	    });
 	board.current_hash = 0;
@@ -1998,8 +2001,8 @@ Board.prototype.As_String_With_Unconditional_Status = function()
         var line = board_y_coord + "|";
         for (var x in range(1, this.size+1))
 		{
-		    var pos_as_character = color_and_status_to_character[this.goban[[x, y]] + this.blocks[x][y].status];
-            line = line + pos_as_character;
+		    var pos_as_character = color_and_status_to_character[this.goban[[x, y]] + this.blocks[[x,y]].status];
+		    line = line + pos_as_character;
 		}
         s = s + line + "|" + board_y_coord + "\n";
 	}
