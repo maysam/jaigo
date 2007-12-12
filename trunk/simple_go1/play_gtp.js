@@ -21,7 +21,7 @@ function coords_to_sgf(size, board_coords)
     return sgffirst + sgfsecond;
 }
 
-function GTP_controller(log,infile, outfile)
+function GTP_controller(log,input, output)
 {
     /*
     # Class members:
