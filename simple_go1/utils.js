@@ -3,13 +3,34 @@ function debug_output(output)
     document.getElementById('debug_output').value += output + "\n";
 }
 
+String.prototype.strip = (
+     function() {
+        //This anonymous function is not strip but a
+        //contrivance to let us share the regex among
+        //all invocations of strip.
+        var escapeRegexCharacterSetElements = /(\[|\\)/g;
+	var ws = /(^\s*)(.*?)(\s*$)/;
+        var result = function(chars) {
+	    var replaceThis;
+	    if (!chars) {
+		replaceThis = ws;
+	    }
+	    else {
+		var garbage = '[' + chars.replace(escapeRegexCharacterSetElements, '\$&') + ']';
+		replaceThis = new RegExp('(^' + garbage + '*)(.*?)(' + garbage + '*$)');
+	    }
+	    return this.replace(replaceThis, '$2');
+        };
+	return result;
+    })();
+
 function diagram2game(str)
 {
     var g;
-	var game_lines = str.split("\n");
-    for (line in game_lines) if (game_lines.hasOwnProperty(line)) //TODO: line doesn't seem to be grabbing the correct element from game_lines.
-	{
-        //line = string.strip(line) TODO: does string.strip take out whitespace?
+    var game_lines = str.split("\n");
+    for (var l in game_lines) if (game_lines.hasOwnProperty(l)) {
+	var whitespace = /(^\s*)(.*?)(\s*$)/;
+	var line = game_lines[l].strip();
         if (!line) 
 		{
 			continue;
