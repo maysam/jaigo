@@ -113,7 +113,7 @@ String.prototype.repeat = function(times) {
 	result += this;
     }
     return result;
-}
+};
 
 
 PASS_MOVE = move(-1, -1);
