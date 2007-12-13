@@ -6,7 +6,7 @@
 <!--
 body { background:#000000; color:#dddddd; font-family: arial; margin: 0px}
 
-table.board { table-layout: fixed; background:#fca843; background-image:url('http://www.gentgo.be/tetsuki/kaya.png');}
+table.board { table-layout: fixed; background:#fca843; background-image:url('kaya.png');}
 table.board td { width:51px; height:51px;}
 table.board tr[row=first] td[column=first] {background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADMAAAAzCAYAAAA6oTAqAAAABGdBTUEAALGOfPtRkwAAAZdpQ0NQSUNDIFByb2ZpbGUAAHiclZG/SxthGMc/74mEQkyWo3SqB/7AIS0hodVgF80gBcEzZEhCl+SSXFJi8nJ3xhYKLo4iARfroFHnQgexQ2nJXnRoIF1Kl/4DhUAXCefwKlkapA888Pl+4eH5Bdp5XsqaBmzUPSe1smxksjkj8IMHPAaAvOXKJdNcZWT87SEAuk/yUtaet/e+fz76GuhOrm3vfBj/PboOgKCTyeZA6IBuK54D9ILiF4C+5UkPhAnoViVfBFEEIk46lQTRAkK24jYQKij+CISalu2B6ADRerFaB/EHWCiWXAu0OcC2pOOB1gKmM9mcoUZrtCExBWO7Q69wAJ++wKNvQ2/6GMKLcHE19PrrCEA87LrleAwAEUzC+C/f789AYB8GLd+/PvH9wSmM/YTOa2vTad7eRWhxuE+r3ZRWPwDV99+s9gcgCmc9SL+D1Ut4fwizZQi/AjMI6QRa/NldqlsBMOGmVpYN02mUq7XSPb/97/BKbzyAZEO+dap2xTOWpKyVIsbLuvU0YsSi0XluADkhcUyyOTqlAAAAIGNIUk0AAHolAAB6JQAAAAAAAHolAAAAAAAAeiUAAAAAAAB6JXIyHmAAAAAJcEhZcwAACxMAAAsTAQCanBgAAABWSURBVGiB7dEBDYAwFEPBQpA0/woQhQr+muXOQPPSBAAAAIB9roGNd2AjSXJPDU14BrfW3wNHPSOmlZhWYlqJaSWmlZhWYlqJaSWmlZhWYlqJaXVUzAd3GQE8n1iREwAAAABJRU5ErkJggg==');}
 table.board tr[row=first] td[column=last] {background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADMAAAAzCAYAAAA6oTAqAAAABGdBTUEAALGOfPtRkwAAAZdpQ0NQSUNDIFByb2ZpbGUAAHiclZG/SxthGMc/74mEQkyWo3SqB/7AIS0hodVgF80gBcEzZEhCl+SSXFJi8nJ3xhYKLo4iARfroFHnQgexQ2nJXnRoIF1Kl/4DhUAXCefwKlkapA888Pl+4eH5Bdp5XsqaBmzUPSe1smxksjkj8IMHPAaAvOXKJdNcZWT87SEAuk/yUtaet/e+fz76GuhOrm3vfBj/PboOgKCTyeZA6IBuK54D9ILiF4C+5UkPhAnoViVfBFEEIk46lQTRAkK24jYQKij+CISalu2B6ADRerFaB/EHWCiWXAu0OcC2pOOB1gKmM9mcoUZrtCExBWO7Q69wAJ++wKNvQ2/6GMKLcHE19PrrCEA87LrleAwAEUzC+C/f789AYB8GLd+/PvH9wSmM/YTOa2vTad7eRWhxuE+r3ZRWPwDV99+s9gcgCmc9SL+D1Ut4fwizZQi/AjMI6QRa/NldqlsBMOGmVpYN02mUq7XSPb/97/BKbzyAZEO+dap2xTOWpKyVIsbLuvU0YsSi0XluADkhcUyyOTqlAAAAIGNIUk0AAHolAAB6JQAAAAAAAHolAAAAAAAAeiUAAAAAAAB6JXIyHmAAAAAJcEhZcwAACxMAAAsTAQCanBgAAABTSURBVGiB7dEBDcAwEAOxbJjGH0FBDUXb6GUTiE5JAAAAALjnSbIObX27B97dA9OsHHp/1DNiWolpJaaVmFZiWolpJaaVmFZiWolpJaaVmFajYn6VOwLQXDMjDQAAAABJRU5ErkJggg==');}
@@ -65,29 +65,57 @@ div[visible=yes] {display: inline; }
 
 <!-- Javascript -->
 <script type="text/javascript" src="tetsuki.js"></script>
+<script type="text/javascript" src="tetsuki_controller.js"></script>
+<script type="text/javascript">var controller;</script>
 </head>
 
-<body onload="start()">
+<!-- tetsuki view 
+	document.getElementById("close_small")
+	document.getElementById("back_small")
+	document.getElementById("forward_small")
+	document.getElementById("delete_small")
+	document.getElementById("more_small")
+	document.getElementById("pass_small")
+	document.getElementById("board9")
+	document.getElementById("board13")
+	document.getElementById("board19")
+	document.getElementById('komi')
+	document.getElementById('black_ai')
+	document.getElementById('white_ai')
+	document.getElementById('handicap')
+	document.getElementById('ingameblack')
+	document.getElementById('ingamewhite')
+	document.getElementById('ingamekomi')
+	document.getElementById("gameHud")
+	document.getElementById('beginWindow')
+	document.getElementById('GameWindow')
+	document.getElementById('InGameSettings')
+	document.getElementById('meta')
+	document.getElementById('ingamehandicap')
+-->
+<body onload="controller = new Tetsuki_Controller(document.getElementById('board9'),document.getElementById('board13'),document.getElementById('board19'),document.getElementById('black_human'),document.getElementById('black_ai_greedy'),document.getElementById('black_ai_crawler'),document.getElementById('white_human'),document.getElementById('white_ai_greedy'),document.getElementById('white_ai_crawler'),document.getElementById('handicap'),document.getElementById('komi'),document.getElementById('beginWindow'),document.getElementById('gameHud'),document.getElementById('gameHud'),document.getElementById('GameWindow'),document.getElementById('ingamehandicap'),document.getElementById('ingamekomi'),document.getElementById('ingameblack'),document.getElementById('ingamewhite'),document.getElementById('InGameSettings'),document.getElementById('forward_small'),document.getElementById('back_small'),document.getElementById('close_small'),document.getElementById('delete_small'),document.getElementById('more_small'),document.getElementById('pass_small'),document.getElementById('meta')); controller.PreGame();">
 
 <div visible="no" id="beginWindow" class="rounded">
 <h1>New Go Game</h1>
+<h2>Size</h2>
 <table cellpadding="0" cellspacing="0"><tbody><tr>
-<td><div id="board9" class="radio" pos="left" value="false" onclick="selectBoardSize(9)">9x9</div></td>
-<td><div id="board13" class="radio" value="false" onclick="selectBoardSize(13)">13x13</div></td>
-<td><div id="board19" class="radio" pos="right" value="true" onclick="selectBoardSize(19)">19x19</div></td>
+<td><div id="board9" class="radio" pos="left" value="false" onclick="controller.SelectBoardSize(9)">9x9</div></td>
+<td><div id="board13" class="radio" value="false" onclick="controller.SelectBoardSize(13)">13x13</div></td>
+<td><div id="board19" class="radio" pos="right" value="true" onclick="controller.SelectBoardSize(19)">19x19</div></td>
 </tr></tbody></table>
-<br>
-<h2>Players</h2>
-<ul>
-<li>Black<table cellpadding="0" cellspacing="0"><tbody><tr><td><div id="black_human" class="radio" pos="left" value="true" onclick="">Human</div></td><td><div id="black_ai" class="radio" value="false" onclick="">AI</div></td></tr></tbody></li>
-<li>White<table cellpadding="0" cellspacing="0"><tbody><tr><td><div id="white_human" class="radio" pos="left" value="false" onclick="">Human</div></td><td><div id="white_ai" class="radio" value="true" onclick="">AI</div></td></tr></tbody></li>
-</ul>
+<br />
+<h2>Black</h2>
+<table cellpadding="0" cellspacing="0"><tbody><tr><td><div id="black_human" class="radio" pos="left" value="true" onclick="controller.SelectBlackPlayer('human')">Human</div></td><td><div id="black_ai_greedy" class="radio" value="false" onclick="controller.SelectBlackPlayer('greedy')">Greedy AI</div></td><td><div id="black_ai_crawler" class="radio" value="false" onclick="controller.SelectBlackPlayer('crawler')">Crawler AI</div></td></tr></tbody></table>
+<br />
+<h2>White</h2>
+<table cellpadding="0" cellspacing="0"><tbody><tr><td><div id="white_human" class="radio" pos="left" value="false" onclick="controller.SelectWhitePlayer('human')">Human</div></td><td><div id="white_ai_greedy" class="radio" value="true" onclick="controller.SelectWhitePlayer('greedy')">Greedy AI</div></td><td><div id="white_ai_crawler" class="radio" value="false" onclick="controller.SelectWhitePlayer('crawler')">Crawler AI</div></td></tr></tbody></table>
+<br />
 <h2>Game</h2>
 <ul>
 <li>Handicap<input name="zip" id="handicap" value="0" type="text"></li>
 <li>Komi<input name="zip" id="komi" value="6.5" type="text"></li>
 </ul>
-<ul><li align="center" onclick="beginNewGame()">Begin</li></ul>
+<ul><li align="center" onclick="controller.StartGame()">Begin</li></ul>
 </div>
 
 
