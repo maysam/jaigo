@@ -1996,7 +1996,7 @@ Board.prototype.As_String_With_Unconditional_Status = function()
     s = s + board_x_coords + "\n";
     s = s + "  +" + "-".repeat(this.size) + "+\n";
 
-    for (var y in range(this.size, 0, -1)) //TODO: [Noel] do we need to strip whitespace chars from y? [Sean] I think we do not, because range is an object whose property names and values match each other. The names are strings, but the range result is not, and the for-loop won't coerce it to a string. So, the spaces you see in the printed representation aren't at issue here. I think. Do you have a test case that proves me wrong?
+    for (var y in range(this.size, 0, -1)) //TODO: [Noel] do we need to strip whitespace chars from y? [Sean] I think we do not, because range is an object whose property names and values match each other. The names are strings, but the range result is not, and the for-loop won't coerce it to a string. So, the spaces you see in the printed representation aren't at issue here. I think. Do you have a test case that proves me wrong? [Noel] No, I noticed that the result board string didn't seem to be parsing out properly on the test page, and was wondering if whitespace was responsible.
 	{
 		var board_y_coord = "";
         if (y < 10)
@@ -2010,7 +2010,7 @@ Board.prototype.As_String_With_Unconditional_Status = function()
         var line = board_y_coord + "|";
         for (var x in range(1, this.size+1))
 		{
-		    //TODO: [Noel] I don't think this is the correct way to compose & call the color_and_status_to_character function. [Sean] color_and_status_to_character is a function in the mathematical sense, but because it is efficiently implemented as a straightforward lookup, I thought it would be cleanest to use JavaScript's property dictionary to implement it. So, I think this does work, but I'm not sure if I have a good test case...
+		    //TODO: [Noel] I don't think this is the correct way to compose & call the color_and_status_to_character function. [Sean] color_and_status_to_character is a function in the mathematical sense, but because it is efficiently implemented as a straightforward lookup, I thought it would be cleanest to use JavaScript's property dictionary to implement it. So, I think this does work, but I'm not sure if I have a good test case... [Noel] Gotcha. 
 		    var pos_as_character = color_and_status_to_character[this.goban[[x, y]] + this.blocks[[x,y]].status];
 		    line = line + pos_as_character;
 		}
