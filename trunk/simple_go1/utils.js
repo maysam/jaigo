@@ -1,7 +1,12 @@
-function debug_output(output)
+function debug_output(debug_window)
 {
-    document.getElementById('debug_output').value += output + "\n";
+    this.debug_window = debug_window;
 }
+
+debug_output.prototype.write = function(output)
+{
+    this.debug_window.value += output + "\n";	
+};
 
 String.prototype.strip = (
      function() {

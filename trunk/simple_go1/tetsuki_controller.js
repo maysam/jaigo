@@ -13,7 +13,7 @@ showGameHud(false)
 goWindow(int)
 */
 
-function Tetsuki_Controller(board9, board13, board19, black_human, black_ai_greedy, black_ai_crawler, white_human, white_ai_greedy, white_ai_crawler, handicap, komi, beginWindow, gameHUD, gameWindow, inGameHandicap, inGameKomi, inGameBlack, inGameWhite, inGameSettings, forward_small, back_small, close_small, delete_small, more_small, pass_small, meta)
+function Tetsuki_Controller(board9, board13, board19, black_human, black_ai_greedy, black_ai_crawler, white_human, white_ai_greedy, white_ai_crawler, handicap, komi, beginWindow, gameHUD, gameWindow, inGameHandicap, inGameKomi, inGameBlack, inGameWhite, inGameSettings, forward_small, back_small, close_small, delete_small, more_small, pass_small, meta, debug)
 {
 	this.board9Button = board9;
 	this.board13Button = board13;
@@ -42,6 +42,9 @@ function Tetsuki_Controller(board9, board13, board19, black_human, black_ai_gree
 	this.passMoveButton = pass_small;
 	this.meta = meta;
 	this.engine;
+	this.handicap;
+	this.komi;
+	this.debug_output = new debug_output(debug);
 }
 
 Tetsuki_Controller.prototype.PreGame = function()
@@ -59,7 +62,7 @@ Tetsuki_Controller.prototype.PreGame = function()
 	  src="data:image/png;base64,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";
 	  this.passMoveButton.setAttribute("src",src);
 	  this.ShowGameWindow("new_game_window");
-	  delete Tetsuki_Controller.prototype.StartGame; // this function is quite big and only executed once... so we can delete the function
+	  delete Tetsuki_Controller.prototype.PreGame; // this function is quite big and only executed once... so we can delete the function
 };
 
 Tetsuki_Controller.prototype.SelectBoardSize = function(boardSize)
@@ -85,25 +88,56 @@ Tetsuki_Controller.prototype.SelectWhitePlayer = function(player)
 
 Tetsuki_Controller.prototype.StartGame = function()
 {
-	var boardSize = 1;
 	if(this.board9Button.value===true)
 	{
-		boardSize = 9;
+		this.engine = new Game(9);
 	}
 	else if(this.board13Button.value===true)
 	{
-		boardSize = 13;
+		this.engine = new Game(13);
 	}
 	else if(this.board19Button.value===true)
 	{
-		boardSize = 19;
+		this.engine = new Game(19);
 	}
 	else
 	{
-		boardSize = 19;
+		this.engine = new Game(19);
 	}
-	this.engine = new Game(boardSize);
-}
+	this.PlayLoop();
+};
+
+Tetsuki_Controller.prototype.PlayLoop = function()
+{
+	var isHumanTurn;
+	if((this.engine.current_board.side === BLACK && this.blackHumanButton.value===true) || (this.engine.current_board.side === WHITE && this.whiteHumanButton.value===true))
+	{
+		isHumanTurn = true;
+	}
+	else
+	{
+		isHumanTurn = false;
+	}
+	
+	while(!isHumanTurn)
+	{
+		//generate and make ai move for current color
+		var move = this.engine.Generate_Move();
+		this.engine.Make_Move(move);
+		
+		//end the game condition
+		if(this.engine.move_history.length()>=2 && this.engine.move_history[-1]==PASS_MOVE && this.engine.move_history[-2]==PASS_MOVE)
+		{
+			break;
+		}
+		
+		//wait for human turn condition
+		if((this.engine.current_board.side === BLACK && this.blackHumanButton.value===true) || (this.engine.current_board.side === WHITE && this.whiteHumanButton.value===true))
+		{
+			isHumanTurn = true;
+		}
+	}
+};
 
 Tetsuki_Controller.prototype.BackToGame = function()
 {
@@ -112,7 +146,13 @@ Tetsuki_Controller.prototype.BackToGame = function()
 
 Tetsuki_Controller.prototype.Tap = function(coord_x,coord_y)
 {
-	
+	var isIllegal = this.engine.Make_Move(move(coord_x,coord_y));
+	if (isIllegal)
+	{
+		this.ShowGameHUD(true, coord_x,coord_y);
+	}
+
+	this.PlayLoop();
 };
 
 Tetsuki_Controller.prototype.ShowGameHUD = function(isVisible)
@@ -136,21 +176,23 @@ Tetsuki_Controller.prototype.ShowGameWindow = function(window_name)
 		this.inGameBlack.setAttribute("value", currentGame.player[0]);
 		this.inGameWhite.setAttribute("value", currentGame.player[1]);
 		this.inGameHandicap.setAttribute("value", currentGame.handicap);
-		this.inGameKomi.setAttribute("value", currentGame.komi)
+		this.inGameKomi.setAttribute("value", currentGame.komi);
 	}
 	setTimeout(function(){window.scrollTo(0, 1);}, 1000);
 };
 
 Tetsuki_Controller.prototype.ShowHUDWindow = function(isVisible,x,y)
 {
-	this.gameHUD.setAttribute( "visible", (isVisible?"yes":"no"))
+	this.gameHUD.setAttribute( "visible", (isVisible?"yes":"no"));
 	if (isVisible)
 	{
-		var pixx=(51*x)+4
-		var maxx = currentGame.boardSize * 51 - 294
-		if (pixx > maxx) 
-		 pixx = maxx
-		this.gameHUD.setAttribute( "style", "top: " + ((51*y)+4)+"px; left: "+pixx+"px;" )
+		var pixx=(51*x)+4;
+		var maxx = currentGame.boardSize * 51 - 294;
+		if (pixx > maxx)
+		{
+			 pixx = maxx;
+		}
+		this.gameHUD.setAttribute( "style", "top: " + ((51*y)+4)+"px; left: "+pixx+"px;");
 	}
 };
 

@@ -889,7 +889,7 @@ Board.prototype.Legal_Move = function(move)
 Board.prototype.Make_Move = function(move)
 {
     /*Make move given in argument.
-       Returns move or None if illegl.
+       Returns move or null if illegal.
        First we check given move for legality.
        Then we make move and remove captured opponent groups if there are any.
        While making move record what is needed to undo the move.
@@ -2262,7 +2262,7 @@ Game.prototype.Select_Scored_Move = function(remove_opponent_dead, pass_allowed)
 		//score = -self.score_position() - base_score
 		if (debug_flag)
 		    {
-			debug_output(score + move_as_string(move, self.size));
+			debug_output(score + move_as_string(move, this.size));
 		    }
 		//self.undo_move()
 		//Give pass move slight bonus so its preferred among do nothing moves
