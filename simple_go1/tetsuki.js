@@ -4,7 +4,7 @@ var currentGame
 // CLASS Game
 // -------------------------------------
 
-function Game( size, handicap, komi, isBlackAI, isWhiteAI)
+function Game(size, handicap, komi)
 {
   this.boardSize=size
   this.openingMove = null
@@ -589,12 +589,10 @@ function beginNewGame( )
   else if (document.getElementById('board13').getAttribute('value')=='true') size=13
   else size=19
   var komi = document.getElementById('komi').value
-  var isBlackAI = document.getElementById('black_ai').value
-  var isWhiteAI = document.getElementById('white_ai').value
   var handicap = document.getElementById('handicap').value
   goWindow( 1 )
   if (currentGame != null) delete currentGame
-  currentGame = new Game( size, handicap, komi, isBlackAI, isWhiteAI )
+  currentGame = new Game( size, handicap, komi)
 }
 
 function goWindow( win )
