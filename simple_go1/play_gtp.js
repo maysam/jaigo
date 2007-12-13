@@ -21,6 +21,32 @@ GTP_player.Final_Score()
 
 var debug = 1;
 
+function KeywordArguments(template) {
+    for (var i in template) if (template.hasOwnProperty(i)) {
+	this[i] = template[i];
+    }
+}
+KeywordArguments.prototype.find = function(args) {
+    // The arguments pseudoarray is very special.
+    // If that's the value we get for args,
+    // then our usual for/in loop finds
+    // nothing.
+    for (var a = 0; a < args.length; ++a) {
+	var arg = args[a];
+	if (arg instanceof KeywordArguments) {
+	    return arg;
+	}
+    }
+};
+KeywordArguments.prototype.combine = function(allArgs, explicitArgs) {
+    var result = explicitArgs;
+    var keywords = KeywordArguments.prototype.find(allArgs);
+    for (var k in keywords) if (keywords.hasOwnProperty(k)) {
+	result[k] = keywords[k];
+    }
+    return result;
+}
+
 function coords_to_sgf(size, board_coords)
 {
     board_coords = board_coords.toLowerCase();
@@ -162,17 +188,18 @@ GTP_player.prototype.Check_Side2Move = function(color)
 
 GTP_player.prototype.Genmove_Plain = function(color, remove_opponent_dead, pass_allowed)
 {
-    this.Check_Side2Move(color);
+    var args = KeywordArguments.prototype.combine(arguments, {color: color, remove_opponent_dead : remove_opponent_dead, pass_allowed : pass_allowed});
+    this.Check_Side2Move(args.color);
     var move = PASS_MOVE;
-	move = this.engine.Generate_Move(remove_opponent_dead, pass_allowed);
+    move = this.engine.Generate_Move(args.remove_opponent_dead, args.pass_allowed);
     move = move_as_string(move, this.engine.size);
-    this.Play_Plain(color, move);
+    this.Play_Plain(args.color, move);
     return move;
 };
 
 GTP_player.prototype.Genmove = function(color)
 {
-    return this.Ok(this.Genmove_Plain(color, remove_opponent_dead=false, pass_allowed=true));
+    return this.Ok(this.Genmove_Plain(color, new KeywordArguments({remove_opponent_dead: false, pass_allowed: true})));
 };
 
 GTP_player.prototype.Play_Plain = function(color, move)
@@ -254,7 +281,7 @@ GTP_player.prototype.Final_Score = function()
 
 GTP_player.prototype.Genmove_Cleanup = function(color)
 {
-    return this.Ok(this.Genmove_Plain(color, remove_opponent_dead=true)); //TODO: how to handle byref params?
+    return this.Ok(this.Genmove_Plain(color, new KeywordArguments({remove_opponent_dead: true})));
 };
 
 GTP_player.prototype.Showboard = function()
