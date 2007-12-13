@@ -738,7 +738,7 @@ Board.prototype.Flood_Mark = function(block, start_pos, mark)
        starting position with given mark
     */
     var to_mark = [start_pos];
-    while (to_mark) //TODO: what will a javascript while do when given to_mark?
+    while (to_mark.length > 0)
 	{
         var pos = to_mark.pop();
         if (block.stones[pos]==mark) {
@@ -2016,7 +2016,7 @@ Board.prototype.As_String_With_Unconditional_Status = function()
 		}
         s = s + line + "|" + board_y_coord + "\n";
 	}
-    s = s + "  +" + "-".repeat(this.size) + "+\n"; //TODO: print "-" board.size times (eg 19 -'s).
+    s = s + "  +" + "-".repeat(this.size) + "+\n";
     s = s + board_x_coords + "\n";
     return s;
 };
