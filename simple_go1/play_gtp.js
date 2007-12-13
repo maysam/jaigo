@@ -1,3 +1,24 @@
+/* gtp controller */
+/*
+GTP_player.version
+GTP_player.name
+GTP_player.protocol_version
+GTP_player.komi
+GTP_player.Genmove("white")
+GTP_player.Genmove("black")
+GTP_player.Genmove(cmd_lst[1])
+GTP_player.Boardsize(cmd_lst[1])
+GTP_player.List_Commands()
+GTP_player.Play(cmd_lst[1], cmd_lst[2])
+GTP_player.Clear_Board()
+GTP_player.Place_Free_Handicap(cmd_lst[1])
+GTP_player.Set_Free_Handicap(cmd_lst.substr(1))
+GTP_player.Final_Status_List(cmd_lst[1])
+GTP_player.Genmove_Cleanup(cmd_lst[1])
+GTP_player.Showboard()
+GTP_player.Final_Score()
+*/
+
 var debug = 1;
 
 function coords_to_sgf(size, board_coords)
