@@ -107,6 +107,14 @@ function randomchoice(seq) {
     return seq[randint(0, seq.length)];
 }
 
+String.prototype.repeat = function(times) {
+    var result = '';
+    for (var i = 0; i < times; i++) {
+	result += this;
+    }
+    return result;
+}
+
 
 PASS_MOVE = move(-1, -1);
 
@@ -1986,7 +1994,7 @@ Board.prototype.As_String_With_Unconditional_Status = function()
     s = s + " Black: " + this.captures[BLACK].toString() + "\n"; 
     var board_x_coords = "   " + x_coords_string.slice(0, this.size);
     s = s + board_x_coords + "\n";
-    s = s + "  +" + "-".Repeat(this.size) + "+\n";
+    s = s + "  +" + "-".repeat(this.size) + "+\n";
 
     for (var y in range(this.size, 0, -1)) //TODO: [Noel] do we need to strip whitespace chars from y? [Sean] I think we do not, because range is an object whose property names and values match each other. The names are strings, but the range result is not, and the for-loop won't coerce it to a string. So, the spaces you see in the printed representation aren't at issue here. I think. Do you have a test case that proves me wrong?
 	{
@@ -2008,7 +2016,7 @@ Board.prototype.As_String_With_Unconditional_Status = function()
 		}
         s = s + line + "|" + board_y_coord + "\n";
 	}
-    s = s + "  +" + "-".Repeat(this.size) + "+\n"; //TODO: print "-" board.size times (eg 19 -'s).
+    s = s + "  +" + "-".repeat(this.size) + "+\n"; //TODO: print "-" board.size times (eg 19 -'s).
     s = s + board_x_coords + "\n";
     return s;
 };
