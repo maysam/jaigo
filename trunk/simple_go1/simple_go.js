@@ -1965,20 +1965,20 @@ Board.prototype.As_String_With_Unconditional_Status = function()
        
        Returns board as string.
     */
-    var color_and_status_to_character =
-		function () {
-			var c = {};
-			c[EMPTY + "unknown"] = EMPTY;
-			c[BLACK + "unknown"] = BLACK;
-			c[WHITE + "unknown"] = WHITE;
-			c[BLACK + "alive"] = "&";
-			c[WHITE + "alive"] = "@";
-			c[BLACK + "dead"] = "x";
-			c[WHITE + "dead"] = "o";
-			c[EMPTY + WHITE + " territory"] = "=";
-			c[EMPTY + BLACK + " territory"] = ":";
-			return c;
-		}();
+    var color_and_status_to_character = (
+        function () {
+	    var c = {};
+	    c[EMPTY + "unknown"] = EMPTY;
+	    c[BLACK + "unknown"] = BLACK;
+	    c[WHITE + "unknown"] = WHITE;
+	    c[BLACK + "alive"] = "&";
+	    c[WHITE + "alive"] = "@";
+	    c[BLACK + "dead"] = "x";
+	    c[WHITE + "dead"] = "o";
+	    c[EMPTY + WHITE + " territory"] = "=";
+	    c[EMPTY + BLACK + " territory"] = ":";
+	    return c;
+	})();
     this.Analyze_Unconditional_Status();
     var s = this.side + " to move:\n"; //TODO: if we print this out first, then when we compare boards, this stuff will be the first line compared?
     s = s + "Captured stones: ";
@@ -1988,7 +1988,7 @@ Board.prototype.As_String_With_Unconditional_Status = function()
     s = s + board_x_coords + "\n";
     s = s + "  +" + "-".Repeat(this.size) + "+\n";
 
-    for (var y in range(this.size, 0, -1)) //TODO: do we need to strip whitespace chars from y?
+    for (var y in range(this.size, 0, -1)) //TODO: [Noel] do we need to strip whitespace chars from y? [Sean] I think we do not, because range is an object whose property names and values match each other. The names are strings, but the range result is not, and the for-loop won't coerce it to a string. So, the spaces you see in the printed representation aren't at issue here. I think. Do you have a test case that proves me wrong?
 	{
 		var board_y_coord = "";
         if (y < 10)
@@ -2002,7 +2002,8 @@ Board.prototype.As_String_With_Unconditional_Status = function()
         var line = board_y_coord + "|";
         for (var x in range(1, this.size+1))
 		{
-		    var pos_as_character = color_and_status_to_character[this.goban[[x, y]] + this.blocks[[x,y]].status]; //TODO: I don't think this is the correct way to compose & call the color_and_status_to_character function.
+		    //TODO: [Noel] I don't think this is the correct way to compose & call the color_and_status_to_character function. [Sean] color_and_status_to_character is a function in the mathematical sense, but because it is efficiently implemented as a straightforward lookup, I thought it would be cleanest to use JavaScript's property dictionary to implement it. So, I think this does work, but I'm not sure if I have a good test case...
+		    var pos_as_character = color_and_status_to_character[this.goban[[x, y]] + this.blocks[[x,y]].status];
 		    line = line + pos_as_character;
 		}
         s = s + line + "|" + board_y_coord + "\n";
