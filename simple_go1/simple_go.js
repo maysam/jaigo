@@ -18,13 +18,7 @@ function object(o) {
     F.prototype = o;
     return new F();
 }
-function Pair(x, y) {
-    this.x = x;
-    this.y = y;
-}
-deepValueEquality = function (other) {
-    var a = this;
-    var b = other;
+deepValueEquality = function (a, b) {
     if (arguments.length == 2) {
 	a = arguments[0];
 	b = arguments[1];
@@ -39,11 +33,6 @@ deepValueEquality = function (other) {
     }
     return true;
 };
-
-Pair.prototype.equals = deepValueEquality;
-function move(x, y) {
-    return object(new Pair(x, y));
-}
 
 function contains(sequence, quarry, eq) {
     eq = eq || deepValueEquality;
@@ -116,17 +105,17 @@ String.prototype.repeat = function(times) {
 };
 
 
-PASS_MOVE = move(-1, -1);
+PASS_MOVE = [-1, -1];
 
 function move_as_string(move, board_size)
 {
     /*convert move tuple to string
       example: (2, 3) -> B3
 	*/
-    if (PASS_MOVE.equals(move)) {
+    if (deepValueEquality(PASS_MOVE, move)) {
 	return "PASS";
     }
-    return x_coords_string[move.x - 1] + str(move.y);
+    return x_coords_string[move[0] - 1] + str(move[1]);
 }
 
 function string_as_move(m, size)
@@ -139,7 +128,7 @@ function string_as_move(m, size)
     }
     x = x_coords_string.indexOf(m.charAt(0));
     y = m.charAt(1);
-    return move(x,y);
+    return [x,y];
 }
 
 /* Block class
@@ -324,7 +313,7 @@ Board.prototype.each_Goban['break'] = false;
 Board.prototype.iterate = function(pairs, f) {
     for (var p in pairs) {
 	var pair = pairs[p];
-	if (1 <= pair.x & pair.x <= this.size && 1 <= pair.y && pair.y <= this.size) {
+	if (1 <= pair[0] & pair[0] <= this.size && 1 <= pair[1] && pair[1] <= this.size) {
 	    if (f(pair) === Board.prototype.iterate['break']) {
 		return;
 	    }
@@ -336,15 +325,16 @@ Board.prototype.iterate['break'] = false;
 
 Board.prototype.each_Neighbour = function(pos)
 {
+    var board = this;
     return function(f) {
 	/*This goes through all neighbour positions in clockwise:
 	  up, right, down, left
 	  Example usage: see legal_move method
 	*/
-	var x = pos.x;
-	var y = pos.y;
-	this.iterate(
-		     [new Pair(x,y+1), new Pair(x+1,y), new Pair(x,y-1), new Pair(x-1,y)],
+	var x = pos[0];
+	var y = pos[1];
+	board.iterate(
+		     [[x,y+1], [x+1,y], [x,y-1], [x-1,y]],
 		     function (p) {
 			 return f(p) === Board.prototype.each_Neighbour['break'] ? Board.prototype.iterate['break'] : Board.prototype.iterate['continue']});
     };
@@ -354,15 +344,16 @@ Board.prototype.each_Neighbour['break'] = false;
 
 Board.prototype.each_Diagonal_Neighbour = function(pos)
 {
+    var board = this;
     return function(f) {
 	/*This goes through all neighbour positions in clockwise:
 	  NE, SE, SW, NW
 	  Example usage: see analyse_eye_point method
 	*/
-	var x = pos.x;
-	var y = pos.y;
-	this.iterate(
-		     [new Pair(x+1,y+1), new Pair(x+1,y-1), new Pair(x-1,y-1), new Pair(x-1,y+1)],
+	var x = pos[0];
+	var y = pos[1];
+	board.iterate(
+		     [[x+1,y+1], [x+1,y-1], [x-1,y-1], [x-1,y+1]],
 		     function (p) {
 			 return f(p) === Board.prototype.each_Diagonal_Neighbor['break'] ? Board.prototype.iterate['break'] : Board.prototype.iterate['continue']});
     };
@@ -372,12 +363,13 @@ Board.prototype.each_Diagonal_Neighbour['break'] = false;
 
 Board.prototype.each_Blocks = function(colors)
 {
+    var board = this;
     return function(f) {
 	/*This goes through all distinct blocks on board with given colors.
 	  Example usage: see analyze_unconditionally_alive
 	*/
-	for (var b in this.block_list) {
-	    var block = this.block_list[b];
+	for (var b in board.block_list) {
+	    var block = board.block_list[b];
 	    if (block.color in colors) {
 		if (f(block) === Board.prototype.each_Blocks['break']) {
 		    break;
@@ -391,6 +383,7 @@ Board.prototype.each_Blocks['break'] = false;
 
 Board.prototype.each_Neighbour_Blocks = function(block)
 {
+    var board = this;
     return function(f) {
 	/*Go through all neighbour positions and add new blocks.
 	  Return once for each new block
@@ -398,7 +391,7 @@ Board.prototype.each_Neighbour_Blocks = function(block)
 	var blocks_seen = [];
 	for (var s in block.neighbour) {
 	    var stone = block.neighbour[s];
-	    var block2 = this.blocks[stone];
+	    var block2 = board.blocks[stone];
 	    if (!contains(blocks_seen, block2)) {
 		if (f(block2) === Board.prototype.each_Neighbour_Blocks['break']) {
 		    return;
@@ -413,6 +406,7 @@ Board.prototype.each_Neighbour_Blocks['break'] = false;
 
 Board.prototype.each_Neighbour_Eye_Blocks = function(eye)
 {
+    var board = this;
     return function(f) {
 	/*First copy eye blocks to list of blocks seen
 	  Then go through all neighbour positions and add new blocks.
@@ -423,7 +417,7 @@ Board.prototype.each_Neighbour_Eye_Blocks = function(eye)
 	    var block = eye.parts[b];
 	    for (var p in block.neighbour) {
 		var pos = block.neighbour[p];
-		var block2 = this.blocks[pos];
+		var block2 = board.blocks[pos];
 		if(blocks_seen.indexOf(block2) === -1) {
 		    if (f(block2) === Board.prototype.each_Neighbour_Eye_Blocks['break']) {
 			return;
@@ -483,7 +477,7 @@ Board.prototype.Are_Adjacent_Points = function(pos1, pos2)
     */
     var result;
     this.each_Neighbour(pos1)(function (pos) {
-	    if (pos.equals(pos2)) {
+	    if (deepValueEquality(pos, pos2)) {
 		result = true;
 		return this.each_Neighbor['break'];
 	    }
@@ -511,7 +505,7 @@ Board.prototype.List_Empty_3x3_Neighbour = function(pos)
 		    diagonal_neighbour_list.append(pos2);
 		}
 	});
-    return new Pair(neighbour_list, diagonal_neighbour_list);
+    return [neighbour_list, diagonal_neighbour_list];
 };
 
 Board.prototype.Is_3x3_Empty = function(pos)
@@ -520,8 +514,8 @@ Board.prototype.Is_3x3_Empty = function(pos)
 	return false;
     }
     var neighbors = this.List_Empty_3x3_Neighbour(pos);
-    var neighbour_list = neighbors.x;
-    var diagonal_neighbour_list = neighbors.y;
+    var neighbour_list = neighbors[0];
+    var diagonal_neighbour_list = neighbors[1];
     if (neighbour_list.length==4 && diagonal_neighbour_list.length==4)
 	{
         return true;
@@ -853,30 +847,31 @@ Board.prototype.Legal_Move = function(move)
     /*Test whether given move is legal.
        Returns truth value.
     */
-    if (move==PASS_MOVE)
+    if (deepValueEquality(move, PASS_MOVE))
 	{
         return true;
 	}
-    if (this.goban.indexOf(move) == -1) {
+    if (this.goban[move] === -1) {
 	return false;
     }
-    if (self.goban[move]!=EMPTY) {
+    if (this.goban[move] !== EMPTY) {
 	return false;
     }
 
     var result;
+    var board = this;
     this.each_Neighbour(move)(function (pos) {
-	    if (this.goban[pos]==EMPTY) {
+	    if (board.goban[pos] === EMPTY) {
 		result = true;
-		return this.each_Neighbour['break'];
+		return board.each_Neighbour['break'];
 	    }
-	    if (this.goban[pos]==this.side && this.Liberties(pos)>1) {
+	    if (board.goban[pos] === board.side && board.Liberties(pos) > 1) {
 		result = true;
-		return this.each_Neighbour['break'];
+		return board.each_Neighbour['break'];
 	    }
-	    if (this.goban[pos]==other_side[this.side] && this.Liberties(pos)==1) {
+	    if (board.goban[pos] === other_side[board.side] && board.Liberties(pos) === 1) {
 		result = true;
-		return this.each_Neighbour['break'];
+		return board.each_Neighbour['break'];
 	    }
 	});
     if (result !== undefined) {
@@ -895,7 +890,7 @@ Board.prototype.Make_Move = function(move)
        While making move record what is needed to undo the move.
     */
     this.Initialize_Undo_Log();
-    if (move==PASS_MOVE)
+    if (deepValueEquality(move, PASS_MOVE))
 	{
         this.Change_Side();
         return move;
@@ -2053,7 +2048,7 @@ Game.prototype.Make_Unchecked_Move = function(m)
     this.current_board.Make_Move(m);
     var undo_log = this.current_board.undo_log;
     var board_key = this.current_board.Key();
-    return move(undo_log, board_key);
+    return [undo_log, board_key];
 };
 
 Game.prototype.Legal_Move = function(move)
@@ -2064,7 +2059,7 @@ Game.prototype.Legal_Move = function(move)
        then check for repetition (situational super-ko)
     */
 
-    if (move==PASS_MOVE) {
+    if (deepValueEquality(move, PASS_MOVE)) {
 	return true;
     }
     if (!this.current_board.Legal_Move(move)) {
@@ -2095,14 +2090,14 @@ Game.prototype.Make_Move = function(move)
     var logkey = this.Make_Unchecked_Move(move);
     var undo_log = logkey[0];
     var board_key = logkey[1];
-    if (move!=PASS_MOVE && (this.position_seen.indexOf(board_key) == -1))
+    if (!deepValueEquality(move, PASS_MOVE) && (this.position_seen.indexOf(board_key) == -1))
 	{
         this.current_board.Undo_Move(undo_log);
         return null;
 	}
-    this.undo_history.Append(undo_log);
-    this.move_history.Append(move);
-    if (move!=PASS_MOVE)
+    this.undo_history.push(undo_log);
+    this.move_history.push(move);
+    if (!deepValueEquality(move, PASS_MOVE))
 	{
         this.position_seen[board_key] = true;
 	}
@@ -2115,11 +2110,11 @@ Game.prototype.Undo_Move = function()
        or return None if at beginning.
        Update repetition history and make previous position current.
     */
-    if (!this.move_history) {
+    if (this.move_history.length === 0) {
 	return null;
     }
     var last_move = this.move_history.pop();
-    if (last_move!=PASS_MOVE)
+    if (!deepValueEquality(last_move, PASS_MOVE))
 	{
 	    this.position_seen.splice(this.current_board.key(), 1);
 	}
@@ -2169,7 +2164,7 @@ Game.prototype.Score_Move = function(move)
     this.Make_Move(move);
     var cboard = this.current_board;
     var best_score = cboard.Score_Position();
-    if (move!=PASS_MOVE) {
+    if (!deepValueEquality(move, PASS_MOVE)) {
         var block = cboard.blocks[move];
         var liberties = cboard.List_Block_Liberties(block);
         //Check if this group is now in atari.
@@ -2266,7 +2261,7 @@ Game.prototype.Select_Scored_Move = function(remove_opponent_dead, pass_allowed)
 		    }
 		//self.undo_move()
 		//Give pass move slight bonus so its preferred among do nothing moves
-		if (move==PASS_MOVE)
+		if (deepValueEquality(move, PASS_MOVE))
 		    {
 			if (!pass_allowed) {
 			    return this.each_Moves['continue'];
@@ -2472,7 +2467,7 @@ function main()
         debug_output(g.current_board.as_string_with_unconditional_status());
         debug_output(g.current_board.score_position());
         //if last 2 moves are pass moves: exit loop
-        if (g.move_history.length()>=2 && g.move_history[-1]==PASS_MOVE && g.move_history[-2]==PASS_MOVE)
+        if (g.move_history.length()>=2 && deepValueEquality(g.move_history[g.move_history.length - 1], PASS_MOVE) && deepValueEquality(g.move_history[g.move_history.length - 2], PASS_MOVE))
 		{
             break;
 		}

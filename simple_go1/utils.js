@@ -1,12 +1,8 @@
-function debug_output(debug_window)
+function debug_output(output)
 {
-    this.debug_window = debug_window;
+    var out = document.getElementById('debug_output');
+    out.value += output + "\n"; 
 }
-
-debug_output.prototype.write = function(output)
-{
-    this.debug_window.value += output + "\n";	
-};
 
 String.prototype.strip = (
      function() {
@@ -14,57 +10,52 @@ String.prototype.strip = (
         //contrivance to let us share the regex among
         //all invocations of strip.
         var escapeRegexCharacterSetElements = /(\[|\\)/g;
-	var ws = /(^\s*)(.*?)(\s*$)/;
+        var ws = /(^\s*)(.*?)(\s*$)/;
         var result = function(chars) {
-	    var replaceThis;
-	    if (!chars) {
-		replaceThis = ws;
-	    }
-	    else {
-		var garbage = '[' + chars.replace(escapeRegexCharacterSetElements, '\$&') + ']';
-		replaceThis = new RegExp('(^' + garbage + '*)(.*?)(' + garbage + '*$)');
-	    }
-	    return this.replace(replaceThis, '$2');
+            var replaceThis;
+            if (!chars) {
+                replaceThis = ws;
+            }
+            else {
+                var garbage = '[' + chars.replace(escapeRegexCharacterSetElements, '\\$&') + ']';
+                replaceThis = new RegExp('(^' + garbage + '*)(.*?)(' + garbage + '*$)');
+            }
+            return this.replace(replaceThis, '$2');
         };
-	return result;
+        return result;
     })();
 
 function diagram2game(str)
 {
+    var digits = /^\d*$/
     var g;
     var game_lines = str.split("\n");
     for (var l in game_lines) if (game_lines.hasOwnProperty(l)) {
-	var whitespace = /(^\s*)(.*?)(\s*$)/;
-	var line = game_lines[l].strip();
-        if (!line) 
-		{
-			continue;
-		}
-        if (g===undefined)
-		{
+        var whitespace = /(^\s*)(.*?)(\s*$)/;
+        var line = game_lines[l].strip();
+        if (!line) {
+            continue;
+        }
+        if (g === undefined) {
             g = new Game(line.length);
-		}
-        else if (line[0] < 19 && line[0] > 0)
-		{
-		    var splitted = line.split("|");
-		    var y = splitted[0];
-		    var line = splitted[1];
-		    var rest = splitted[2];
-            for (x in range(line.length)) if (range(line.length).hasOwnProperty(x))
-			{
+        }
+        else if (digits.test(line[0])) {
+            var splitted = line.split("|");
+            var y = splitted[0];
+            var line = splitted[1];
+            var rest = splitted[2];
+            for (x in range(line.length)) if (range(line.length).hasOwnProperty(x)) {
                 var stone = line[x];
-                x = x + 1;
-                if (stone == WHITE || stone == BLACK)
-				{
-                    if (g.current_board.side!=stone)
-					{
+                x = Number(x) + 1;
+                if (stone === WHITE || stone === BLACK) {
+                    if (g.current_board.side != stone) {
                         g.Make_Move(PASS_MOVE);
-					}
-                    g.Make_Move(x, y);
-				}
-			}
-		}
-	}
+                    }
+                    g.Make_Move([x, y]);
+                }
+	    }
+        }
+    }
     return g;
 }
 
@@ -76,8 +67,8 @@ function test_unconditional(str)
 
 String.prototype.Repeat = function(repetitions)
 {
-	var s = "";
-	t = this.toString();
-	while (--repetitions >= 0) s += t;
-	return s;
+        var s = "";
+        t = this.toString();
+        while (--repetitions >= 0) s += t;
+        return s;
 }
