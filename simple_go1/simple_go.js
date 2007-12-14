@@ -9,7 +9,9 @@ var debug_flag = false;
 
 var BOTH = BLACK + WHITE;
 
-other_side = {BLACK: WHITE, WHITE: BLACK};
+other_side = {};
+other_side[BLACK] = WHITE;
+other_side[WHITE] = BLACK;
 
 /* Douglas Crockford's prototypal
    inheritance fn */
@@ -575,7 +577,7 @@ Board.prototype.Add_Stone = function(color, pos)
     old_block.Remove_Stone(pos);
     if (old_block.Size() === 0)
 	{
-        this.block_list.Remove(old_block);
+	    this.block_list.splice(this.block_list.indexOf(old_block), 1);
 	}
     this.Set_Goban(color, pos);
     var new_block = new Block(color);
@@ -598,19 +600,20 @@ Board.prototype.Add_Stone = function(color, pos)
     //...........O.......
 
     //combine and split blocks as needed
+    var board = this;
     var split_list = [];
-    this.each_neighbour(pos)(function (pos2) {
-	    var other_block = this.blocks[pos2];
-	    if (this.goban[pos2]==color) {
-		new_block = this.Combine_Blocks(new_block, other_block);
+    this.each_Neighbour(pos)(function (pos2) {
+	var other_block = board.blocks[pos2];
+	if (board.goban[pos2]==color) {
+	    new_block = board.Combine_Blocks(new_block, other_block);
+	}
+	else {
+	    new_block.neighbour[pos2] = true;
+	    if (board.goban[pos2]==old_color) {
+		split_list.push(pos2);
 	    }
-	    else {
-		new_block.neighbour[pos2] = true;
-		if (this.goban[pos2]==old_color) {
-		    split_list.push(pos2);
-		}
-	    }
-	});
+	}
+    });
     //If these splits are actually trivially same: do update fast
     if (this.Simple_Same_Block(split_list))
 	{
@@ -619,10 +622,10 @@ Board.prototype.Add_Stone = function(color, pos)
         this.each_Neighbour(pos)(function (pos2) {
 		if (old_block.stones.indexOf(pos2) == -1) //this if is slight optimization: can't be neighbour if belongs to block
 		    {
-			this.each_Neighbour(pos2)(function (pos3) {
+			board.each_Neighbour(pos2)(function (pos3) {
 				if (contains(old_block.stones, pos3)) {
 				    //yes, pos2 is neighbour
-				    return this.each_Neighbour['break'];
+				    return board.each_Neighbour['break'];
 				}
 			    });
 		    }
@@ -636,27 +639,24 @@ Board.prototype.Add_Stone = function(color, pos)
 		    }
 	    });
 	}
-    else
-	{
+    else {
         changed_blocks.push(old_block); //now we need this
         old_block.Mark_Stones(0);
         var last_old_mark = 0;
-        for (var pos2 in split_list)
-		{
+        for (var p2 in split_list) {
+	    var pos2 = split_list[p2];
             var other_block = this.blocks[pos2];
-            if (other_block.stones[pos2] === 0)
-			{
+            if (other_block.stones[pos2] === 0) {
                 last_old_mark = last_old_mark + 1;
-                this.Flood_Mark(other_block, pos2, last_old_mark);
-                if (last_old_mark>1)
-				{
+                this.flood_mark(other_block, pos2, last_old_mark);
+                if (last_old_mark > 1) {
                     var splitted_block = this.Split_Marked_Group(other_block, last_old_mark);
                     this.Add_Block(splitted_block);
                     changed_blocks.push(splitted_block);
-				}
-			}
 		}
+	    }
 	}
+    }
     if (pos in new_block.neighbour)
 	{
         new_block.neighbour.splice(new_block.neighbour.indexOf(pos),1);
@@ -726,7 +726,7 @@ Board.prototype.Split_Marked_Group = function(block, mark)
     return new_block;
 };
 
-Board.prototype.Flood_Mark = function(block, start_pos, mark)
+Board.prototype.flood_mark = function(block, start_pos, mark)
 {
     /* mark all stones reachable from given
        starting position with given mark
@@ -899,12 +899,13 @@ Board.prototype.Make_Move = function(move)
 	{
 	this.Add_Stone(this.side, move);
 	this.Add_Undo_Info("add_stone", EMPTY, move);
+	var board = this;
         var remove_color = other_side[this.side];
         this.each_Neighbour(move)(function (pos) {
-		if (this.goban[pos] == remove_color && this.Liberties(pos) === 0)
+		if (board.goban[pos] == remove_color && board.Liberties(pos) === 0)
 		    {
-			this.Remove_Block(pos);
-			this.Add_Undo_Info("change_block_color", remove_color, pos);
+			board.Remove_Block(pos);
+			board.Add_Undo_Info("change_block_color", remove_color, pos);
 		    }
 	    });
         this.Change_Side();
@@ -1628,7 +1629,7 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
 				{
 				    this.each_Neighbour(eye)(function (pos) {
 					    if (eye_block.stones.indexOf(pos) != -1) {
-						this.Flood_Mark(eye_block, pos, new_mark);
+						this.flood_mark(eye_block, pos, new_mark);
 						var splitted_block = this.split_marked_group(eye_block, new_mark);
 						stone_block_list.push(splitted_block);
 					    }
