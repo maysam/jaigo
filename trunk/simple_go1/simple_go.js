@@ -111,7 +111,7 @@ String.prototype.repeat = function(times) {
  */
 function update(s, t) {
     for (var nom in t) if (t.hasOwnProperty(nom)) {
-	s[nom] = t[nom];
+        s[nom] = t[nom];
     }
 }
 
@@ -386,7 +386,7 @@ Board.prototype.each_Blocks = function(colors)
         */
         for (var b in board.block_list) {
             var block = board.block_list[b];
-            if (block.color in colors) {
+            if (colors.indexOf(block.color) !== -1) {
                 if (f(block) === Board.prototype.each_Blocks['break']) {
                     break;
                 }
@@ -1358,14 +1358,15 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
     this.each_Blocks(EMPTY+WHITE+BLACK)(function (block) {
             block.eye = null;
         });
+    var board = this;
     this.each_Blocks(eye_colors)(function (block) {
             if (block.eye) {
-                        return this.each_Blocks['continue'];
+                        return board.each_Blocks['continue'];
             }
             var current_eye = new Eye();
             eye_list.push(current_eye);
             var blocks_to_process = [block];
-            while (blocks_to_process) 
+            while (blocks_to_process.length > 0) 
                 {
                     var block2 = blocks_to_process.pop();
                     if (block2.eye) {
@@ -1375,8 +1376,8 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
                     current_eye.parts.push(block2);
                     for (var pos in block2.neighbour)
                         {
-                            var block3 = this.blocks[pos];
-                            if (block3.color in eye_colors && !block3.eye)
+                            var block3 = board.blocks[pos];
+                            if (eye_colors.indexOf(block3.color) !== -1 && !block3.eye)
                                 {
                                     blocks_to_process.push(block3);
                                 }
@@ -1385,18 +1386,18 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
         });
     //check that all empty points are adjacent to our color
     var ok_eye_list = [];
-    for (var eye in eye_list)
-        {
+    for (var i in eye_list) if (eye_list.hasOwnProperty(i)) {
+        var eye = eye_list[i];
         var prev_our_blocks = null;
         eye_is_ok = false;
         eye.each_Stones(function (stone) {
-                if (this.goban[stone]!=EMPTY) {
+                if (board.goban[stone]!=EMPTY) {
                     return eye.each_Stones['continue'];
                 }
                 eye_is_ok = true;
                 var our_blocks = [];
-                this.each_Neighbour(stone)(function (pos) {
-                        var block = this.blocks[pos];
+                board.each_Neighbour(stone)(function (pos) {
+                        var block = board.blocks[pos];
                         if (block.color == color && (our_blocks.indexOf(block) !== -1)) {
                             our_blocks.push(block);
                         }
@@ -1446,13 +1447,13 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
         this.each_Blocks(color)(function (block) {
                 //not really needed but short and probably useful optimization
                 if (block.eye_count < 2) {
-                    return this.each_Blocks['continue'];
+                    return board.each_Blocks['continue'];
                 }
                 //count eyes
                 var block_eye_list = [];
                 for (var stone in block.neighbour)
                 {
-                        var eye = this.blocks[stone].eye;
+                        var eye = board.blocks[stone].eye;
                         if (eye && block_eye_list.indexOf(eye) == -1)
                     { 
                                 block_eye_list.push(eye);
