@@ -21,7 +21,7 @@ function test_speed(n)
     var g = new Game(19);
     var t0 = new Date();
 	var b;
-    for (i in xrange(n)) //TODO: what is xrange?
+    for (i in xrange(n))
 	{
         b = g.current_board.Copy();
 	}

@@ -69,6 +69,9 @@ function range(begin, end, step) {
     return a;
 }
 
+/* http://docs.python.org/lib/typesseq.html */
+var xrange = range;
+
 function randint(min, max) {
     // result is distributed pretty evenly between
     // min + 1 and max - 1, tailing off at
@@ -113,6 +116,15 @@ function update(s, t) {
     for (var nom in t) if (t.hasOwnProperty(nom)) {
         s[nom] = t[nom];
     }
+}
+
+function map(f, s) {
+    var result = object(s);
+    for (var e in result) {
+        var e2 = f(result[e]);
+        result[e] = f(result[e]);
+    }
+    return result;
 }
 
 PASS_MOVE = [-1, -1];
@@ -213,7 +225,7 @@ Block.prototype.Get_Origin = function()
     */
     var lst = [];
     for (var s in this.stones) if (this.stones.hasOwnProperty(s)) {
-        lst.push(this.stones[s]);
+        lst.push(s);
     }
     lst.sort(); //TODO: provide a suitable <=
     return lst[0];
@@ -236,7 +248,7 @@ Eye.prototype.each_Stones = function(f)
     for (var b in this.parts) {
         var block = this.parts[b];
         for (var s in block.stones) {
-            var stone = block.stones[s];
+            var stone = map(Number, s.split(','));
             if (f(stone) === Eye.prototype.each_Stones['break']) {
                 return;
             }
@@ -329,7 +341,7 @@ Board.prototype.each_Goban['break'] = false;
 Board.prototype.iterate = function(pairs, f) {
     for (var p in pairs) {
         var pair = pairs[p];
-        if (1 <= pair[0] & pair[0] <= this.size && 1 <= pair[1] && pair[1] <= this.size) {
+        if (1 <= pair[0] && pair[0] <= this.size && 1 <= pair[1] && pair[1] <= this.size) {
             if (f(pair) === Board.prototype.iterate['break']) {
                 return;
             }
@@ -565,7 +577,7 @@ Board.prototype.Simple_Same_Block = function(pos_list)
     this.flood_mark(temp_block, pos_list[0], new_mark);
     for (var pos in pos_list)
         {
-        if (temp_block.stones[pos]!=new_mark)
+        if (temp_block.stones[pos] !== new_mark)
                 {
             return false;
                 }
@@ -728,11 +740,11 @@ Board.prototype.Split_Marked_Group = function(block, mark)
        Return splitted group.
     */
     var new_block = new Block(block.color);
-    for (var s in block.stones) {
-        var stone = block.stones[s];
-        if (stone === mark) {
-            block.Remove_Stone(stone);
-            new_block.Add_Stone(stone);
+    for (var stonePosition in block.stones) {
+        var stoneMark = block.stones[stonePosition];
+        if (stoneMark === mark) {
+            block.Remove_Stone(stonePosition);
+            new_block.Add_Stone(stonePosition);
         }
     }
     return new_block;
@@ -747,12 +759,12 @@ Board.prototype.flood_mark = function(block, start_pos, mark)
     while (to_mark.length > 0)
         {
         var pos = to_mark.pop();
-        if (block.stones[pos]==mark) {
+        if (block.stones[pos] === mark) {
             continue;
         }
         block.stones[pos] = mark;
         this.each_Neighbour(pos)(function (pos2) {
-                if (pos2 in block.stones)
+                if (block.stones[pos2] !== undefined)
                     {
                         to_mark.push(pos2);
                     }
@@ -768,7 +780,7 @@ Board.prototype.Calculate_Neighbour = function(block)
     for (var stone in block.stones)
         {
             this.each_Neighbour(stone)(function (pos) {
-                    if (block.stones.indexOf(pos) == -1)
+                    if (block.stones[pos] === undefined)
                         {
                             block.neighbour[pos] = true;
                         }
@@ -1366,23 +1378,20 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
             var current_eye = new Eye();
             eye_list.push(current_eye);
             var blocks_to_process = [block];
-            while (blocks_to_process.length > 0) 
-                {
-                    var block2 = blocks_to_process.pop();
-                    if (block2.eye) {
-                        continue;
-                    }
-                    block2.eye = current_eye;
-                    current_eye.parts.push(block2);
-                    for (var pos in block2.neighbour)
-                        {
-                            var block3 = board.blocks[pos];
-                            if (eye_colors.indexOf(block3.color) !== -1 && !block3.eye)
-                                {
-                                    blocks_to_process.push(block3);
-                                }
-                        }
+            while (blocks_to_process.length > 0) {
+                var block2 = blocks_to_process.pop();
+                if (block2.eye) {
+                    continue;
                 }
+                block2.eye = current_eye;
+                current_eye.parts.push(block2);
+                for (var pos in block2.neighbour) {
+                    var block3 = board.blocks[pos];
+                    if (eye_colors.indexOf(block3.color) !== -1 && !block3.eye) {
+                        blocks_to_process.push(block3);
+                    }
+                }
+            }
         });
     //check that all empty points are adjacent to our color
     var ok_eye_list = [];
@@ -1390,50 +1399,49 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
         var eye = eye_list[i];
         var prev_our_blocks = null;
         eye_is_ok = false;
+        var our_blocks;
         eye.each_Stones(function (stone) {
-                if (board.goban[stone]!=EMPTY) {
+                if (board.goban[stone] !== EMPTY) {
                     return eye.each_Stones['continue'];
                 }
                 eye_is_ok = true;
-                var our_blocks = [];
+                our_blocks = [];
                 board.each_Neighbour(stone)(function (pos) {
                         var block = board.blocks[pos];
-                        if (block.color == color && (our_blocks.indexOf(block) !== -1)) {
+                        if (block.color === color && (our_blocks.indexOf(block) !== -1)) {
                             our_blocks.push(block);
                         }
                     });
                 //list of blocks different than earlier
-                if ((prev_our_blocks !== null) && (prev_our_blocks != our_blocks)) {
+                if ((prev_our_blocks !== null) && (prev_our_blocks !== our_blocks)) {
                     var ok_our_blocks = [];
-                    for (var block in our_blocks) {
-                        if (block in prev_our_blocks) {
+                    for (var b in our_blocks) {
+                        var block = our_blocks[b];
+                        if (prev_our_blocks.indexOf(block) !== 1) {
                             ok_our_blocks.push(block);
                         }
                     }
                     our_blocks = ok_our_blocks;
                 }
                 //this empty point was not adjacent to our block or there is no block that has all empty points adjacent to it
-                if (!our_blocks) {
+                if (our_blocks.length === 0) {
                     eye_is_ok = false;
                     return eye.each_Stones['break'];
                 }                
                 prev_our_blocks = our_blocks;
             });
-        if (eye_is_ok)
-                {
+        if (eye_is_ok) {
             ok_eye_list.push(eye);
             eye.our_blocks = our_blocks;
-                }
-        else
-                {
+        }
+        else {
             not_ok_eye_list.push(eye);
             //remove reference to eye that is not ok
-            for (block in eye.parts)
-                        {
+            for (block in eye.parts) {
                 block.eye = null;
-                        }
-                }
+            }
         }
+    }
         
     eye_list = ok_eye_list;
 
@@ -1461,21 +1469,20 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
                 }
                 //count only those eyespaces which have empty point(s) adjacent to this block
                 block.eye_count = 0;
-                for (var eye in block_eye_list)
-                    {
-                        if (contains(eye.our_blocks, block, deepValueEquality))
-                            {
-                                block.eye_count = block.eye_count + 1;
-                            }
+                for (var e in block_eye_list) {
+                    var eye = block_eye_list[e];
+                    if (contains(eye.our_blocks, block, deepValueEquality)) {
+                        block.eye_count = block.eye_count + 1;
                     }
-                if (block.eye_count < 2)
-                    {
-                        changed_count = changed_count + 1;
-                    }
+                }
+                if (block.eye_count < 2) {
+                    changed_count = changed_count + 1;
+                }
             });
         //check eyes for required all groups 2 eyes
         var ok_eye_list = [];
-        for (var eye in eye_list) {
+        for (var e in eye_list) {
+            var eye = eye_list[e];
             eye_is_ok = true;
             this.each_Neighbour_Eye_Blocks(eye)(function (block) {
                     if (block.eye_count < 2) {
@@ -1503,27 +1510,27 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
     }
     //mark alive and dead blocks
     this.each_Blocks(color)(function(block) {
-            if (block.eye_count >= 2)
+            if (block.eye_count >= 2) //TODO: why is this always 0?
                 {
                     block.status = "alive";
                 }
         });
-    for (var eye in eye_list)
-        {
+    for (var e in eye_list) if (eye_list.hasOwnProperty(e)) {
+        var eye = eye_list[e];
         eye.Mark_Status(color);
-        }
+    }
     //Unconditional dead part:
     //Mark all groups with only 1 potential empty point and completely surrounded by live groups as dead.
     //All empty points adjacent to live group are not counted.
-    for (eye_group in not_ok_eye_list)
-        {
+    for (var eg in not_ok_eye_list) {
+        var eye_group = not_ok_eye_list[eg];
         eye_group.dead_analysis_done = false;
+    }
+    for (var eg in not_ok_eye_list) {
+        var eye_group = not_ok_eye_list[eg];
+        if (eye_group.dead_analysis_done) {
+            continue;
         }
-    for (eye_group in not_ok_eye_list)
-        {
-            if (eye_group.dead_analysis_done) {
-                continue;
-            }
         eye_group.dead_analysis_done = true;
         var true_eye_list = [];
         var false_eye_list = [];
@@ -1534,100 +1541,78 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
         var has_unconditional_neighbour_block = false;
         var maybe_dead_group = new Eye();
         var blocks_analysed = [];
-        var blocks_to_analyse = object(eye_group.parts);
-        while ((blocks_to_analyse.length > 0) && two_eyes_impossible)
-                {
+        var blocks_to_analyse = object(eye_group.parts); //TODO: does this work?
+        while ((blocks_to_analyse.length > 0) && two_eyes_impossible) {
             var block = blocks_to_analyse.pop();
-            if (block.eye)
-                        {
+            if (block.eye) {
                 block.eye.dead_analysis_done = true;
-                        }
+            }
             blocks_analysed.push(block);
-            if (block.status=="alive")
-                        {
-                if (block.color==color)
-                                {
+            if (block.status === "alive") {
+                if (block.color === color) {
                     has_unconditional_neighbour_block = true;
-                                }
-                else
-                                {
+                }
+                else {
                     two_eyes_impossible = false;
-                                }
+                }
                 continue;
-                        }
+            }
             maybe_dead_group.parts.push(block);
-            for (var pos in block.stones)
-                        {
+            for (var pos in block.stones) {
                 eye_block.Add_Stone(pos);
-                if (block.color==EMPTY)
-                                {
+                if (block.color === EMPTY) {
                     eye_type = this.Analyse_Eye_Point(pos, color);
-                                }
-                else if (block.color==color)
-                                {
+                }
+                else if (block.color === color) {
                     eye_type = this.Analyse_Opponent_Stone_As_Eye_Point(pos);
-                                }
-                else
-                                {
+                }
+                else {
                     continue;
-                                }
-                if (eye_type === null)
-                                {
+                }
+                if (eye_type === null) {
                     continue;
-                                }
-                if (eye_type === true)
-                                {
-                    if (true_eye_list.length === 2)
-                                        {
+                }
+                if (eye_type === true) {
+                    if (true_eye_list.length === 2) {
                         two_eyes_impossible = false;
                         break;
-                                        }
-                    else if (true_eye_list.length === 1)
-                                        {
-                        if (this.Are_Adjacent_Points(pos, true_eye_list[0]))
-                                                {
+                    }
+                    else if (true_eye_list.length === 1) {
+                        if (this.Are_Adjacent_Points(pos, true_eye_list[0])) {
                             //Second eye point is adjacent to first one.
                             true_eye_list.push(pos);
-                                                }
-                        else
-                                                {
-                                                        //Second eye point is not adjacent to first one.
+                        }
+                        else {
+                            //Second eye point is not adjacent to first one.
                             two_eyes_impossible = false;
                             break;
-                                                }
-                                        }
-                    else
-                                        {
-                                                //len(empty_list) == 0
-                        true_eye_list.push(pos);
-                                        }
-                                }
-                else
-                                {
-                                        //eye_type==False
-                    false_eye_list.push(pos);
-                                }
                         }
-            if (two_eyes_impossible)
-                        {
+                    }
+                    else {
+                        //len(empty_list) == 0
+                        true_eye_list.push(pos);
+                    }
+                }
+                else {
+                    //eye_type==False
+                    false_eye_list.push(pos);
+                }
+            }
+            if (two_eyes_impossible) {
                 //bleed to neighbour blocks that are at other side of blocking color block:
                 //consider whole area surrounded by unconditional blocks as one group
-                for (var pos in block.neighbour)
-                                {
+                for (var pos in block.neighbour) {
                     var block = this.blocks[pos];
-                    if (blocks_analysed.indexOf(block) == -1 && blocks_to_analyse.indexOf(block) == -1)
-                                        {
+                    if (blocks_analysed.indexOf(block) == -1 && blocks_to_analyse.indexOf(block) === -1) {
                         blocks_to_analyse.push(block);
-                                        }
-                                }
-                        }
-                }            
+                    }
+                }
+            }
+        }            
         //must be have some neighbour groups:
         //for example board that is filled with stones except for one empty point is not counted as unconditionally dead
-        if (two_eyes_impossible && has_unconditional_neighbour_block)
-                {
-            if ((true_eye_list.length > 0 && false_eye_list.length > 0) || false_eye_list.length >= 2)
-                        {
+        if (two_eyes_impossible && has_unconditional_neighbour_block) {
+            if ((true_eye_list.length > 0 && false_eye_list.length > 0) || false_eye_list.length >= 2) {
                 //Need to do false eye analysis to see if enough of them turn to true eyes.
                 var both_eye_list = true_eye_list.concat(false_eye_list);
                 var stone_block_list = [];
@@ -1638,42 +1623,40 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
                                 }
                 //Split group by eyes.
                 var new_mark = 2; //When stones are added they get by default value true (==1)
-                for (var eye in both_eye_list)
-                                {
-                                    this.each_Neighbour(eye)(function (pos) {
-                                            if (eye_block.stones.indexOf(pos) != -1) {
-                                                this.flood_mark(eye_block, pos, new_mark);
-                                                var splitted_block = this.split_marked_group(eye_block, new_mark);
-                                                stone_block_list.push(splitted_block);
-                                            }
-                                        });
-                                }
+                for (var eye in both_eye_list) {
+                    this.each_Neighbour(eye)(function (pos) {
+                        if (eye_block.stones.indexOf(pos) != -1) {
+                            this.flood_mark(eye_block, pos, new_mark);
+                            var splitted_block = this.split_marked_group(eye_block, new_mark);
+                            stone_block_list.push(splitted_block);
+                        }
+                    });
+                }
                 //Add eyes to block neighbour.
-                for (var eye in both_eye_list)
-                                {
-                                    this.each_Neighbour(eye)(function (pos) {
-                                            for (var block in stone_block_list)
-                                                {
-                                                    if (block.stones.indexOf(pos) != -1)
-                                                        {
-                                                            block.neighbour[eye] = true;
-                                                        }
-                                                }
-                                        });
-                                }
+                for (var eye in both_eye_list) {
+                    this.each_Neighbour(eye)(function (pos) {
+                        for (var b in stone_block_list) {
+                            var block = stone_block_list[b];
+                            if (block.stones[pos] !== undefined) {
+                                block.neighbour[eye] = true;
+                            }
+                        }
+                    });
+                }
                 //main false eye loop: at end of loop check if changes
                 while (true) {
                     var changed_count = 0;
                     //Remove actual false eyes from list.
-                    for (var block in stone_block_list) {
-                        if (block.neighbour.length==1) {
+                    for (var b in stone_block_list) {
+                        var block = stone_block_list[b];
+                        if (block.neighbour.length === 1) {
                             var neighbour_list = block.neighbour.keys();
                             var eye = neighbour_list[0];
                             both_eye_list.remove(eye);
                             //combine this block and eye into other blocks by 'filling' false eye
                             block.Add_Stone(eye);
                             for (var block2 in object(stone_block_list)) {
-                                if ((block!=block2) && (block2.neighbour.indexOf(eye) != -1)) {
+                                if ((block !== block2) && (block2.neighbour.indexOf(eye) !== -1)) {
                                     block.Add_Block(block2);
                                     stone_block_list.splice(stone_block_list.indexOf(block2),1);
                                 }
@@ -1683,31 +1666,26 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
                             break; //we have changed stone_block_list, restart
                         }
                     }
-                    if (changed_count.length === 0)
-                                        {
+                    if (changed_count.length === 0) {
                         break;
-                                        }
-                                }
-                //Check if we have enough eyes.
-                if (both_eye_list.length > 2)
-                                {
-                    two_eyes_impossible = false;
-                                }
-                else if (both_eye_list.length == 2)
-                                {
-                    if (!this.Are_Adjacent_Points(both_eye_list[0], both_eye_list[1]))
-                                        {
-                        two_eyes_impossible = false;
-                                        }
-                                }
-                        }
-            //False eye analysis done: still surely dead
-            if (two_eyes_impossible)
-                        {
-                maybe_dead_group.Mark_Status(color);
-                        }
+                    }
                 }
+                //Check if we have enough eyes.
+                if (both_eye_list.length > 2) {
+                    two_eyes_impossible = false;
+                }
+                else if (both_eye_list.length === 2) {
+                    if (!this.Are_Adjacent_Points(both_eye_list[0], both_eye_list[1])) {
+                        two_eyes_impossible = false;
+                    }
+                }
+            }
+            //False eye analysis done: still surely dead
+            if (two_eyes_impossible) {
+                maybe_dead_group.Mark_Status(color);
+            }
         }
+    }
 };
 
 Board.prototype.Analyze_Unconditional_Status = function()
