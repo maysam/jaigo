@@ -1,18 +1,18 @@
 function debug_output(output, element, tag)
 {
-	if (arguments.length < 2)
-	{
-		element = 'debug_output';
-	}
+        if (arguments.length < 2)
+        {
+                element = 'debug_output';
+        }
     var out = document.getElementById(element);
-	if (arguments.length < 3)
-	{
-	    out.value += output + "\n";		
-	}
-	else
-	{
-		out.value += "<" + tag + ">" + output + "</" + tag + ">";
-	}
+        if (arguments.length < 3)
+        {
+            out.value += output + "\n";         
+        }
+        else
+        {
+                out.value += "<" + tag + ">" + output + "</" + tag + ">";
+        }
 }
 
 String.prototype.strip = (
@@ -55,16 +55,17 @@ function diagram2game(str)
             var y = splitted[0];
             var line = splitted[1];
             var rest = splitted[2];
-            for (x in range(line.length)) if (range(line.length).hasOwnProperty(x)) {
+            var xpositions = range(line.length);
+            for (x in xpositions) if (xpositions.hasOwnProperty(x)) {
                 var stone = line[x];
                 x = Number(x) + 1;
                 if (stone === WHITE || stone === BLACK) {
-                    if (g.current_board.side != stone) {
+                    if (g.current_board.side !== stone) {
                         g.Make_Move(PASS_MOVE);
                     }
                     g.Make_Move([x, y]);
                 }
-	    }
+            }
         }
     }
     return g;
