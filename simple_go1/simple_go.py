@@ -1,4 +1,4 @@
-s#Simple Go playing program
+#Simple Go playing program
 #Goals are:
 #1) Easy to understand:
 #   If fully understanding GnuGo could be considered advanced,
@@ -1005,9 +1005,13 @@ class Board:
         eye_list = []
         not_ok_eye_list = [] #these might still contain dead groups if totally inside live group
         eye_colors = EMPTY + other_side[color]
+        ewb = 0
         for block in self.iterate_blocks(EMPTY+WHITE+BLACK):
+            ewb = ewb + 1
             block.eye = None
+        ecb = 0
         for block in self.iterate_blocks(eye_colors):
+            ecb = ecb + 1
             if block.eye: continue
             current_eye = Eye()
             eye_list.append(current_eye)
@@ -1021,6 +1025,9 @@ class Board:
                     block3 = self.blocks[pos]
                     if block3.color in eye_colors and not block3.eye:
                         blocks_to_process.append(block3)
+        print len(self.block_list)
+        #print ewb, ecb
+        #print [[len(part.stones) for part in eye.parts] for eye in eye_list]
         #check that all empty points are adjacent to our color
         ok_eye_list = []
         for eye in eye_list:
