@@ -21,7 +21,7 @@ function object(o) {
     return new F();
 }
 deepValueEquality = function (a, b) {
-    if (arguments.length == 2) {
+    if (arguments.length === 2) {
         a = arguments[0];
         b = arguments[1];
     }
@@ -688,7 +688,7 @@ Board.prototype.Add_Stone = function(color, pos)
             }
         }
     }
-    if (pos in new_block.neighbour)
+    if (new_block.neighbour[pos] !== undefined)
         {
             delete new_block.neighbour[pos];
         }
@@ -2263,7 +2263,7 @@ Game.prototype.Select_Scored_Move = function(remove_opponent_dead, pass_allowed)
     var best_score = WORST_SCORE;
     var best_moves = [];
         this.each_Moves()(function (move) {
-                if (move in forbidden_moves) {
+                if (forbidden_moves[move] !== undefined) {
                     return this.each_Moves['continue'];
                 }
                 score = -Game.prototype.Score_Move(move) - base_score;
@@ -2343,7 +2343,7 @@ Game.prototype.Place_Free_Handicap = function(count)
                 if (this.make_move(move)) {
                     result.push(move);
                 }
-        if (move in move_candidates)
+                if (move_candidates.indexOf(move) !== -1)
                 {
              move_candidates.remove(move);
                 }
