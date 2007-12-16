@@ -44,7 +44,7 @@ function Tetsuki_Controller(board9, board13, board19, black_human, black_ai_gree
 	this.engine;
 	this.handicap;
 	this.komi;
-	this.debug_output = new debug_output(debug);
+	this.debug_output_element = debug;
 }
 
 Tetsuki_Controller.prototype.PreGame = function()
@@ -110,7 +110,7 @@ Tetsuki_Controller.prototype.StartGame = function()
 Tetsuki_Controller.prototype.PlayLoop = function()
 {
 	var isHumanTurn;
-	if((this.engine.current_board.side === BLACK && this.blackHumanButton.value===true) || (this.engine.current_board.side === WHITE && this.whiteHumanButton.value===true))
+	if((this.engine.current_board.side === BLACK && this.blackHumanButton.attributes["value"].nodeValue==="true") || (this.engine.current_board.side === WHITE && this.whiteHumanButton.attributes["value"].nodeValue==="true"))
 	{
 		isHumanTurn = true;
 	}

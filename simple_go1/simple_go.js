@@ -1366,7 +1366,7 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
         //find potential eyes
     var eye_list = [];
     var not_ok_eye_list = []; //these might still contain dead groups if totally inside live group
-    var eye_colors = EMPTY + other_side[color]; //TODO: I don't understand this assignment
+    var eye_colors = EMPTY + other_side[color];
     this.each_Blocks(EMPTY+WHITE+BLACK)(function (block) {
             block.eye = null;
         });
@@ -1697,7 +1697,6 @@ Board.prototype.Analyze_Unconditional_Status = function()
     this.each_Blocks(BLACK+WHITE+EMPTY)(function (block) {
             block.status = "unknown";
         });
-    //import pdb; pdb.set_trace()
     this.Analyze_Color_Unconditional_Status(BLACK);
     this.Analyze_Color_Unconditional_Status(WHITE);
     //cleanup
@@ -1712,7 +1711,7 @@ Board.prototype.Has_Block_Status = function(colors, status)
     this.each_Blocks(colors)(function (block) {
             if (block.status==status) {
                 result = true;
-                return this.each_Blocks['break'];
+                return Board.prototype.each_Blocks['break'];
             }
         });
     return result || false;
@@ -1851,31 +1850,31 @@ Board.prototype.Score_Block = function(block)
     */
         var score = 0;
     if (block.color==EMPTY)
-        {
+    {
         if (block.status==this.side + " territory")
-                {
-            score = block.Size();
-                }
-        else if (block.status==other_side[this.side] + " territory")
-                {
-            score = -block.Size();
-                }
-        else //empty block with unknown status
-                {
-            score = 0;
-                }
-        }
-    else
         {
-        if (block.color==this.side)
-                {
-            score = this.Score_Stone_Block(block);
-                }
-        else //block.color==other_side[self.side]
-                {
-                        score = -this.Score_Stone_Block(block);
-                }
+            score = block.Size();
         }
+        else if (block.status==other_side[this.side] + " territory")
+        {
+            score = -block.Size();
+        }
+        else //empty block with unknown status
+        {
+            score = 0;
+        }
+    }
+    else
+	{
+		if (block.color==this.side)
+	    {
+			score = this.Score_Stone_Block(block);
+	    }
+		else //block.color==other_side[self.side]
+	    {
+	    	score = -this.Score_Stone_Block(block);
+	    }
+	}
     return score;
 };
 
@@ -1889,7 +1888,7 @@ Board.prototype.Score_Position = function()
     var score = 0;
     this.Analyze_Unconditional_Status();
     this.each_Blocks(BLACK+WHITE+EMPTY)(function (block) {
-            score = score + this.Score_Block(block);
+            score = score + Board.prototype.Score_Block(block);
         });
     return score;
 };
@@ -2242,7 +2241,7 @@ Game.prototype.Select_Scored_Move = function(remove_opponent_dead, pass_allowed)
                 if (move in forbidden_moves) {
                     return this.each_Moves['continue'];
                 }
-                score = -this.Score_Move(move) - base_score;
+                score = -Game.prototype.Score_Move(move) - base_score;
                 //self.make_move(move)
                 //get score from our viewpoint: negative of opponent score
                 //score = -self.current_board.score_position() - base_score

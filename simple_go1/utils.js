@@ -1,7 +1,18 @@
-function debug_output(output)
+function debug_output(output, element, tag)
 {
-    var out = document.getElementById('debug_output');
-    out.value += output + "\n"; 
+	if (arguments.length < 2)
+	{
+		element = 'debug_output';
+	}
+    var out = document.getElementById(element);
+	if (arguments.length < 3)
+	{
+	    out.value += output + "\n";		
+	}
+	else
+	{
+		out.value += "<" + tag + ">" + output + "</" + tag + ">";
+	}
 }
 
 String.prototype.strip = (
