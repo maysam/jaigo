@@ -20,11 +20,11 @@ function test_speed(n)
 {
     var g = new Game(19);
     var t0 = new Date();
-	var b;
+        var b;
     for (i in xrange(n))
-	{
+        {
         b = g.current_board.Copy();
-	}
+        }
     var t1 = new Date();
     t_elapsed = t1-t0;
     debug_output(t_elapsed);
@@ -39,26 +39,26 @@ function test_position(diagram, ok_result)
     var m = board_pat(ok_result);
     var ok_result_board;
     if (m)
-	{
+        {
         ok_result_board = m[1];
-	}
+        }
     else
-	{
+        {
         ok_result_board = "1";
-	}
+        }
     m = board_pat(test_result);
     if (m)
-	{
+        {
         test_result_board = m[1];
-	}
+        }
     else
-	{
+        {
         test_result_board = "2";
-	}
+        }
     if (ok_result_board==test_result_board)
-	{
-		return;
-	}
+        {
+                return;
+        }
     debug_output(ok_result);
     debug_output(test_result);
     throw new EvalError("unconditional test failed");
@@ -66,31 +66,31 @@ function test_position(diagram, ok_result)
 
 function test_all()
 {
-	test_position("" +
-	 "ABCDEFGHI\n" +
- 	"+---------+\n" +
-	"9|.........| 9\n" +
-	"8|.XX......| 8\n" +
-	"7|.X.XXX...| 7\n" +
-	"6|.XXX.XOO.| 6\n" +
-	"5|..XOOOX..| 5\n" +
-	"4|.OOXXXX..| 4\n" +
-	"3|..X.X.X..| 3\n" +
-	"2|..XXXXX..| 2\n" +
-	"1|.........| 1\n" +
-	 "+---------+\n" +
-	  "ABCDEFGHI\n",
-	 "ABCDEFGHJ\n" +
-	 "+---------+\n" +
-	"9|.........| 9\n" +
-	"8|.&&......| 8\n" +
-	"7|.&:&&&...| 7\n" +
-	"6|.&&&:&OO.| 6\n" +
-	"5|..&ooo&..| 5\n" +
-	"4|.OO&&&&..| 4\n" +
-	"3|..&:&:&..| 3\n" +
-	"2|..&&&&&..| 2\n" +
-	"1|.........| 1\n" +
-	 "+---------+\n" +
-	  "ABCDEFGHJ\n");
+        test_position("" +
+         "ABCDEFGHI\n" +
+        "+---------+\n" +
+        "9|.........| 9\n" +
+        "8|.XX......| 8\n" +
+        "7|.X.XXX...| 7\n" +
+        "6|.XXX.XOO.| 6\n" +
+        "5|..XOOOX..| 5\n" +
+        "4|.OOXXXX..| 4\n" +
+        "3|..X.X.X..| 3\n" +
+        "2|..XXXXX..| 2\n" +
+        "1|.........| 1\n" +
+         "+---------+\n" +
+          "ABCDEFGHI\n",
+         "ABCDEFGHJ\n" +
+         "+---------+\n" +
+        "9|.........| 9\n" +
+        "8|.&&......| 8\n" +
+        "7|.&:&&&...| 7\n" +
+        "6|.&&&:&OO.| 6\n" +
+        "5|..&ooo&..| 5\n" +
+        "4|.OO&&&&..| 4\n" +
+        "3|..&:&:&..| 3\n" +
+        "2|..&&&&&..| 2\n" +
+        "1|.........| 1\n" +
+         "+---------+\n" +
+          "ABCDEFGHJ\n");
 }
