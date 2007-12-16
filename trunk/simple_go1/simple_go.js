@@ -127,6 +127,12 @@ function map(f, s) {
     return result;
 }
 
+function iterateOwnProperties(target, f) {
+    for (var i in target) if (target.hasOwnProperty(i)) {
+        f(i);
+    }
+}
+
 PASS_MOVE = [-1, -1];
 
 function move_as_string(move, board_size)
@@ -167,7 +173,7 @@ function Block(color)
 {
     this.stones = {};
     this.stoneCount = 0;
-    this.neighbour = [];
+    this.neighbour = {};
     this.color = color;
 }
 
@@ -417,8 +423,7 @@ Board.prototype.each_Neighbour_Blocks = function(block)
           Return once for each new block
         */
         var blocks_seen = [];
-        for (var s in block.neighbour) {
-            var stone = block.neighbour[s];
+        for (var stone in block.neighbour) {
             var block2 = board.blocks[stone];
             if (!contains(blocks_seen, block2)) {
                 if (f(block2) === Board.prototype.each_Neighbour_Blocks['break']) {
@@ -544,7 +549,7 @@ Board.prototype.Is_3x3_Empty = function(pos)
     var neighbors = this.List_Empty_3x3_Neighbour(pos);
     var neighbour_list = neighbors[0];
     var diagonal_neighbour_list = neighbors[1];
-    if (neighbour_list.length==4 && diagonal_neighbour_list.length==4)
+    if (neighbour_list.length === 4 && diagonal_neighbour_list.length === 4)
         {
         return true;
         }
@@ -568,7 +573,7 @@ Board.prototype.Simple_Same_Block = function(pos_list)
         {
         temp_block.Add_Stone(pos);
         this.each_Neighbour(pos)(function (pos2) {
-                if (this.goban[pos2]==color) {
+                if (this.goban[pos2] === color) {
                     temp_block.Add_Stone(pos2);
                 }
             });
@@ -630,12 +635,12 @@ Board.prototype.Add_Stone = function(color, pos)
     var split_list = [];
     this.each_Neighbour(pos)(function (pos2) {
         var other_block = board.blocks[pos2];
-        if (board.goban[pos2]==color) {
+        if (board.goban[pos2] === color) {
             new_block = board.Combine_Blocks(new_block, other_block);
         }
         else {
             new_block.neighbour[pos2] = true;
-            if (board.goban[pos2]==old_color) {
+            if (board.goban[pos2] === old_color) {
                 split_list.push(pos2);
             }
         }
@@ -658,9 +663,9 @@ Board.prototype.Add_Stone = function(color, pos)
                 else //no, it's not neighbour
                     {
                         //was it neighbour to old_block? remove it if it is
-                        if (pos2 in old_block.neighbour)
+                        if (old_block.neighbour[pos2] !== undefined)
                             {
-                                oldblock.neighbour.splice(old_block.neighbour.indexOf(pos2),1);
+                                delete oldblock.neighbour[pos2];
                             }
                     }
             });
@@ -685,7 +690,7 @@ Board.prototype.Add_Stone = function(color, pos)
     }
     if (pos in new_block.neighbour)
         {
-        new_block.neighbour.splice(new_block.neighbour.indexOf(pos),1);
+            delete new_block.neighbour[pos];
         }
     for (block in changed_blocks)
         {
@@ -1085,7 +1090,7 @@ Board.prototype.listPotentialEyes = function(eye_colors) {
             }
         });
     return eye_list;
-}
+};
 
 Board.prototype.Analyze_Color_Unconditional_Status = function(color)
 {
@@ -1505,8 +1510,8 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
                 not_ok_eye_list.push(eye);
                 //remove reference to eye that is not ok
                 for (var b in eye.parts) {
-                    var block = eye.parts[b];
-                    block.eye = null;
+                    var epb = eye.parts[b];
+                    epb.eye = null;
                 }
             }
             eye_list = ok_eye_list;
@@ -1656,19 +1661,32 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
                     //Remove actual false eyes from list.
                     for (var b in stone_block_list) {
                         var block = stone_block_list[b];
-                        if (block.neighbour.length === 1) {
-                            var neighbour_list = block.neighbour.keys();
+                        var blockNeighbourLength = (function () {
+                                var result = 0;
+                                iterateOwnProperties(block.neighbour, function (i) {
+                                        ++result;
+                                    });
+                                return result;
+                            })();
+                        if (blockNeighbourLength === 1) {
+                            var neighbour_list = (function () {
+                                    var result = [];
+                                    iterateOwnProperties(block.neighbour, function (i) {
+                                        result.append(i);
+                                    });
+                                    return result;
+                                })();
                             var eye = neighbour_list[0];
                             both_eye_list.remove(eye);
                             //combine this block and eye into other blocks by 'filling' false eye
                             block.Add_Stone(eye);
                             for (var block2 in object(stone_block_list)) {
-                                if ((block !== block2) && (block2.neighbour.indexOf(eye) !== -1)) {
+                                if ((block !== block2) && (block2.neighbour[eye] !== undefined)) {
                                     block.Add_Block(block2);
                                     stone_block_list.splice(stone_block_list.indexOf(block2),1);
                                 }
                             }
-                            block.neighbour.splice(block.neighbor.indexOf(eye),1);
+                            delete block.neighbour[eye];
                             changed_count = changed_count + 1;
                             break; //we have changed stone_block_list, restart
                         }
@@ -1836,7 +1854,7 @@ Board.prototype.Score_Stone_Block = function(block)
         this.each_Neighbour_Blocks(block)(function (block2) {
                 if (block2.color==other_side[block.color] && (this.Block_Liberties(block2)==1)) {
                     for (var stone in block.neighbour) {
-                        if (stone in block2.stones) {
+                        if (block2.stones[stone] !== undefined) {
                             liberties = liberties + 0.5;
                         }
                     }

@@ -46,6 +46,38 @@ def test_position(diagram, ok_result):
     print test_result
     raise ValueError, "unconditional test failed"
 
+def test_all_js():
+    test_position("""
+   ABCDEFGHI
+  +---------+
+ 9|.........| 9
+ 8|.XX......| 8
+ 7|.X.XXX...| 7
+ 6|.XXX.XOO.| 6
+ 5|..XOOOX..| 5
+ 4|.OOXXXX..| 4
+ 3|..X.X.X..| 3
+ 2|..XXXXX..| 2
+ 1|.........| 1
+  +---------+
+   ABCDEFGHI""",
+"""
+   ABCDEFGHJ
+  +---------+
+ 9|.........| 9
+ 8|.&&......| 8
+ 7|.&:&&&...| 7
+ 6|.&&&:&OO.| 6
+ 5|..&ooo&..| 5
+ 4|.OO&&&&..| 4
+ 3|..&:&:&..| 3
+ 2|..&&&&&..| 2
+ 1|.........| 1
+  +---------+
+   ABCDEFGHJ
+""")
+
+
 def test_all():
     test_position("""
    ABCDEFGHI

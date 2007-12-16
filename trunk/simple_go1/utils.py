@@ -14,7 +14,7 @@ def diagram2game(str):
                 stone = line[x]
                 x = x + 1
                 if stone in simple_go.WHITE+simple_go.BLACK:
-                    if g.current_board.side!=stone:
+                    if g.current_board.side != stone:
                         g.make_move(simple_go.PASS_MOVE)
                     g.make_move((x, y))
     return g
