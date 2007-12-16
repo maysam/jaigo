@@ -103,7 +103,7 @@ function randomchoice(seq) {
 
 String.prototype.repeat = function(times) {
     var result = '';
-    for (var i = 0; i < times; i++) {
+    for (var i = 0; i < times; ++i) {
         result += this;
     }
     return result;
@@ -721,8 +721,9 @@ Board.prototype.Combine_Blocks = function(new_block, other_block)
     if (new_block.Size() < other_block.Size())
         {
         //Optimization: for example if new_block size is one as is usually case and other_block is most of board as is often case when combining empty point to mostly empty board.
-        new_block = other_block;
-                other_block = new_block;
+            var temp = new_block;
+            new_block = other_block;
+            other_block = temp;
         }
         
     new_block.Add_Block(other_block);
@@ -1055,6 +1056,37 @@ Board.prototype.Analyse_Opponent_Stone_As_Eye_Point = function(pos)
         }
 };
 
+Board.prototype.listPotentialEyes = function(eye_colors) {
+    var eye_list = [];
+    this.each_Blocks(EMPTY+WHITE+BLACK)(function (block) {
+            block.eye = null;
+        });
+    var board = this;
+    this.each_Blocks(eye_colors)(function (block) {
+            if (block.eye) {
+                return board.each_Blocks['continue'];
+            }
+            var current_eye = new Eye();
+            eye_list.push(current_eye);
+            var blocks_to_process = [block];
+            while (blocks_to_process.length > 0) {
+                var block2 = blocks_to_process.pop();
+                if (block2.eye) {
+                    continue;
+                }
+                block2.eye = current_eye;
+                current_eye.parts.push(block2);
+                for (var pos in block2.neighbour) {
+                    var block3 = board.blocks[pos];
+                    if (eye_colors.indexOf(block3.color) !== -1 && !block3.eye) {
+                        blocks_to_process.push(block3);
+                    }
+                }
+            }
+        });
+    return eye_list;
+}
+
 Board.prototype.Analyze_Color_Unconditional_Status = function(color)
 {
     /* This is Benson's Algorithm for unconditional life.
@@ -1363,36 +1395,11 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
          ABCDEFG
     */
 
-        //find potential eyes
-    var eye_list = [];
+    //find potential eyes
     var not_ok_eye_list = []; //these might still contain dead groups if totally inside live group
     var eye_colors = EMPTY + other_side[color];
-    this.each_Blocks(EMPTY+WHITE+BLACK)(function (block) {
-            block.eye = null;
-        });
+    var eye_list = this.listPotentialEyes(eye_colors);
     var board = this;
-    this.each_Blocks(eye_colors)(function (block) {
-            if (block.eye) {
-                        return board.each_Blocks['continue'];
-            }
-            var current_eye = new Eye();
-            eye_list.push(current_eye);
-            var blocks_to_process = [block];
-            while (blocks_to_process.length > 0) {
-                var block2 = blocks_to_process.pop();
-                if (block2.eye) {
-                    continue;
-                }
-                block2.eye = current_eye;
-                current_eye.parts.push(block2);
-                for (var pos in block2.neighbour) {
-                    var block3 = board.blocks[pos];
-                    if (eye_colors.indexOf(block3.color) !== -1 && !block3.eye) {
-                        blocks_to_process.push(block3);
-                    }
-                }
-            }
-        });
     //check that all empty points are adjacent to our color
     var ok_eye_list = [];
     for (var i in eye_list) if (eye_list.hasOwnProperty(i)) {
@@ -1865,16 +1872,16 @@ Board.prototype.Score_Block = function(block)
         }
     }
     else
-	{
-		if (block.color==this.side)
-	    {
-			score = this.Score_Stone_Block(block);
-	    }
-		else //block.color==other_side[self.side]
-	    {
-	    	score = -this.Score_Stone_Block(block);
-	    }
-	}
+        {
+                if (block.color==this.side)
+            {
+                        score = this.Score_Stone_Block(block);
+            }
+                else //block.color==other_side[self.side]
+            {
+                score = -this.Score_Stone_Block(block);
+            }
+        }
     return score;
 };
 
