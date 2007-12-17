@@ -21,32 +21,6 @@ GTP_player.Final_Score()
 
 var debug = 1;
 
-function KeywordArguments(template) {
-    for (var i in template) if (template.hasOwnProperty(i)) {
-	this[i] = template[i];
-    }
-}
-KeywordArguments.prototype.find = function(args) {
-    // The arguments pseudoarray is very special.
-    // If that's the value we get for args,
-    // then our usual for/in loop finds
-    // nothing.
-    for (var a = 0; a < args.length; ++a) {
-	var arg = args[a];
-	if (arg instanceof KeywordArguments) {
-	    return arg;
-	}
-    }
-};
-KeywordArguments.prototype.combine = function(allArgs, explicitArgs) {
-    var result = explicitArgs;
-    var keywords = KeywordArguments.prototype.find(allArgs);
-    for (var k in keywords) if (keywords.hasOwnProperty(k)) {
-	result[k] = keywords[k];
-    }
-    return result;
-}
-
 function coords_to_sgf(size, board_coords)
 {
     board_coords = board_coords.toLowerCase();
