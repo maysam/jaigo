@@ -172,7 +172,6 @@ function string_as_move(m, size)
 function Block(color)
 {
     this.stones = {};
-    this.stoneCount = 0;
     this.neighbour = {};
     this.color = color;
 }
@@ -182,7 +181,6 @@ Block.prototype.Add_Stone = function(position)
         /*add stone or empty point at given position
     */
     this.stones[position] = true;
-    this.stoneCount += 1;
 };
 
 Block.prototype.Remove_Stone = function(position)
@@ -190,7 +188,6 @@ Block.prototype.Remove_Stone = function(position)
     /*remove stone or empty point at given position
     */
     delete this.stones[position];
-    this.stoneCount -= 1;
 };
 
 Block.prototype.Add_Block = function(other_block)
