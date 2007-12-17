@@ -212,7 +212,11 @@ Block.prototype.Size = function()
 {
     /*returns block size
     */
-    return this.stonesCount;
+    var result = 0;
+    iterateOwnProperties(this.stones, function (i) {
+            ++result;
+        });
+    return result;
 };
 
 Block.prototype.Max_Liberties = function()

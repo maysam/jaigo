@@ -52,7 +52,7 @@ function diagram2game(str)
         }
         else if (digits.test(line[0])) {
             var splitted = line.split("|");
-            var y = splitted[0];
+            var y = Number(splitted[0]);
             var line = splitted[1];
             var rest = splitted[2];
             var xpositions = range(line.length);
