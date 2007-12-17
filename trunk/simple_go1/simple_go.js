@@ -133,6 +133,33 @@ function iterateOwnProperties(target, f) {
     }
 }
 
+function KeywordArguments(template) {
+    for (var i in template) if (template.hasOwnProperty(i)) {
+        this[i] = template[i];
+    }
+}
+KeywordArguments.prototype.find = function(args) {
+    // The arguments pseudoarray is very special.
+    // If that's the value we get for args,
+    // then our usual for/in loop finds
+    // nothing.
+    for (var a = 0; a < args.length; ++a) {
+        var arg = args[a];
+        if (arg instanceof KeywordArguments) {
+            return arg;
+        }
+    }
+};
+KeywordArguments.prototype.combine = function(allArgs, explicitArgs) {
+    var result = explicitArgs;
+    var keywords = KeywordArguments.prototype.find(allArgs);
+    for (var k in keywords) if (keywords.hasOwnProperty(k)) {
+        result[k] = keywords[k];
+    }
+    return result;
+}
+
+
 PASS_MOVE = [-1, -1];
 
 function move_as_string(move, board_size)
@@ -143,7 +170,7 @@ function move_as_string(move, board_size)
     if (deepValueEquality(PASS_MOVE, move)) {
         return "PASS";
     }
-    return x_coords_string[move[0] - 1] + str(move[1]);
+    return x_coords_string[move[0] - 1] + String(move[1]);
 }
 
 function string_as_move(m, size)
@@ -154,8 +181,8 @@ function string_as_move(m, size)
     if (m == "PASS") {
         return PASS_MOVE;
     }
-    x = x_coords_string.indexOf(m.charAt(0));
-    y = m.charAt(1);
+    var x = x_coords_string.indexOf(m.charAt(0));
+    var y = m.charAt(1);
     return [x,y];
 }
 
@@ -605,7 +632,7 @@ Board.prototype.Add_Stone = function(color, pos)
        Other cases are handed in need to do basis.
     */
     var old_block = this.blocks[pos];
-    old_color = old_block.color;
+    var old_color = old_block.color;
     old_block.Remove_Stone(pos);
     if (old_block.Size() === 0)
         {
@@ -1411,7 +1438,7 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
     for (var i in eye_list) if (eye_list.hasOwnProperty(i)) {
         var eye = eye_list[i];
         var prev_our_blocks = null;
-        eye_is_ok = false;
+        var eye_is_ok = false;
         var our_blocks;
         eye.each_Stones(function (stone) {
                 if (board.goban[stone] !== EMPTY) {
@@ -1573,6 +1600,7 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
             maybe_dead_group.parts.push(block);
             for (var pos in block.stones) {
                 eye_block.Add_Stone(pos);
+                var eye_type;
                 if (block.color === EMPTY) {
                     eye_type = this.Analyse_Eye_Point(pos, color);
                 }
@@ -2233,11 +2261,13 @@ Game.prototype.Select_Scored_Move = function(remove_opponent_dead, pass_allowed)
                 }
                 pass_allowed = true;
     }
+    var args = KeywordArguments.prototype.combine(arguments, {remove_opponent_dead: remove_opponent_dead, pass_allowed : pass_allowed});
+
     /* Go through all legal moves.
        Keep track of best score and all moves that achieve it.
        Select one move from best moves and return it.
     */
-    var territory_moves_forbidden = pass_allowed;
+    var territory_moves_forbidden = args['pass_allowed'];
     var base_score = this.current_board.Score_Position();
     if (debug_flag)
         {
@@ -2249,15 +2279,15 @@ Game.prototype.Select_Scored_Move = function(remove_opponent_dead, pass_allowed)
     var has_opponent_dead_block = this.current_board.Has_Block_Status(other_side[this.current_board.side], "dead");
     //has unsettled blocks
         if (has_unknown_status_block) {
-            pass_allowed = false;
+            args['pass_allowed'] = false;
         }
     //dead removal has been requested and there are dead opponent stones
-    if (remove_opponent_dead && has_opponent_dead_block)
+    if (args['remove_opponent_dead'] && has_opponent_dead_block)
         {
         territory_moves_forbidden = false;
-        pass_allowed = false;
+        args['pass_allowed'] = false;
         }
-    forbidden_moves =
+    var forbidden_moves =
         territory_moves_forbidden ?
         this.current_board.Territory_As_Dict() :
         [];
@@ -2280,7 +2310,7 @@ Game.prototype.Select_Scored_Move = function(remove_opponent_dead, pass_allowed)
                 //Give pass move slight bonus so its preferred among do nothing moves
                 if (deepValueEquality(move, PASS_MOVE))
                     {
-                        if (!pass_allowed) {
+                        if (!args['pass_allowed']) {
                             return this.each_Moves['continue'];
                         }
                         score = score + 0.001;
@@ -2339,7 +2369,7 @@ Game.prototype.Place_Free_Handicap = function(count)
                  //print self.current_board
                  //print move, score_diff
                         }
-            move = this.Select_Scored_Move(pass_allowed=false);
+             move = this.Select_Scored_Move(new KeywordArguments({pass_allowed: false}));
                 }
                 if (this.make_move(move)) {
                     result.push(move);
