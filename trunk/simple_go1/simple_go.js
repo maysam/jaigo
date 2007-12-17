@@ -1527,7 +1527,7 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
             this.each_Neighbour_Eye_Blocks(eye)(function (block) {
                     if (block.eye_count < 2) {
                         eye_is_ok = false;
-                        return each_Neighbour_Eye_Blocks['break'];
+                        return board.each_Neighbour_Eye_Blocks['break'];
                     }
                 });
             if (eye_is_ok) {
@@ -1890,7 +1890,7 @@ Board.prototype.Score_Stone_Block = function(block)
                 }
             });
         var liberty_ratio = liberties / block.Max_Liberties();
-        score = block.Size() * normal_stone_value_ratio * (1 - pow(1-liberty_ratio, 2));
+        score = block.Size() * normal_stone_value_ratio * (1 - Math.pow(1-liberty_ratio, 2));
         }
     return score;
 };
@@ -2346,6 +2346,7 @@ Game.prototype.Place_Free_Handicap = function(count)
          });
      while (result.length() < count)
         {
+            var move;
                 if (this.current_board.side==WHITE)
                 {
              this.Make_Move(PASS_MOVE);
