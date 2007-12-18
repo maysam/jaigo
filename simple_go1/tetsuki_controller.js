@@ -13,7 +13,7 @@ showGameHud(false)
 goWindow(int)
 */
 
-function Tetsuki_Controller(board9, board13, board19, black_human, black_ai_greedy, black_ai_crawler, white_human, white_ai_greedy, white_ai_crawler, handicap, komi, beginWindow, gameHUD, gameWindow, inGameHandicap, inGameKomi, inGameBlack, inGameWhite, inGameSettings, forward_small, back_small, close_small, delete_small, more_small, pass_small, meta, debug)
+function Tetsuki_Controller(board9, board13, board19, black_human, black_ai_greedy, black_ai_crawler, white_human, white_ai_greedy, white_ai_crawler, handicap, komi, beginWindow, gameHUD, gameWindow, inGameHandicap, inGameKomi, inGameBlack, inGameWhite, inGameSettings, forward_small, back_small, close_small, delete_small, more_small, pass_small, meta, goban, debug)
 {
 	this.board9Button = board9;
 	this.board13Button = board13;
@@ -44,6 +44,7 @@ function Tetsuki_Controller(board9, board13, board19, black_human, black_ai_gree
 	this.engine;
 	this.handicap;
 	this.komi;
+	this.goban = goban;
 	this.debug_output_element = debug;
 }
 
@@ -88,6 +89,8 @@ Tetsuki_Controller.prototype.SelectWhitePlayer = function(player)
 
 Tetsuki_Controller.prototype.StartGame = function()
 {
+	  this.ShowGameWindow("game_window");
+	
 	if(this.board9Button.attributes["value"].nodeValue==="true")
 	{
 		this.engine = new Game(9);
@@ -124,7 +127,7 @@ Tetsuki_Controller.prototype.PlayLoop = function()
 		//generate and make ai move for current color
 		var move = this.engine.Generate_Move();
 		this.engine.Make_Move(move);
-		
+		this.SetStone(move,this.engine.current_board.side);
 		//end the game condition
 		if(this.engine.move_history.length()>=2 && this.engine.move_history[-1]==PASS_MOVE && this.engine.move_history[-2]==PASS_MOVE)
 		{
@@ -132,7 +135,7 @@ Tetsuki_Controller.prototype.PlayLoop = function()
 		}
 		
 		//wait for human turn condition
-		if((this.engine.current_board.side === BLACK && this.blackHumanButton.value===true) || (this.engine.current_board.side === WHITE && this.whiteHumanButton.value===true))
+		if((this.engine.current_board.side === BLACK && this.blackHumanButton.attributes["value"].nodeValue==="true") || (this.engine.current_board.side === WHITE && this.whiteHumanButton.attributes["value"].nodeValue==="true"))
 		{
 			isHumanTurn = true;
 		}
@@ -151,9 +154,36 @@ Tetsuki_Controller.prototype.Tap = function(coord_x,coord_y)
 	{
 		this.ShowGameHUD(true, coord_x,coord_y);
 	}
+	else
+	{
+		//update the ui goban with move
+		this.SetStone([coord_x,coord_y],this.engine.current_board.side);
+		if (this.engine.current_board.side === BLACK)
+		{
+			this.engine.current_board.side = WHITE;
+		}
+		else
+		{
+			this.engine.current_board.side = BLACK;
+		}
+	}
 
 	this.PlayLoop();
 };
+
+Tetsuki_Controller.prototype.SetStone = function(move,color)
+{
+//  debug("settings stone")
+	var cell=this.goban.rows[move[1]].cells[move[0]];
+	if ("X"==color)
+    cell.innerHTML="<div class='black'></div>";
+	else if ("O"==color)
+    cell.innerHTML="<div class='white'></div>";
+	else if ("."==color)
+    cell.innerHTML="";
+	
+}
+
 
 Tetsuki_Controller.prototype.ShowGameHUD = function(isVisible)
 {
