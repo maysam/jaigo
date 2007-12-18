@@ -16,6 +16,35 @@
 ##    print g.current_board
 */
 
+function test_listPotentialEyes() {
+    var g = diagram2game("ABCDEFGHI\n" +
+        "+---------+\n" +
+        "9|.........| 9\n" +
+        "8|.XX......| 8\n" +
+        "7|.X.XXX...| 7\n" +
+        "6|.XXX.XOO.| 6\n" +
+        "5|..XOOOX..| 5\n" +
+        "4|.OOXXXX..| 4\n" +
+        "3|..X.X.X..| 3\n" +
+        "2|..XXXXX..| 2\n" +
+        "1|.........| 1\n" +
+        "+---------+\n" +
+	"ABCDEFGHI\n");
+    var list = g.current_board.listPotentialEyes(BLACK);
+    if (list.length !== 2) throw new Error("wrong number of eyes");
+    var flattened = {};
+    for (var l in list) {
+	var el = list[l];
+	for (var p in el.parts) {
+	    var part = el.parts[p];
+	    for (var pos in part.stones) {
+		flattened[pos] = true;
+	    }
+	}
+    }
+    return flattened[[2, 8]] !== undefined && flattened[[3,2]] !== undefined;
+}
+
 function test_speed(n)
 {
     var g = new Game(19);
