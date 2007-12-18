@@ -15,3 +15,4 @@ Renamed all object methods to {{{Capital_Case}}}. Added all object methods to {{
 
 = Optimization =
 Compressed using [http://shrinksafe.dojotoolkit.org/ shrinksafe]
+[http://www.crockford.com/javascript/jsmin.html minify]
