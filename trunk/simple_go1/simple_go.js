@@ -955,7 +955,7 @@ Board.prototype.Make_Move = function(move)
         }
     if (this.Legal_Move(move))
         {
-        this.Add_Stone(this.side, move);
+        this.Add_Stone(this.side, move); //TODO: blocks don't seem to be updating from here.
         this.Add_Undo_Info("add_stone", EMPTY, move);
         var board = this;
         var remove_color = other_side[this.side];
@@ -966,7 +966,7 @@ Board.prototype.Make_Move = function(move)
                         board.Add_Undo_Info("change_block_color", remove_color, pos);
                     }
             });
-        this.Change_Side();
+        //this.Change_Side();
         return move;
         }
     return null;
@@ -2144,11 +2144,11 @@ Game.prototype.Make_Move = function(move)
     var logkey = this.Make_Unchecked_Move(move);
     var undo_log = logkey[0];
     var board_key = logkey[1];
-    if (!deepValueEquality(move, PASS_MOVE) && (this.position_seen.indexOf(board_key) == -1))
-        {
+    //TODO: Disabled the conditional since hashing is not working.if (!deepValueEquality(move, PASS_MOVE) && (this.position_seen.indexOf(board_key) == -1))
+/*        {
         this.current_board.Undo_Move(undo_log);
         return null;
-        }
+        }*/
     this.undo_history.push(undo_log);
     this.move_history.push(move);
     if (!deepValueEquality(move, PASS_MOVE))
