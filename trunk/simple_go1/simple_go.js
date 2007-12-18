@@ -157,7 +157,7 @@ KeywordArguments.prototype.combine = function(allArgs, explicitArgs) {
         result[k] = keywords[k];
     }
     return result;
-}
+};
 
 
 PASS_MOVE = [-1, -1];
@@ -1120,6 +1120,60 @@ Board.prototype.listPotentialEyes = function(eye_colors) {
     return eye_list;
 };
 
+Board.prototype.classifyPotentialEyesByColor = function (eye_list, color) {
+    var ok_eye_list = [];
+    var not_ok_eye_list = []; //these might still contain dead groups if totally inside live group
+    var board = this;
+    for (var i in eye_list) if (eye_list.hasOwnProperty(i)) {
+        var eye = eye_list[i];
+        var prev_our_blocks = null;
+        var eye_is_ok = false;
+        var our_blocks;
+        eye.each_Stones(function (stone) {
+                if (board.goban[stone] !== EMPTY) {
+                    return eye.each_Stones['continue'];
+                }
+                eye_is_ok = true;
+                our_blocks = [];
+                board.each_Neighbour(stone)(function (pos) {
+                        var block = board.blocks[pos];
+                        if (block.color === color && (our_blocks.indexOf(block) !== -1)) {
+                            our_blocks.push(block);
+                        }
+                    });
+                //list of blocks different than earlier
+                if ((prev_our_blocks !== null) && (prev_our_blocks !== our_blocks)) {
+                    var ok_our_blocks = [];
+                    for (var b in our_blocks) {
+                        var block = our_blocks[b];
+                        if (prev_our_blocks.indexOf(block) !== 1) {
+                            ok_our_blocks.push(block);
+                        }
+                    }
+                    our_blocks = ok_our_blocks;
+                }
+                //this empty point was not adjacent to our block or there is no block that has all empty points adjacent to it
+                if (our_blocks.length === 0) {
+                    eye_is_ok = false;
+                    return eye.each_Stones['break'];
+                }                
+                prev_our_blocks = our_blocks;
+            });
+        if (eye_is_ok) {
+            ok_eye_list.push(eye);
+            eye.our_blocks = our_blocks;
+        }
+        else {
+            not_ok_eye_list.push(eye);
+            //remove reference to eye that is not ok
+            for (block in eye.parts) {
+                block.eye = null;
+            }
+        }
+    }
+    return [ok_eye_list, not_ok_eye_list];
+};
+
 Board.prototype.Analyze_Color_Unconditional_Status = function(color)
 {
     /* This is Benson's Algorithm for unconditional life.
@@ -1429,61 +1483,14 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
     */
 
     //find potential eyes
-    var not_ok_eye_list = []; //these might still contain dead groups if totally inside live group
     var eye_colors = EMPTY + other_side[color];
     var eye_list = this.listPotentialEyes(eye_colors);
     var board = this;
     //check that all empty points are adjacent to our color
-    var ok_eye_list = [];
-    for (var i in eye_list) if (eye_list.hasOwnProperty(i)) {
-        var eye = eye_list[i];
-        var prev_our_blocks = null;
-        var eye_is_ok = false;
-        var our_blocks;
-        eye.each_Stones(function (stone) {
-                if (board.goban[stone] !== EMPTY) {
-                    return eye.each_Stones['continue'];
-                }
-                eye_is_ok = true;
-                our_blocks = [];
-                board.each_Neighbour(stone)(function (pos) {
-                        var block = board.blocks[pos];
-                        if (block.color === color && (our_blocks.indexOf(block) !== -1)) {
-                            our_blocks.push(block);
-                        }
-                    });
-                //list of blocks different than earlier
-                if ((prev_our_blocks !== null) && (prev_our_blocks !== our_blocks)) {
-                    var ok_our_blocks = [];
-                    for (var b in our_blocks) {
-                        var block = our_blocks[b];
-                        if (prev_our_blocks.indexOf(block) !== 1) {
-                            ok_our_blocks.push(block);
-                        }
-                    }
-                    our_blocks = ok_our_blocks;
-                }
-                //this empty point was not adjacent to our block or there is no block that has all empty points adjacent to it
-                if (our_blocks.length === 0) {
-                    eye_is_ok = false;
-                    return eye.each_Stones['break'];
-                }                
-                prev_our_blocks = our_blocks;
-            });
-        if (eye_is_ok) {
-            ok_eye_list.push(eye);
-            eye.our_blocks = our_blocks;
-        }
-        else {
-            not_ok_eye_list.push(eye);
-            //remove reference to eye that is not ok
-            for (block in eye.parts) {
-                block.eye = null;
-            }
-        }
-    }
-        
-    eye_list = ok_eye_list;
+    var lists = this.classifyPotentialEyesByColor(eye_list, color);
+    var not_ok_eye_list; //these might still contain dead groups if totally inside live group
+    eye_list = lists[0];
+    not_ok_eye_list = lists[1];
 
     //first we assume all blocks to be ok
     this.each_Blocks(color)(function (block) {
