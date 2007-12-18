@@ -88,15 +88,15 @@ Tetsuki_Controller.prototype.SelectWhitePlayer = function(player)
 
 Tetsuki_Controller.prototype.StartGame = function()
 {
-	if(this.board9Button.value===true)
+	if(this.board9Button.attributes["value"].nodeValue==="true")
 	{
 		this.engine = new Game(9);
 	}
-	else if(this.board13Button.value===true)
+	else if(this.board13Button.attributes["value"].nodeValue==="true")
 	{
 		this.engine = new Game(13);
 	}
-	else if(this.board19Button.value===true)
+	else if(this.board19Button.attributes["value"].nodeValue==="true")
 	{
 		this.engine = new Game(19);
 	}
@@ -146,7 +146,7 @@ Tetsuki_Controller.prototype.BackToGame = function()
 
 Tetsuki_Controller.prototype.Tap = function(coord_x,coord_y)
 {
-	var isIllegal = this.engine.Make_Move(move(coord_x,coord_y));
+	var isIllegal = this.engine.Make_Move([coord_x,coord_y]);
 	if (isIllegal)
 	{
 		this.ShowGameHUD(true, coord_x,coord_y);
