@@ -512,7 +512,7 @@ Board.prototype.Init_Hash = function()
 {
     /*Set stone at position to color and update hash value*/
     var old_color = this.goban[pos];
-    this.current_hash = this.current_hash ^ this.board_hash_values[old_color][pos];
+    this.current_hash = this.current_hash ^ this.board_hash_values[old_color][pos]; //TODO: this is not actually hashing properly, at least as far as I can figure. I tried changing the structure to [color][x][y], but didn't get the init right for that. Anyways, value of current_has is always 0, and I can't seem to address a hash value in the board. I've tried _values.X[1,1], _values.X["1","1"], _values["X"][1,1], _values["X"]["1","1"]. No joy. 
     this.goban[pos] = color;
     this.current_hash = this.current_hash ^ this.board_hash_values[color][pos];
 };
@@ -847,7 +847,7 @@ Board.prototype.List_Block_Liberties = function(block)
     var liberties = [];
     for (var pos2 in block.neighbour)
         {
-        if (this.goban[pos2]==EMPTY)
+        if (this.goban[pos2]==EMPTY) //TODO: this not in scope during first move of game.
                 {
             liberties.push(pos2);
                 }
@@ -1072,9 +1072,11 @@ Board.prototype.Analyse_Opponent_Stone_As_Eye_Point = function(pos)
     var total_count = 0;
     var other_count = 0;
     var color = this.goban[pos];
-    this.each_Diagonal_Neighbour(pos)(function (pos2) {
+	var goban = this.goban; //TODO: added this to help with upcoming closure. Still having problems stemming from here.
+	var blocks = this.blocks;
+    this.each_Diagonal_Neighbour(pos)(function (pos2) { 
             total_count = total_count + 1;
-            if (this.goban[pos2]==color && this.blocks[pos2].status=="alive")
+            if (goban[pos2]==color && blocks[pos2].status=="alive")
                 {
                     other_count = other_count + 1;
                 }
@@ -2198,12 +2200,11 @@ Game.prototype.List_Moves = function()
     /* return all legal moves including pass move
     */
     var all_moves = [PASS_MOVE];
-    for (var move in this.current_board.Iterate_Goban())
-        {
-            if (this.Legal_Move(move)) {
-                    all_moves.push(move);
-                }
-        }
+	var board = this.current_board
+	board.each_Goban(function (move) {
+		if (board.Legal_Move(move)){
+                all_moves.push(move);
+            }});
     return all_moves;
 };
 
@@ -2259,6 +2260,51 @@ Game.prototype.Score_Move = function(move)
     return best_score;
 };
 
+Game.prototype.Select_Crawler_Move = function(remove_opponent_dead, pass_allowed)
+{
+	if (arguments.length < 2) 
+        {
+                if (arguments.length < 1) 
+                {
+                remove_opponent_dead = false;
+                }
+                pass_allowed = true;
+    }
+    var args = KeywordArguments.prototype.combine(arguments, {remove_opponent_dead: remove_opponent_dead, pass_allowed : pass_allowed});
+    
+	/* find the move that produces the largest liberties.
+	   reject a move if it results in less liberties for the block than before.
+	*/
+	var best_moves = [];
+	var most_liberties = 0;
+	
+	if (this.move_history.length <= 1)
+	{
+		return this.Select_Random_Move();
+	}
+	
+	for (var block in this.current_board.blocks)
+	{
+		if (block.color === this.current_board.side)
+		{
+			for (liberty in this.current_board.List_Block_Liberties(this.current_board.blocks[block]))
+			{
+				var current_block_liberties = this.current_board.Block_Liberties(this.current_board.blocks[block]);
+				if (current_block_liberties >= most_liberties)
+				{
+					this.Make_Move(liberty);
+					var new_block_liberties = this.current_board.Block_Liberties(this.current_board.blocks[block]);
+					if (new_block_liberties >= current_block_liberties)
+					{
+						best_moves.push(liberty);
+					}
+				}
+			}
+		}
+	}
+	return randomchoice(best_moves);
+};
+
 Game.prototype.Select_Scored_Move = function(remove_opponent_dead, pass_allowed) {
     if (arguments.length < 2) 
         {
@@ -2282,7 +2328,7 @@ Game.prototype.Select_Scored_Move = function(remove_opponent_dead, pass_allowed)
         }
     //if abs(base_score)==self.size**2:
     //    import pdb; pdb.set_trace()
-    var has_unknown_status_block = this.current_board.Has_Block_Status(WHITE+BLACK+EMPTY, "unknown"); //TODO: not sure how this call works
+    var has_unknown_status_block = this.current_board.Has_Block_Status(WHITE+BLACK+EMPTY, "unknown");
     var has_opponent_dead_block = this.current_board.Has_Block_Status(other_side[this.current_board.side], "dead");
     //has unsettled blocks
         if (has_unknown_status_block) {
@@ -2409,7 +2455,7 @@ Game.prototype.Select_Random_Move = function()
 {
     /* return randomly selected move from all legal moves
     */
-    return randomchoice(this.list_moves());
+    return randomchoice(this.List_Moves());
 };
 
 Game.prototype.Select_Random_No_Eye_Fill_Move = function()
@@ -2489,20 +2535,35 @@ Game.prototype.Select_Random_No_Eye_Fill_Move = function()
         }
 };
 
-Game.prototype.Generate_Move = function(remove_opponent_dead, pass_allowed) 
+Game.prototype.Generate_Move = function(remove_opponent_dead, pass_allowed, ai) 
 {
-    if (arguments.length < 2) 
-        {
-                if (arguments.length < 1) 
-                {
-                remove_opponent_dead = false;
-                }
-                pass_allowed = true;
+    if (arguments.length < 3) 
+    {
+		if (arguments.length < 2) 
+		{
+			if(arguments.length < 1)
+			{
+			 	remove_opponent_dead = false;						
+			}
+			pass_allowed = true;					
+		}
+		ai = "scored_move";
     }
     /* generate move using scored move generator
     */
     //return self.select_random_move()
-    return this.Select_Scored_Move(remove_opponent_dead, pass_allowed);
+	if(ai == "scored_move")
+	{
+    	return this.Select_Scored_Move(remove_opponent_dead, pass_allowed);
+	}
+	else if (ai == "crawler")
+	{
+		return this.Select_Crawler_Move(remove_opponent_dead, pass_allowed);
+	}
+	else
+	{
+    	return this.Select_Scored_Move(remove_opponent_dead, pass_allowed);		
+	}
 };
 
 function main()
