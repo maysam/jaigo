@@ -15,6 +15,8 @@
 		<textarea rows="22" cols="22" id="expected_board">expected text board</textarea>
 		<input type="button" value="Test Board!" onclick="test_position(document.getElementById('play_board').value, document.getElementById('expected_board').value);" />		
 		<input type="button" value="Test All!" onclick="test_all();" />
+		<input type="button" value="List Eyes" onclick="test_listPotentialEyes();" />
+		<input type="button" value="Classify Eyes" onclick="test_classifyPotentialEyesByColor();" />
 		<br />
 		<br />
 		<textarea rows= "2" cols="22" id="gtp_input">&gt;</textarea>

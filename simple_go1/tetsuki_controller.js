@@ -124,12 +124,32 @@ Tetsuki_Controller.prototype.PlayLoop = function()
 	
 	while(!isHumanTurn)
 	{
+		var ai;
+		if (this.engine.current_board.side === BLACK && this.blackAIGreedyButton.attributes["value"].nodeValue==="true")
+		{
+			ai = "scored_move";
+		}
+		else if (this.engine.current_board.side === BLACK && this.blackAICrawlerButton.attributes["value"].nodeValue==="true")
+		{
+			ai = "crawler";			
+		}
+		if (this.engine.current_board.side === WHITE && this.whiteAIGreedyButton.attributes["value"].nodeValue==="true")
+		{
+			ai = "scored_move";
+		}
+		else if (this.engine.current_board.side === WHITE && this.whiteAICrawlerButton.attributes["value"].nodeValue==="true")
+		{
+			ai = "crawler";			
+		}
+
 		//generate and make ai move for current color
-		var move = this.engine.Generate_Move();
+		var move = this.engine.Generate_Move(false, true, ai);
 		this.engine.Make_Move(move);
 		this.SetStone(move,this.engine.current_board.side);
-		//end the game condition
-		if(this.engine.move_history.length()>=2 && this.engine.move_history[-1]==PASS_MOVE && this.engine.move_history[-2]==PASS_MOVE)
+		this.engine.current_board.Change_Side();
+		break;
+/*		//end the game condition
+		if(this.engine.move_history.length>=2 && this.engine.move_history[-1]==PASS_MOVE && this.engine.move_history[-2]==PASS_MOVE)
 		{
 			break;
 		}
@@ -138,7 +158,9 @@ Tetsuki_Controller.prototype.PlayLoop = function()
 		if((this.engine.current_board.side === BLACK && this.blackHumanButton.attributes["value"].nodeValue==="true") || (this.engine.current_board.side === WHITE && this.whiteHumanButton.attributes["value"].nodeValue==="true"))
 		{
 			isHumanTurn = true;
+			break;
 		}
+		*/
 	}
 };
 
@@ -158,14 +180,7 @@ Tetsuki_Controller.prototype.Tap = function(coord_x,coord_y)
 	{
 		//update the ui goban with move
 		this.SetStone([coord_x,coord_y],this.engine.current_board.side);
-		if (this.engine.current_board.side === BLACK)
-		{
-			this.engine.current_board.side = WHITE;
-		}
-		else
-		{
-			this.engine.current_board.side = BLACK;
-		}
+		this.engine.current_board.Change_Side();
 	}
 
 	this.PlayLoop();
