@@ -149,7 +149,7 @@ Tetsuki_Controller.prototype.BackToGame = function()
 
 Tetsuki_Controller.prototype.Tap = function(coord_x,coord_y)
 {
-	var isIllegal = this.engine.Make_Move([coord_x,coord_y]);
+	var isIllegal = this.engine.Make_Move([coord_x+1,coord_y+1]); //simple_go engine uses 1-based coords.
 	if (isIllegal)
 	{
 		this.ShowGameHUD(true, coord_x,coord_y);
