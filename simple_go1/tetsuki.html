@@ -49,12 +49,7 @@ div.radio[pos=left]{-webkit-border-bottom-left-radius: 11px; -webkit-border-top-
 div.radio[pos=right]{-webkit-border-bottom-right-radius: 11px; -webkit-border-top-right-radius: 11px; margin-right:10px; }
 div.radio[value=true]{background-color:rgb(20,60,180); color:white;}
 div.radio[value=false]{background-color:rgb(220,220,220); color:rgb(80,80,80); text-shadow:white 0px 1px 1px }
-#gamehud {
-			position: fixed;
-			width: 252px;
-              height: 42px;
-			padding: 0px;
-              background-color: transparent;}
+#gamehud { position: fixed; width: 252px; height: 42px; padding: 0px; background-color: transparent;}
 
 div[visible=no] { display: none; }
 div.floating[visible=yes] { display: block; }
@@ -64,9 +59,7 @@ div[visible=yes] {display: inline; }
 </style>
 
 <!-- Javascript -->
-<script type="text/javascript" src="utils.js"></script>
-<script type="text/javascript" src="simple_go.js"></script>
-<script type="text/javascript" src="tetsuki_controller.js"></script>
+<script type="text/javascript" src="jaigo.compressed.js"></script>
 <script type="text/javascript">var controller;</script>
 </head>
 
@@ -141,17 +134,17 @@ div[visible=yes] {display: inline; }
 <div class="floating" id="gameHud" visible="no">
 <table cellpadding="0" cellspacing="0">
 <tbody><tr>
-<td><img src="tetsuki_files/a_003" id="close_small" onclick="controller.ShowGameHud(false)" height="42" width="42"></td>
+<td><img src="a_003.png" id="close_small" onclick="controller.ShowGameHud(false)" height="42" width="42"></td>
 <td><div class="buttonspace"></div></td>
-<td><img src="tetsuki_files/a_006" id="back_small" onclick="currentGame.step(-1)" height="42" width="42"></td>
+<td><img src="a_006.png" id="back_small" onclick="currentGame.step(-1)" height="42" width="42"></td>
 <td><div class="buttonspace"></div></td>
-<td><img src="tetsuki_files/a_005" id="forward_small" onclick="currentGame.step(1)" height="42" width="42"></td>
+<td><img src="a_005.png" id="forward_small" onclick="currentGame.step(1)" height="42" width="42"></td>
 <td><div class="buttonspace"></div></td>
-<td><img src="tetsuki_files/a" id="delete_small" onclick="currentGame.deleteLastMove()" height="42" width="42"></td>
+<td><img src="a.png" id="delete_small" onclick="currentGame.deleteLastMove()" height="42" width="42"></td>
 <td><div class="buttonspace"></div></td>
-<td><img src="tetsuki_files/a_002" id="pass_small" onclick="currentGame.pass()" height="42" width="42"></td>
+<td><img src="a_002.png" id="pass_small" onclick="currentGame.pass()" height="42" width="42"></td>
 <td><div class="buttonspace"></div></td>
-<td><img src="tetsuki_files/a_004" id="more_small" onclick="controller.GoWindow(2)" height="42" width="42"></td>
+<td><img src="a_004.png" id="more_small" onclick="controller.GoWindow(2)" height="42" width="42"></td>
 </tr></tbody></table>
 </div>
 
