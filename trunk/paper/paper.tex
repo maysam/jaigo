@@ -34,10 +34,10 @@ Go players are classified by their skill into equivalence classes called kyu and
 
 Game theorists would describe Go as a zero-sum, perfect information, partisan, deterministic strategy game. In zero-sum games, the utility of any action with respect to player a is the additive inverse of the utility of that action with respect to player b. Perfect information games are fully observable in AI parlance. Go has a turn-taking structure, so it is partisan (i.e., some moves are available to only one player). There is no element of chance in Go. These characteristics invite comparison with games such as Chess.
 
-While chess eventually yielded to clever hardware and algorithms, the sheer state-space of Go has rendered specialize search approaches weak. In 1965, noted statistician I.J. Good noted presciently:
+While chess eventually yielded to clever hardware and algorithms, the sheer state-space of Go has rendered specialize search approaches weak. In 1965, noted statistician I.J. Good presciently commented:
 
 \begin{quote}
-Go on a computer? – In order to programme [sic] a computer to play a reasonable game of Go – rather than merely a legal game – it is necessary to formalise the principles of good strategy, or to design a learning programme. The principles are more qualitative and mysterious than in chess, and depend more on judgment. So I think it will be even more difficult to programme a computer to play a reasonable game of Go than of chess. \cite{Good65}
+Go on a computer? -- In order to programme [sic] a computer to play a reasonable game of Go -- rather than merely a legal game -- it is necessary to formalise the principles of good strategy, or to design a learning programme. The principles are more qualitative and mysterious than in chess, and depend more on judgment. So I think it will be even more difficult to programme a computer to play a reasonable game of Go than of chess. \cite{Good65}
 \end{quote}
 
 Unlike many similar problems that were also announced in this manner, Go remains both a challenging and tantalizing problem.
@@ -52,7 +52,7 @@ Two major factors make computer Go more difficult to program than computer Chess
 \section{Board representation}
 With 3361 board states, and perhaps 10768 games, representing the board may be the most difficult part of writing a go engine.
 
-The exploration of alternative future board states often yields duplicate (potential) states; it is helpful to memorize board evaluation such that a board state may be evaluated only once, regardless of the paths by which it is reached \cite{Zobrist1970b}. The Zobrist hash function is useful in this capacity: (reduce xor (map f board-positions)), f: (x, y, color) -> Z.
+The exploration of alternative future board states often yields duplicate (potential) states; it is helpful to memorize board evaluation such that a board state may be evaluated only once, regardless of the paths by which it is reached \cite{Zobrist1970b}. The Zobrist hash function is useful in this capacity: (reduce xor (map f board-positions)), $f: (x, y, color) \rightarrow Z$.
 
 There are traditional concepts in go of blocks and eyes. Blocks are simply contiguously-connected stones of the same color. Eyes are empty spaces which are completely surrounded by stones of the same color. A good implementation of computer Go will represent these concepts, as they provide vital information when generating moves, evaluating the state of the board, and in scoring the board. 
 
@@ -69,9 +69,9 @@ There are several significant issues to consider when programming computer Go. F
 
 Second, there is a fight between optimizing the main loop -- that is, evaluating the board -- versus optimizing the small loops (given a board evaluation, local tricks to improve evaluation function). There is yet no standard, robust board evaluation algorithm. If a main board evaluation loop is established for playing computer Go and optimizations are made to the smaller evaluation functions within the loop, this would change the way the board is evaluated.  However, though such developments would potentially better the speed, completeness, or accuracy of the evaluation, they may also potentially damage the smaller evaluation functions.
 
-Third, while GA \& NN initially seemed promising, no commercial package uses them due to lack of speed.
+Third, while genetic algorithms and neural networks initially seemed promising, no commercial package uses them due to lack of speed.
 
-Thus, if all older techniques are inadequate and new techniques do not pan out, whither computer Go? Our project seeks to create a JavaScript-based Go-engine. JavaScript is a dynamically typed, imperative language that supports the functional and object-oriented paradigms \cite{ECMA-262}. It is ubiquitous due to its inclusion in nearly every Web browser, and recently has enjoyed a surge of popularity among programmers due to the availability of cross-platform libraries and the success of applications such as GMail. As professional programmers, we viewed this project as an opportunity to explore not only AI but also renewed interest in the JavaScript language. Also, JavaScript is the only supported means of developing iPhone applications. iPhone is an intrinsically interesting platform; its communication capabilities and computational limitations only heighten the interest.
+Thus, if all older techniques are inadequate and new techniques do not pan out, whither computer Go? Our project seeks to create a JavaScript-based Go-engine. JavaScript is a dynamically typed, imperative language that supports the functional and object-oriented paradigms \cite{ECMA-262}. It is ubiquitous due to its inclusion in nearly every Web browser, and recently has enjoyed a surge of popularity among programmers due to the availability of cross-platform libraries and the success of applications such as GMail. As professional programmers, we viewed this project as an opportunity to explore not only AI but also to pursue our renewed interest in the JavaScript language. Also, JavaScript is the only supported means of developing iPhone applications. iPhone is an intrinsically interesting platform; its communication capabilities and computational limitations heighten the interest.
 
 \chapter{Interaction/UI}
 
@@ -100,16 +100,16 @@ A c-chain is unconditionally alive if and only if it belongs to a set of c-chain
 \chapter{Engine choice}
 There are a number of Go engines, so we sought to extend an existing engine rather than write something completely new. We could not find an engine in JavaScript, so the first order of business was to choose an engine to port. Our criteria for choosing an engine was simple: What is the engine with the smallest (estimated) expression in JavaScript and the highest kyu ranking?
 
-We chose to implement two different move choice engines, each of which provides a different playing experience. SimpleGo v1, a 50kyu greedy search move generator which picks a random move from list of moves with worst opponent score. Crawler, an unranked move generator which analyzes the current blocks on the board and picks the move that both connects to a block and results in the largest number of liberties for the block.
+We implemented two different move choice engines, each of which provides a different playing experience. SimpleGo v1, a 50kyu greedy search move generator which picks a random move from list of moves with worst opponent score. Crawler, an unranked move generator which analyzes the current blocks on the board and picks the move that both connects to a block and results in the largest number of liberties for the block.
 
 \chapter{Technical details}
-Code Listing
+%Code Listing
 - Implementation of Benson's algorithm for determining unconditional life: Analyze\_Color\_Unconditional\_Status
 - Greedy Search algorithm: select\_scored\_move
 - Crawler algorithm: select\_crawler\_move
 
 \chapter{Discussions, observations, and comparisons}
-We implemented two move choice engines based on two different algorithms, scoring for color and blocks based on Benson's algorithm, and representations of the board, the game, eyes, blocks, and numerous language-specific utilities. Our goals were compactness and speed due to the target platform limitations. 
+We implemented representations of the board, the game, eyes, and blocks; scoring for color and blocks based on Benson's algorithm; two move choice engines based on two different algorithms; and numerous language-specific utilities. Our goals were compactness and speed due to the target platform limitations.
 
 Due to issues with the jaigo board representation, our measurements were limited to the first 100 moves.
 
@@ -171,7 +171,7 @@ On an iPhone over 54mbps 802.11g wifi with a full signal connected to a 3mbps ca
 Median move times in other go engines (gnugo especially)?
 
 \chapter{Recommendations, especially for future work and unsolved issues}
-We feel that the choice of browser is more important than the choice of computing platform for the performance of jaigo. However, we have not quantified this claim.
+We feel that the choice of browser is more important than the choice of computing platform for the performance of jaigo. Our anecdotal experience and those of others on the Web show that there is an order of magnitude difference between popular browsers for some JavaScript operations. However, we have not carefully studied this issue.%http://therealcrisp.xs4all.nl/blog/2006/12/09/string-performance-in-internet-explorer/
 
 The performance of $\alpha-\beta$ search pruning in javascript should be investigated. like SimpleGo v3, a 30kyu $\alpha$-$\beta$ pruned search move generator.
 
