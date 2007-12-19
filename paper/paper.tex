@@ -122,9 +122,9 @@ Regarding speed, we do not anticipate that the choice of processor and platform 
 
 \tref{table:first50} shows the first 50 moves on a 19x19 board with human (black) versus crawler (white).
 \begin{table}
-  \rotatebox{90}{
-    \begin{tabular}{ccccccccc} \toprule
-      Function & Calls & Percent & Own Time (ms) & Time (ms) & Avg (ms) & Min (ms) & Max (ms) & File\\ \midrule
+  \rotatebox{90}{%  fc%         own       time      avg       min       max file
+    \begin{tabular}{lrD{.}{.}{2}D{.}{.}{3}D{.}{.}{3}D{.}{.}{3}D{.}{.}{3}D{.}{.}{3}l} \toprule
+      Function & Calls & \multicolumn{1}{c}{Percent} & \multicolumn{1}{c}{Own Time (ms)} & \multicolumn{1}{c}{Time (ms)} & \multicolumn{1}{c}{Avg (ms)} & \multicolumn{1}{c}{Min (ms)} & \multicolumn{1}{c}{Max (ms)} & File\\ \midrule
       (no name) & 109675 & 25.68 & 14310.594 &	36908.812 &	0.337 &	0.059	& 1593.542	& simple\_go.js (line 407)\\
       flood\_mark & 1618 & 14.17 & 7897.73 & 25481.245 & 15.749 & 0.162 & 1635.18 & simple\_go.js (line 807)\\
       (no name) &	194678 &	11.75	& 6551.626 &	6554.733 &	0.034 &	0.008 &	1555.243 &	simple\_go.js (line 819)\\
