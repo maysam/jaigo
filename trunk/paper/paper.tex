@@ -121,9 +121,10 @@ Regarding compactness, the total size of all jaigo files, including images, scri
 Regarding speed, we do not anticipate that the choice of processor and platform of any modern PC will have a significant change to the performance of jaigo.
 
 \tref{table:first50} shows the first 50 moves on a 19x19 board with human (black) versus crawler (white).
+\newcolumntype{M}{D{.}{.}{3}}
 \begin{table}
   \rotatebox{90}{%  fc%         own       time      avg       min       max file
-    \begin{tabular}{lrD{.}{.}{2}D{.}{.}{3}D{.}{.}{3}D{.}{.}{3}D{.}{.}{3}D{.}{.}{3}l} \toprule
+    \begin{tabular}{lrD{.}{.}{2}MMMMMl} \toprule
       Function & Calls & \multicolumn{1}{c}{Percent} & \multicolumn{1}{c}{Own Time (ms)} & \multicolumn{1}{c}{Time (ms)} & \multicolumn{1}{c}{Avg (ms)} & \multicolumn{1}{c}{Min (ms)} & \multicolumn{1}{c}{Max (ms)} & File\\ \midrule
       (no name) & 109675 & 25.68 & 14310.594 &	36908.812 &	0.337 &	0.059	& 1593.542	& simple\_go.js (line 407)\\
       flood\_mark & 1618 & 14.17 & 7897.73 & 25481.245 & 15.749 & 0.162 & 1635.18 & simple\_go.js (line 807)\\
@@ -148,8 +149,8 @@ Regarding speed, we do not anticipate that the choice of processor and platform 
 
 \begin{table}
   \rotatebox{90}{
-    \begin{tabular}{ccccccccc} \toprule
-      Function & Calls & Percent & Own Time (ms) & Time (ms) & Avg (ms) & Min (ms) & Max (ms) & File\\	\midrule
+    \begin{tabular}{lrD{.}{.}{2}MMMMMl} \toprule
+      Function & Calls & \multicolumn{1}{c}{Percent} & \multicolumn{1}{c}{Own Time (ms)} & \multicolumn{1}{c}{Time (ms)} & \multicolumn{1}{c}{Avg (ms)} & \multicolumn{1}{c}{Min (ms)} & \multicolumn{1}{c}{Max (ms)} & File\\ \midrule
       (no name) &	404494 &	32.8 &	71255.203 &	147518.241 &	0.365 &	0.059 &	1650.149 &	simple\_go.js (line 407)\\
       flood\_mark &	3838 &	15.94 &	34634.022 &	96713.52 &	25.199 &	0.206 &	1736.537 &	simple\_go.js (line 807)\\
       iterate &	404495 &	8.75 &	19004.696 &	76254.33 &	0.189 &	0.011 &	1650.101 &	simple\_go.js (line 391)\\
