@@ -115,37 +115,37 @@ Regarding compactness, the total size of all jaigo files, including images, scri
 Regarding speed, we do not anticipate that the choice of processor and platform of any modern PC will have a significant change to the performance of jaigo.
 
 For the first 50 moves on a 19x19 board with human (black) versus crawler (white),
-$\begin{tabular}{ccccccccc}
+\begin{tabular}{ccccccccc}
 \hline
 Function & Calls & Percent & Own Time & Time & Avg & Min & Max & File\\
 \hline
-(no name) & 109675 & 25.68% & 14310.594ms &	36908.812ms &	0.337ms &	0.059ms	& 1593.542ms	& simple_go.js (line 407)\\
+(no name) & 109675 & 25.68 & 14310.594ms &	36908.812ms &	0.337ms &	0.059ms	& 1593.542ms	& simple\_go.js (line 407)\\
 \hline
-flood_mark & 1618 & 14.17% & 7897.73ms & 25481.245ms & 15.749ms & 0.162ms & 1635.18ms & simple_go.js (line 807)\\
+flood\_mark & 1618 & 14.17 & 7897.73ms & 25481.245ms & 15.749ms & 0.162ms & 1635.18ms & simple\_go.js (line 807)\\
 \hline
-(no name) &	194678 &	11.75%	& 6551.626ms &	6554.733ms &	0.034ms &	0.008ms &	1555.243ms &	simple_go.js (line 819)\\
+(no name) &	194678 &	11.75	& 6551.626ms &	6554.733ms &	0.034ms &	0.008ms &	1555.243ms &	simple\_go.js (line 819)\\
 \hline
-string_as_move &	56065 &	7.48% &	4168.485ms &	4169.549ms &	0.074ms &	0.011ms &	1591.844ms &	simple_go.js (line 192)\\
+string\_as\_move &	56065 &	7.48 &	4168.485ms &	4169.549ms &	0.074ms &	0.011ms &	1591.844ms &	simple\_go.js (line 192)\\
 \hline
-iterate	109676 &	7.19% &	4005.749ms &	22595.463ms &	0.206ms &	0.011ms &	1593.499ms &	simple_go.js (line 391)\\
+iterate	& 109676 &	7.19 &	4005.749ms &	22595.463ms &	0.206ms &	0.011ms &	1593.499ms &	simple\_go.js (line 391)\\
 \hline
-(no name) &	283642 &	4.9% &	2732.499ms &	18589.343ms &	0.066ms &	0.015ms &	1593.144ms &	simple_go.js & (line 416)\\
+(no name) &	283642 &	4.9 &	2732.499ms &	18589.343ms &	0.066ms &	0.015ms &	1593.144ms &	simple\_go.js (line 416)\\
 \hline
-iterateOwnProperties &	5811	& 4.38%	& 2440.378ms &	2847.852ms &	0.49ms &	0.004ms &	2.917ms &	simple_go.js (line 132)\\
+iterateOwnProperties &	5811	& 4.38	& 2440.378ms &	2847.852ms &	0.49ms &	0.004ms &	2.917ms &	simple\_go.js (line 132)\\
 \hline
-Set_Goban &	2150 &	3.53% &	1968.651ms &	1969.095ms &	0.916ms &	0.004ms &	942.058ms &	simple_go.js (line 528)\\
+Set\_Goban &	2150 &	3.53 &	1968.651ms &	1969.095ms &	0.916ms &	0.004ms &	942.058ms &	simple\_go.js (line 528)\\
 \hline
-(no name) &	42734 &	2.99% &	1666.478ms &	1666.716ms &	0.039ms &	0.008ms &	935.83ms &	simple_go.js (line 835)\\
+(no name) &	42734 &	2.99 &	1666.478ms &	1666.716ms &	0.039ms &	0.008ms &	935.83ms &	simple\_go.js (line 835)\\
 \hline
-update &	3662 &	2.9% &	1613.61ms &	1614.099ms &	0.441ms &	0.004ms &	1560.416ms &	simple_go.js (line 117)\\
+update &	3662 &	2.9 &	1613.61ms &	1614.099ms &	0.441ms &	0.004ms &	1560.416ms &	simple\_go.js (line 117)\\
 \hline
-Add_Block &	2340 &	2.8% &	1559.92ms &	1560.774ms &	0.667ms &	0.007ms &	1529.63ms &	simple_go.js (line 757)\\
+Add\_Block &	2340 &	2.8 &	1559.92ms &	1560.774ms &	0.667ms &	0.007ms &	1529.63ms &	simple\_go.js (line 757)\\
 \hline
-Calculate_Neighbour &	448	2.67% &	1487.337ms &	12205.939ms &	27.245ms &	0.019ms &	1579.849ms &	simple_go.js (line 829)\\
+Calculate\_Neighbour &	448	2.67 &	1487.337ms &	12205.939ms &	27.245ms &	0.019ms &	1579.849ms &	simple\_go.js (line 829)\\
 \hline
-Simple_Same_Block &	2149 &	1.93% &	1073.573ms &	8185.472ms &	3.809ms &	0.002ms &	1556.376ms &	simple_go.js (line 606)\\
+Simple\_Same\_Block &	2149 &	1.93 &	1073.573ms &	8185.472ms &	3.809ms &	0.002ms &	1556.376ms &	simple\_go.js (line 606)\\
 \hline
-List_Block_Liberties &	3210 &	1.56% &	871.609ms &	5057.619ms &	1.576ms &	0.012ms &	1593.058ms &	simple_go.js (line 863)\\
+List\_Block\_Liberties &	3210 &	1.56 &	871.609ms &	5057.619ms &	1.576ms &	0.012ms &	1593.058ms &	simple\_go.js (line 863)\\
 \hline
 \end{tabular}
 
@@ -156,36 +156,36 @@ For the first 100 moves of a game on a 19x19 board, with crawler (black) versus 
 	\hline
 	Function & Calls & Percent & Own Time & Time & Avg & Min & Max & File\\	
 \hline
-(no name) &	$404494 &	32.8% &	71255.203ms &	147518.241ms &	0.365ms &	0.059ms &	1650.149ms &	simple_go.js (line 407)\\
+(no name) &	404494 &	32.8 &	71255.203ms &	147518.241ms &	0.365ms &	0.059ms &	1650.149ms &	simple\_go.js (line 407)\\
 \hline
-flood_mark &	3838 &	15.94% &	34634.022ms &	96713.52ms &	25.199ms &	0.206ms &	1736.537ms &	simple_go.js (line 807)\\
+flood\_mark &	3838 &	15.94 &	34634.022ms &	96713.52ms &	25.199ms &	0.206ms &	1736.537ms &	simple\_go.js (line 807)\\
 \hline
-iterate &	404495 &	8.75% &	19004.696ms &	76254.33ms &	0.189ms &	0.011ms &	1650.101ms &	simple_go.js (line 391)\\
+iterate &	404495 &	8.75 &	19004.696ms &	76254.33ms &	0.189ms &	0.011ms &	1650.101ms &	simple\_go.js (line 391)\\
 \hline
-(no name) &	735190 &	8.72% &	18941.197ms &	18941.987ms &	0.026ms &	0.008ms &	1572.648ms &	simple_go.js (line 819)\\
+(no name) &	735190 &	8.72 &	18941.197ms &	18941.987ms &	0.026ms &	0.008ms &	1572.648ms &	simple\_go.js (line 819)\\
 \hline
-string_as_move &	242765 &	5.86% &	12724.373ms	& 12725.279ms &	0.052ms &	0.011ms &	1629.186ms &	simple_go.js (line 192)\\
+string\_as\_move &	242765 &	5.86 &	12724.373ms	& 12725.279ms &	0.052ms &	0.011ms &	1629.186ms &	simple\_go.js (line 192)\\
 \hline
-(no name) &	1041519 &	4.7% &	10209.513ms &	57248.372ms &	0.055ms &	0.015ms &	1649.869ms &	simple_go.js (line 416)\\
+(no name) &	1041519 &	4.7 &	10209.513ms &	57248.372ms &	0.055ms &	0.015ms &	1649.869ms &	simple\_go.js (line 416)\\
 \hline
-List_Block_Liberties &	7706 &	4.02% &	8727.331ms &	21457.809ms &	2.785ms &	0.013ms &	1630.607ms &	simple_go.js (line 863)\\
+List\_Block\_Liberties &	7706 &	4.02 &	8727.331ms &	21457.809ms &	2.785ms &	0.013ms &	1630.607ms &	simple\_go.js (line 863)\\
 \hline
-iterateOwnProperties &	14752 &	3.68% &	7985.019ms &	9340.503ms &	0.633ms &	0.004ms &	2.419ms &	simple_go.js (line 132)\\
+iterateOwnProperties &	14752 &	3.68 &	7985.019ms &	9340.503ms &	0.633ms &	0.004ms &	2.419ms &	simple\_go.js (line 132)\\
 \hline
-update &	8742 &	3.18% &	6911.102ms &	6911.93ms &	0.791ms &	0.004ms &	1648.007ms &	simple_go.js (line 117)\\
+update &	8742 &	3.18 &	6911.102ms &	6911.93ms &	0.791ms &	0.004ms &	1648.007ms &	simple\_go.js (line 117)\\
 \hline
-Calculate_Neighbour &	661 &	3.03% &	6593.032ms &	60385.478ms &	91.355ms &	0.115ms &	1679.244ms &	simple_go.js (line 829)\\
+Calculate\_Neighbour &	661 &	3.03 &	6593.032ms &	60385.478ms &	91.355ms &	0.115ms &	1679.244ms &	simple\_go.js (line 829)\\
 \hline
-(no name) &	160414 &	2.51% &	5444.827ms &	5445.809ms &	0.034ms	& 0.008ms &	944.464ms &	simple_go.js (line 835)\\
+(no name) &	160414 &	2.51 &	5444.827ms &	5445.809ms &	0.034ms	& 0.008ms &	944.464ms &	simple\_go.js (line 835)\\
 \hline
-Add_Stone &	6010 &	1.1% &	2392.214ms	& 191461.602ms	& 31.857ms &	1.524ms &	1785.447ms &	simple_go.js (line 641)\\
+Add\_Stone &	6010 &	1.1 &	2392.214ms	& 191461.602ms	& 31.857ms &	1.524ms &	1785.447ms &	simple\_go.js (line 641)\\
 \hline
 \end{tabular}
 
 
 Median move response time for 10 games into the first 50 moves was was 1 second, with the high being 3 seconds and the low being unmeasurable.
 
-On an iPhone over 54mbps 802.11g wifi with a full signal connected to a 3mbps cable modem, the median jaigo load time was 5 seconds, with the initial load time being the longest measurement at 15 seconds. On an iPhone over AT&T 2.5G EDGE with a full signal, the median jaigo load time was 21 seconds, with a low of 17 seconds and a high of 30 seconds.
+On an iPhone over 54mbps 802.11g wifi with a full signal connected to a 3mbps cable modem, the median jaigo load time was 5 seconds, with the initial load time being the longest measurement at 15 seconds. On an iPhone over AT\&T 2.5G EDGE with a full signal, the median jaigo load time was 21 seconds, with a low of 17 seconds and a high of 30 seconds.
 
 Median move times in other go engines (gnugo especially)?
 
