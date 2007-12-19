@@ -51,7 +51,7 @@ With 3361 board states, and perhaps 10768 games, representing the board may be t
 
 The exploration of alternative future board states often yields duplicate (potential) states; it is helpful to memorize board evaluation such that a board state may be evaluated only once, regardless of the paths by which it is reached \cite{Zobrist1970b}. The Zobrist hash function is useful in this capacity: (reduce xor (map f board-positions)), f: (x, y, color) -> Z.
 
-There are traditional concepts in go of blocks and eyes. Blocks are simply contiguously-connected stones of the same color. Eyes are empty spaces which are completely surrounded by stones of the same color. A good implementation of computer go will represent these concepts, as they provide vital information when generating moves, evaluating the state of the board, and in scoring the board. 
+There are traditional concepts in go of blocks and eyes. Blocks are simply contiguously-connected stones of the same color. Eyes are empty spaces which are completely surrounded by stones of the same color. A good implementation of computer Go will represent these concepts, as they provide vital information when generating moves, evaluating the state of the board, and in scoring the board. 
 
 \section{Known techniques}
 Search techniques have been successful in games including Chess, but they have been much less effective in Go. The large branching factor of Go prohibits exhaustive search. Wolfe has shown by reduction from 3-QBF that Go endgames are PSPACE-hard \cite{Wolfe} and Go itself is EXPTIME-complete \cite{Burmeister}, so it is unlikely that any algorithm can guarantee optimal and efficient play. Computer Go is thus focused on approximation algorithms, and suboptimal or incomplete but empirically successful heuristic searches. Minimax with $\alpha$-$\beta$ pruning and the anytime beam stack search methods are of limited use given the very short horizon and absence of good heuristics for Go.
@@ -62,12 +62,13 @@ Br\"ugmann's approach plays games by choosing moves randomly according to probab
 
 \chapter{Current Issues}
 
-    * Finding a good evaluation function is hard. The human heuristics are vague, and when/how they get applied is even more vague. Zobrist divided the game into phases for the purpose of selecting evaluation functions \cite{Zobrist1970b}. Ryder distinguished between tactical and strategic utility \cite{Burmeister}.
-    * fight between optimizing the main loop (evaluating the board) vs optimizing the small loops (given a board evaluation, local tricks to improve evaluation function). There is yet no standard, robust board evaluation algorithm. Once a main board evaluation loop is established for playing computer go and optimizations are made to the smaller evaluation functions within the loop, changing the way the board is evaluated, though potentially better for the speed, completeness, or accuracy of the evaluation, may also potentially damage the smaller evaluation functions.
-    * GA \& NN seemed promising at first, but no commercial package uses them due to lack of speed.
-    * If all old techniques are inadequate and new techniques don't pan out, whither computer go? 
+There are several significant issues to consider when programming computer Go. First, it is difficult to find an appropriate evaluation function. The human heuristics are vague, and the parameters for their application  are even more vague. Zobrist divided the game into phases for the purpose of selecting evaluation functions \cite{Zobrist1970b}. On the other hand, Ryder distinguished between tactical and strategic utility \cite{Burmeister}.
 
-Our project seeks to create a JavaScript-based Go-engine. JavaScript is a dynamically typed, imperative language that supports the functional and object-oriented paradigms \cite{ECMA-262}. It is ubiquitous due to its inclusion in nearly every Web browser, and recently has enjoyed a surge of popularity among programmers due to the availability of cross-platform libraries and the success of applications such as GMail. As professional programmers, we viewed this project as an opportunity to explore not only AI but also renewed interest in the JavaScript language. Also, JavaScript is the only supported means of developing iPhone applications. iPhone is an intrinsically interesting platform; its communication capabilities and computational limitations only heighten the interest.
+Second, there is a fight between optimizing the main loop -- that is, evaluating the board -- versus optimizing the small loops (given a board evaluation, local tricks to improve evaluation function). There is yet no standard, robust board evaluation algorithm. If a main board evaluation loop is established for playing computer Go and optimizations are made to the smaller evaluation functions within the loop, this would change the way the board is evaluated.  However, though such developments would potentially better the speed, completeness, or accuracy of the evaluation, they may also potentially damage the smaller evaluation functions.
+
+Third, while GA \& NN initially seemed promising, no commercial package uses them due to lack of speed.
+
+Thus, if all older techniques are inadequate and new techniques do not pan out, whither computer Go? Our project seeks to create a JavaScript-based Go-engine. JavaScript is a dynamically typed, imperative language that supports the functional and object-oriented paradigms \cite{ECMA-262}. It is ubiquitous due to its inclusion in nearly every Web browser, and recently has enjoyed a surge of popularity among programmers due to the availability of cross-platform libraries and the success of applications such as GMail. As professional programmers, we viewed this project as an opportunity to explore not only AI but also renewed interest in the JavaScript language. Also, JavaScript is the only supported means of developing iPhone applications. iPhone is an intrinsically interesting platform; its communication capabilities and computational limitations only heighten the interest.
 
 \chapter{Interaction/UI}
 
@@ -96,11 +97,7 @@ A c-chain is unconditionally alive if and only if it belongs to a set of c-chain
 \chapter{Engine choice}
 There are a number of Go engines, so we sought to extend an existing engine rather than write something completely new. We could not find an engine in JavaScript, so the first order of business was to choose an engine to port. Our criteria for choosing an engine was simple: What is the engine with the smallest (estimated) expression in JavaScript and the highest kyu ranking?
 
-implemented:
-
-SimpleGo v1, a 50kyu greedy search move generator which picks a random move from list of moves with worst opponent score.
-
-Crawler, an unranked move generator which analyzes the current blocks on the board and picks the move that both connects to a block and results in the largest number of liberties for the block.
+We chose to implement two different move choice engines, each of which provides a different playing experience. SimpleGo v1, a 50kyu greedy search move generator which picks a random move from list of moves with worst opponent score. Crawler, an unranked move generator which analyzes the current blocks on the board and picks the move that both connects to a block and results in the largest number of liberties for the block.
 
 \chapter{Technical details}
 Code Listing
@@ -111,71 +108,80 @@ Code Listing
 \chapter{Discussions, observations, and comparisons}
 We implemented two move choice engines based on two different algorithms, scoring for color and blocks based on Benson's algorithm, and representations of the board, the game, eyes, blocks, and numerous language-specific utilities. Our goals were compactness and speed due to the target platform limitations. 
 
-Due to issues with the jaigo board representation, our measurements were limited to the first 50 moves
+Due to issues with the jaigo board representation, our measurements were limited to the first 100 moves.
 
 Regarding compactness, the total size of all jaigo files, including images, scripts, and html, was 102221 bytes for our initial release. The full implementation of the jaigo code is 66071 bytes \cite{SpeedReport}.
 
 Regarding speed, we do not anticipate that the choice of processor and platform of any modern PC will have a significant change to the performance of jaigo.
 
-for the first 50 moves on a 19x19 board with human (black) versus crawler (white),
+For the first 50 moves on a 19x19 board with human (black) versus crawler (white),
 $\begin{tabular}{ccccccccc}
 \hline
-Method Name & Total Time & r1c3 & r1c4 & r1c5 & r1c6 & r1c7 & r1c8 & r1c9\\
+Function & Calls & Percent & Own Time & Time & Avg & Min & Max & File\\
 \hline
-(no name) & 109675 & r1c3 & r1c4 & r1c5 & r1c6 & r1c7 & r1c8 & r1c9\\
+(no name) & 109675 & 25.68% & 14310.594ms &	36908.812ms &	0.337ms &	0.059ms	& 1593.542ms	& simple_go.js (line 407)\\
 \hline
-r2c1 & r2c2 & r2c3 & r2c4 & r2c5 & r2c6 & r2c7 & r2c8 & r2c9\\
+flood_mark & 1618 & 14.17% & 7897.73ms & 25481.245ms & 15.749ms & 0.162ms & 1635.18ms & simple_go.js (line 807)\\
 \hline
-r3c1 & r3c2 & r3c3 & r3c4 & r3c5 & r3c6 & r3c7 & r3c8 & r3c9\\
+(no name) &	194678 &	11.75%	& 6551.626ms &	6554.733ms &	0.034ms &	0.008ms &	1555.243ms &	simple_go.js (line 819)\\
 \hline
-r4c1 & r4c2 & r4c3 & r4c4 & r4c5 & r4c6 & r4c7 & r4c8 & r4c9\\
+string_as_move &	56065 &	7.48% &	4168.485ms &	4169.549ms &	0.074ms &	0.011ms &	1591.844ms &	simple_go.js (line 192)\\
 \hline
-r5c1 & r5c2 & r5c3 & r5c4 & r5c5 & r5c6 & r5c7 & r5c8 & r5c9\\
+iterate	109676 &	7.19% &	4005.749ms &	22595.463ms &	0.206ms &	0.011ms &	1593.499ms &	simple_go.js (line 391)\\
 \hline
-r6c1 & r6c2 & r6c3 & r6c4 & r6c5 & r6c6 & r6c7 & r6c8 & r6c9\\
+(no name) &	283642 &	4.9% &	2732.499ms &	18589.343ms &	0.066ms &	0.015ms &	1593.144ms &	simple_go.js & (line 416)\\
 \hline
-r7c1 & r7c2 & r7c3 & r7c4 & r7c5 & r7c6 & r7c7 & r7c8 & r7c9\\
+iterateOwnProperties &	5811	& 4.38%	& 2440.378ms &	2847.852ms &	0.49ms &	0.004ms &	2.917ms &	simple_go.js (line 132)\\
 \hline
-r8c1 & r8c2 & r8c3 & r8c4 & r8c5 & r8c6 & r8c7 & r8c8 & r8c9\\
+Set_Goban &	2150 &	3.53% &	1968.651ms &	1969.095ms &	0.916ms &	0.004ms &	942.058ms &	simple_go.js (line 528)\\
 \hline
-r9c1 & r9c2 & r9c3 & r9c4 & r9c5 & r9c6 & r9c7 & r9c8 & r9c9\\
+(no name) &	42734 &	2.99% &	1666.478ms &	1666.716ms &	0.039ms &	0.008ms &	935.83ms &	simple_go.js (line 835)\\
 \hline
-r10c1 & r10c2 & r10c3 & r10c4 & r10c5 & r10c6 & r10c7 & r10c8 & r10c9\\
+update &	3662 &	2.9% &	1613.61ms &	1614.099ms &	0.441ms &	0.004ms &	1560.416ms &	simple_go.js (line 117)\\
 \hline
-r11c1 & r11c2 & r11c3 & r11c4 & r11c5 & r11c6 & r11c7 & r11c8 & r11c9\\
+Add_Block &	2340 &	2.8% &	1559.92ms &	1560.774ms &	0.667ms &	0.007ms &	1529.63ms &	simple_go.js (line 757)\\
 \hline
-r12c1 & r12c2 & r12c3 & r12c4 & r12c5 & r12c6 & r12c7 & r12c8 & r12c9\\
+Calculate_Neighbour &	448	2.67% &	1487.337ms &	12205.939ms &	27.245ms &	0.019ms &	1579.849ms &	simple_go.js (line 829)\\
+\hline
+Simple_Same_Block &	2149 &	1.93% &	1073.573ms &	8185.472ms &	3.809ms &	0.002ms &	1556.376ms &	simple_go.js (line 606)\\
+\hline
+List_Block_Liberties &	3210 &	1.56% &	871.609ms &	5057.619ms &	1.576ms &	0.012ms &	1593.058ms &	simple_go.js (line 863)\\
 \hline
 \end{tabular}
-(no name)	109675	25.68%	14310.594ms	36908.812ms	0.337ms	0.059ms	1593.542ms	simple_go.js (line 407)
-flood_mark	1618	14.17%	7897.73ms	25481.245ms	15.749ms	0.162ms	1635.18ms	simple_go.js (line 807)
-(no name)	194678	11.75%	6551.626ms	6554.733ms	0.034ms	0.008ms	1555.243ms	simple_go.js (line 819)
-string_as_move	56065	7.48%	4168.485ms	4169.549ms	0.074ms	0.011ms	1591.844ms	simple_go.js (line 192)
-iterate	109676	7.19%	4005.749ms	22595.463ms	0.206ms	0.011ms	1593.499ms	simple_go.js (line 391)
-(no name)	283642	4.9%	2732.499ms	18589.343ms	0.066ms	0.015ms	1593.144ms	simple_go.js (line 416)
-iterateOwnProperties	5811	4.38%	2440.378ms	2847.852ms	0.49ms	0.004ms	2.917ms	simple_go.js (line 132)
-Set_Goban	2150	3.53%	1968.651ms	1969.095ms	0.916ms	0.004ms	942.058ms	simple_go.js (line 528)
-(no name)	42734	2.99%	1666.478ms	1666.716ms	0.039ms	0.008ms	935.83ms	simple_go.js (line 835)
-update	3662	2.9%	1613.61ms	1614.099ms	0.441ms	0.004ms	1560.416ms	simple_go.js (line 117)
-Add_Block	2340	2.8%	1559.92ms	1560.774ms	0.667ms	0.007ms	1529.63ms	simple_go.js (line 757)
-Calculate_Neighbour	448	2.67%	1487.337ms	12205.939ms	27.245ms	0.019ms	1579.849ms	simple_go.js (line 829)
-Simple_Same_Block	2149	1.93%	1073.573ms	8185.472ms	3.809ms	0.002ms	1556.376ms	simple_go.js (line 606)
-List_Block_Liberties	3210	1.56%	871.609ms	5057.619ms	1.576ms	0.012ms	1593.058ms	simple_go.js (line 863)$
 
-for the first 50 moves of a game on a 19x19 board, with crawler (black) versus crawler (white),
 
-(no name)	$404494	32.8%	71255.203ms	147518.241ms	0.365ms	0.059ms	1650.149ms	simple_go.js (line 407)
-flood_mark	3838	15.94%	34634.022ms	96713.52ms	25.199ms	0.206ms	1736.537ms	simple_go.js (line 807)
-iterate	404495	8.75%	19004.696ms	76254.33ms	0.189ms	0.011ms	1650.101ms	simple_go.js (line 391)
-(no name)	735190	8.72%	18941.197ms	18941.987ms	0.026ms	0.008ms	1572.648ms	simple_go.js (line 819)
-string_as_move	242765	5.86%	12724.373ms	12725.279ms	0.052ms	0.011ms	1629.186ms	simple_go.js (line 192)
-(no name)	1041519	4.7%	10209.513ms	57248.372ms	0.055ms	0.015ms	1649.869ms	simple_go.js (line 416)
-List_Block_Liberties	7706	4.02%	8727.331ms	21457.809ms	2.785ms	0.013ms	1630.607ms	simple_go.js (line 863)
-iterateOwnProperties	14752	3.68%	7985.019ms	9340.503ms	0.633ms	0.004ms	2.419ms	simple_go.js (line 132)
-update	8742	3.18%	6911.102ms	6911.93ms	0.791ms	0.004ms	1648.007ms	simple_go.js (line 117)
-Calculate_Neighbour	661	3.03%	6593.032ms	60385.478ms	91.355ms	0.115ms	1679.244ms	simple_go.js (line 829)
-(no name)	160414	2.51%	5444.827ms	5445.809ms	0.034ms	0.008ms	944.464ms	simple_go.js (line 835)
-Add_Stone	6010	1.1%	2392.214ms	191461.602ms	31.857ms	1.524ms	1785.447ms	simple_go.js (line 641)$
+For the first 100 moves of a game on a 19x19 board, with crawler (black) versus crawler (white),
+
+\begin{tabular}{ccccccccc}
+	\hline
+	Function & Calls & Percent & Own Time & Time & Avg & Min & Max & File\\	
+\hline
+(no name) &	$404494 &	32.8% &	71255.203ms &	147518.241ms &	0.365ms &	0.059ms &	1650.149ms &	simple_go.js (line 407)\\
+\hline
+flood_mark &	3838 &	15.94% &	34634.022ms &	96713.52ms &	25.199ms &	0.206ms &	1736.537ms &	simple_go.js (line 807)\\
+\hline
+iterate &	404495 &	8.75% &	19004.696ms &	76254.33ms &	0.189ms &	0.011ms &	1650.101ms &	simple_go.js (line 391)\\
+\hline
+(no name) &	735190 &	8.72% &	18941.197ms &	18941.987ms &	0.026ms &	0.008ms &	1572.648ms &	simple_go.js (line 819)\\
+\hline
+string_as_move &	242765 &	5.86% &	12724.373ms	& 12725.279ms &	0.052ms &	0.011ms &	1629.186ms &	simple_go.js (line 192)\\
+\hline
+(no name) &	1041519 &	4.7% &	10209.513ms &	57248.372ms &	0.055ms &	0.015ms &	1649.869ms &	simple_go.js (line 416)\\
+\hline
+List_Block_Liberties &	7706 &	4.02% &	8727.331ms &	21457.809ms &	2.785ms &	0.013ms &	1630.607ms &	simple_go.js (line 863)\\
+\hline
+iterateOwnProperties &	14752 &	3.68% &	7985.019ms &	9340.503ms &	0.633ms &	0.004ms &	2.419ms &	simple_go.js (line 132)\\
+\hline
+update &	8742 &	3.18% &	6911.102ms &	6911.93ms &	0.791ms &	0.004ms &	1648.007ms &	simple_go.js (line 117)\\
+\hline
+Calculate_Neighbour &	661 &	3.03% &	6593.032ms &	60385.478ms &	91.355ms &	0.115ms &	1679.244ms &	simple_go.js (line 829)\\
+\hline
+(no name) &	160414 &	2.51% &	5444.827ms &	5445.809ms &	0.034ms	& 0.008ms &	944.464ms &	simple_go.js (line 835)\\
+\hline
+Add_Stone &	6010 &	1.1% &	2392.214ms	& 191461.602ms	& 31.857ms &	1.524ms &	1785.447ms &	simple_go.js (line 641)\\
+\hline
+\end{tabular}
+
 
 Median move response time for 10 games into the first 50 moves was was 1 second, with the high being 3 seconds and the low being unmeasurable.
 
@@ -188,11 +194,7 @@ We feel that the choice of browser is more important than the choice of computin
 
 The performance of $\alpha-\beta$ search pruning in javascript should be investigated. like SimpleGo v3, a 30kyu $\alpha$-$\beta$ pruned search move generator.
 
-There is much more optimization and correctness work to be done to the jaigo board and game representations.
-
-The move speed of jaigo could be measured on many diverse computing platforms.
-
-Jaigo could be also used as a "widget", a popular way of packaging small javascript and html applications into a format that is used by many different web sites and operating systems such as Windows Vista, Mac OS X, Facebook, Google, and others.
+There is much more optimization and correctness work to be done to the jaigo board and game representations. For example, the move speed of jaigo could be measured on many diverse computing platforms. Jaigo could be also used as a "widget", a popular way of packaging small javascript and html applications into a format that is used by many different web sites and operating systems such as Windows Vista, Mac OS X, Facebook, Google, and others.
 
 There are many open issues being tracked by the jaigo project at this time. Addressing them may lead to better, more correct performance. We anticipate continuing work on this project.
 
