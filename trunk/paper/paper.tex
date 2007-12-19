@@ -1,5 +1,6 @@
 \documentclass{memoir}
 
+\usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{memhfixc}
 
@@ -10,6 +11,7 @@
 	
 \newtheorem{defn}{Definition}
 
+\frontmatter
 \begin{titlingpage}
 \maketitle
 
@@ -21,6 +23,7 @@ Despite its elegantly simple rules, Go's complexity as a game of deterministic s
 \tableofcontents
 \listoftables
 
+\mainmatter
 \chapter{Introduction}
 %Include background materials and define the problem and scope of your project.
 Go is a two-player board game which originated in Ancient China and remains one of the most richly complex games of strategy today. The objective is to control more area or territory than one's opponent on the game board. The game is played on a square line grid; the standard size of this grid is 19 x 19, though 13 x 13 and 9 x 9 grids are used occasionally. Players place stones -- either black or white -- at the intersecting points of the grid to signify control of that position. Once placed on the board a stone has a number of liberties -- unoccupied grid positions which are orthogonally adjacent to that stone. The goal of the game is to claim as much territory as possible by forming chains (contiguous extensions of stones of the same color) which cannot be captured by one's opponent. A stone or chain is captured and removed from the board when it has no liberties, the result of being surrounded by stones of the opposing color.
@@ -114,74 +117,52 @@ Regarding compactness, the total size of all jaigo files, including images, scri
 
 Regarding speed, we do not anticipate that the choice of processor and platform of any modern PC will have a significant change to the performance of jaigo.
 
-For the first 50 moves on a 19x19 board with human (black) versus crawler (white),
-\begin{tabular}{ccccccccc}
-\hline
-Function & Calls & Percent & Own Time & Time & Avg & Min & Max & File\\
-\hline
-(no name) & 109675 & 25.68 & 14310.594ms &	36908.812ms &	0.337ms &	0.059ms	& 1593.542ms	& simple\_go.js (line 407)\\
-\hline
-flood\_mark & 1618 & 14.17 & 7897.73ms & 25481.245ms & 15.749ms & 0.162ms & 1635.18ms & simple\_go.js (line 807)\\
-\hline
-(no name) &	194678 &	11.75	& 6551.626ms &	6554.733ms &	0.034ms &	0.008ms &	1555.243ms &	simple\_go.js (line 819)\\
-\hline
-string\_as\_move &	56065 &	7.48 &	4168.485ms &	4169.549ms &	0.074ms &	0.011ms &	1591.844ms &	simple\_go.js (line 192)\\
-\hline
-iterate	& 109676 &	7.19 &	4005.749ms &	22595.463ms &	0.206ms &	0.011ms &	1593.499ms &	simple\_go.js (line 391)\\
-\hline
-(no name) &	283642 &	4.9 &	2732.499ms &	18589.343ms &	0.066ms &	0.015ms &	1593.144ms &	simple\_go.js (line 416)\\
-\hline
-iterateOwnProperties &	5811	& 4.38	& 2440.378ms &	2847.852ms &	0.49ms &	0.004ms &	2.917ms &	simple\_go.js (line 132)\\
-\hline
-Set\_Goban &	2150 &	3.53 &	1968.651ms &	1969.095ms &	0.916ms &	0.004ms &	942.058ms &	simple\_go.js (line 528)\\
-\hline
-(no name) &	42734 &	2.99 &	1666.478ms &	1666.716ms &	0.039ms &	0.008ms &	935.83ms &	simple\_go.js (line 835)\\
-\hline
-update &	3662 &	2.9 &	1613.61ms &	1614.099ms &	0.441ms &	0.004ms &	1560.416ms &	simple\_go.js (line 117)\\
-\hline
-Add\_Block &	2340 &	2.8 &	1559.92ms &	1560.774ms &	0.667ms &	0.007ms &	1529.63ms &	simple\_go.js (line 757)\\
-\hline
-Calculate\_Neighbour &	448	2.67 &	1487.337ms &	12205.939ms &	27.245ms &	0.019ms &	1579.849ms &	simple\_go.js (line 829)\\
-\hline
-Simple\_Same\_Block &	2149 &	1.93 &	1073.573ms &	8185.472ms &	3.809ms &	0.002ms &	1556.376ms &	simple\_go.js (line 606)\\
-\hline
-List\_Block\_Liberties &	3210 &	1.56 &	871.609ms &	5057.619ms &	1.576ms &	0.012ms &	1593.058ms &	simple\_go.js (line 863)\\
-\hline
-\end{tabular}
+\tref{table:first50} shows the first 50 moves on a 19x19 board with human (black) versus crawler (white).
+\begin{table}
+  \rotatebox{90}{
+    \begin{tabular}{ccccccccc} \toprule
+      Function & Calls & Percent & Own Time (ms) & Time (ms) & Avg (ms) & Min (ms) & Max (ms) & File\\ \midrule
+      (no name) & 109675 & 25.68 & 14310.594 &	36908.812 &	0.337 &	0.059	& 1593.542	& simple\_go.js (line 407)\\
+      flood\_mark & 1618 & 14.17 & 7897.73 & 25481.245 & 15.749 & 0.162 & 1635.18 & simple\_go.js (line 807)\\
+      (no name) &	194678 &	11.75	& 6551.626 &	6554.733 &	0.034 &	0.008 &	1555.243 &	simple\_go.js (line 819)\\
+      string\_as\_move &	56065 &	7.48 &	4168.485 &	4169.549 &	0.074 &	0.011 &	1591.844 &	simple\_go.js (line 192)\\
+      iterate	& 109676 &	7.19 &	4005.749 &	22595.463 &	0.206 &	0.011 &	1593.499 &	simple\_go.js (line 391)\\
+      (no name) &	283642 &	4.9 &	2732.499 &	18589.343 &	0.066 &	0.015 &	1593.144 &	simple\_go.js (line 416)\\
+      iterateOwnProperties &	5811	& 4.38	& 2440.378 &	2847.852 &	0.49 &	0.004 &	2.917 &	simple\_go.js (line 132)\\
+      Set\_Goban &	2150 &	3.53 &	1968.651 &	1969.095 &	0.916 &	0.004 &	942.058 &	simple\_go.js (line 528)\\
+      (no name) &	42734 &	2.99 &	1666.478 &	1666.716 &	0.039 &	0.008 &	935.83 &	simple\_go.js (line 835)\\
+      update &	3662 &	2.9 &	1613.61 &	1614.099 &	0.441 &	0.004 &	1560.416 &	simple\_go.js (line 117)\\
+      Add\_Block &	2340 &	2.8 &	1559.92 &	1560.774 &	0.667 &	0.007 &	1529.63 &	simple\_go.js (line 757)\\
+      Calculate\_Neighbour &	448 &	2.67 &	1487.337 &	12205.939 &	27.245 &	0.019 &	1579.849 &	simple\_go.js (line 829)\\
+      Simple\_Same\_Block &	2149 &	1.93 &	1073.573 &	8185.472 &	3.809 &	0.002 &	1556.376 &	simple\_go.js (line 606)\\
+      List\_Block\_Liberties &	3210 &	1.56 &	871.609 &	5057.619 &	1.576 &	0.012 &	1593.058 &	simple\_go.js (line 863)\\ \bottomrule
+  \end{tabular}}
+  \caption{First 50 moves on a 19x19 board}
+  \label{table:first50}
+\end{table}
 
+\tref{table:first100} shows the first 100 moves of a game on a 19x19 board, with crawler (black) versus crawler (white).
 
-For the first 100 moves of a game on a 19x19 board, with crawler (black) versus crawler (white),
-
-\begin{tabular}{ccccccccc}
-	\hline
-	Function & Calls & Percent & Own Time & Time & Avg & Min & Max & File\\	
-\hline
-(no name) &	404494 &	32.8 &	71255.203ms &	147518.241ms &	0.365ms &	0.059ms &	1650.149ms &	simple\_go.js (line 407)\\
-\hline
-flood\_mark &	3838 &	15.94 &	34634.022ms &	96713.52ms &	25.199ms &	0.206ms &	1736.537ms &	simple\_go.js (line 807)\\
-\hline
-iterate &	404495 &	8.75 &	19004.696ms &	76254.33ms &	0.189ms &	0.011ms &	1650.101ms &	simple\_go.js (line 391)\\
-\hline
-(no name) &	735190 &	8.72 &	18941.197ms &	18941.987ms &	0.026ms &	0.008ms &	1572.648ms &	simple\_go.js (line 819)\\
-\hline
-string\_as\_move &	242765 &	5.86 &	12724.373ms	& 12725.279ms &	0.052ms &	0.011ms &	1629.186ms &	simple\_go.js (line 192)\\
-\hline
-(no name) &	1041519 &	4.7 &	10209.513ms &	57248.372ms &	0.055ms &	0.015ms &	1649.869ms &	simple\_go.js (line 416)\\
-\hline
-List\_Block\_Liberties &	7706 &	4.02 &	8727.331ms &	21457.809ms &	2.785ms &	0.013ms &	1630.607ms &	simple\_go.js (line 863)\\
-\hline
-iterateOwnProperties &	14752 &	3.68 &	7985.019ms &	9340.503ms &	0.633ms &	0.004ms &	2.419ms &	simple\_go.js (line 132)\\
-\hline
-update &	8742 &	3.18 &	6911.102ms &	6911.93ms &	0.791ms &	0.004ms &	1648.007ms &	simple\_go.js (line 117)\\
-\hline
-Calculate\_Neighbour &	661 &	3.03 &	6593.032ms &	60385.478ms &	91.355ms &	0.115ms &	1679.244ms &	simple\_go.js (line 829)\\
-\hline
-(no name) &	160414 &	2.51 &	5444.827ms &	5445.809ms &	0.034ms	& 0.008ms &	944.464ms &	simple\_go.js (line 835)\\
-\hline
-Add\_Stone &	6010 &	1.1 &	2392.214ms	& 191461.602ms	& 31.857ms &	1.524ms &	1785.447ms &	simple\_go.js (line 641)\\
-\hline
-\end{tabular}
-
+\begin{table}
+  \rotatebox{90}{
+    \begin{tabular}{ccccccccc} \toprule
+      Function & Calls & Percent & Own Time & Time & Avg & Min & Max & File\\	\midrule
+      (no name) &	404494 &	32.8 &	71255.203 &	147518.241 &	0.365 &	0.059 &	1650.149 &	simple\_go.js (line 407)\\
+      flood\_mark &	3838 &	15.94 &	34634.022 &	96713.52 &	25.199 &	0.206 &	1736.537 &	simple\_go.js (line 807)\\
+      iterate &	404495 &	8.75 &	19004.696 &	76254.33 &	0.189 &	0.011 &	1650.101 &	simple\_go.js (line 391)\\
+      (no name) &	735190 &	8.72 &	18941.197 &	18941.987 &	0.026 &	0.008 &	1572.648 &	simple\_go.js (line 819)\\
+      string\_as\_move &	242765 &	5.86 &	12724.373	& 12725.279 &	0.052 &	0.011 &	1629.186 &	simple\_go.js (line 192)\\
+      (no name) &	1041519 &	4.7 &	10209.513 &	57248.372 &	0.055 &	0.015 &	1649.869 &	simple\_go.js (line 416)\\
+      List\_Block\_Liberties &	7706 &	4.02 &	8727.331 &	21457.809 &	2.785 &	0.013 &	1630.607 &	simple\_go.js (line 863)\\
+      iterateOwnProperties &	14752 &	3.68 &	7985.019 &	9340.503 &	0.633 &	0.004 &	2.419 &	simple\_go.js (line 132)\\
+      update &	8742 &	3.18 &	6911.102 &	6911.93 &	0.791 &	0.004 &	1648.007 &	simple\_go.js (line 117)\\
+      Calculate\_Neighbour &	661 &	3.03 &	6593.032 &	60385.478 &	91.355 &	0.115 &	1679.244 &	simple\_go.js (line 829)\\
+      (no name) &	160414 &	2.51 &	5444.827 &	5445.809 &	0.034	& 0.008 &	944.464 &	simple\_go.js (line 835)\\
+      Add\_Stone &	6010 &	1.1 &	2392.214	& 191461.602	& 31.857 &	1.524 &	1785.447 &	simple\_go.js (line 641)\\ \bottomrule
+    \end{tabular}}
+  \caption{First 100 moves on a 19x19 board}
+  \label{table:first100}
+\end{table}
 
 Median move response time for 10 games into the first 50 moves was was 1 second, with the high being 3 seconds and the low being unmeasurable.
 
@@ -198,8 +179,7 @@ There is much more optimization and correctness work to be done to the jaigo boa
 
 There are many open issues being tracked by the jaigo project at this time. Addressing them may lead to better, more correct performance. We anticipate continuing work on this project.
 
-%(7)    References.
-
+\backmatter
 \bibliography{paper}
 \bibliographystyle{plain}
 \end{document}
