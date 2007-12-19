@@ -196,7 +196,6 @@ Tetsuki_Controller.prototype.SetStone = function(move,color)
     cell.innerHTML="<div class='white'></div>";
 	else if ("."==color)
     cell.innerHTML="";
-	
 }
 
 

@@ -98,7 +98,9 @@ function randint(min, max) {
 }
 
 function randomchoice(seq) {
-    return seq[randint(0, seq.length)];
+//	if(seq.length == 1)
+//		return seq[0];
+    return seq[randint(0, seq.length-1)];
 }
 
 String.prototype.repeat = function(times) {
@@ -183,6 +185,20 @@ function string_as_move(m, size)
     }
     var x = x_coords_string.indexOf(m.charAt(0));
     var y = m.charAt(1);
+    return [x,y];
+}
+
+function string_as_move(s)
+{
+	/* convert string to move tuple
+	   example: "2,3" -> (2,3)
+	*/
+    if (s == "PASS") {
+        return PASS_MOVE;
+    }
+	var m = s.split(",");
+    var x = parseInt(m[0]);
+    var y = parseInt(m[1]);
     return [x,y];
 }
 
@@ -417,7 +433,7 @@ Board.prototype.each_Diagonal_Neighbour = function(pos)
         board.iterate(
                      [[x+1,y+1], [x+1,y-1], [x-1,y-1], [x-1,y+1]],
                      function (p) {
-                         return f(p) === Board.prototype.each_Diagonal_Neighbor['break'] ? Board.prototype.iterate['break'] : Board.prototype.iterate['continue']});
+                         return f(p) === Board.prototype.each_Diagonal_Neighbour['break'] ? Board.prototype.iterate['break'] : Board.prototype.iterate['continue']});
     };
 };
 Board.prototype.each_Diagonal_Neighbour['continue'] = true;
@@ -552,18 +568,20 @@ Board.prototype.List_Empty_3x3_Neighbour = function(pos)
 {
     //check normal neighbour positions first
     var neighbour_list = [];
+	var goban = this.goban;
     this.each_Neighbour(pos)(function (pos2) {
-            if (this.goban[pos2]==EMPTY) {
-                neighbour_list.append(pos2);
+            if (goban[pos2]==EMPTY) {
+                neighbour_list.push(pos2);
             }
         });
     //check diagonal neighbour positions first
     //this is done to ensure that empty block is/will not splitted
     var diagonal_neighbour_list = [];
-    this.each_diagonal_neighbour(pos)(function (pos2) {
-            if (this.goban[pos2]==EMPTY)
+	var goban = this.goban;
+    this.each_Diagonal_Neighbour(pos)(function (pos2) {
+            if (goban[pos2]==EMPTY)
                 {
-                    diagonal_neighbour_list.append(pos2);
+                    diagonal_neighbour_list.push(pos2);
                 }
         });
     return [neighbour_list, diagonal_neighbour_list];
@@ -599,9 +617,10 @@ Board.prototype.Simple_Same_Block = function(pos_list)
     //Add all stones in pos_list and their neighbour to block if they have same color.
     for (var pos in pos_list)
         {
-        temp_block.Add_Stone(pos);
-        this.each_Neighbour(pos)(function (pos2) {
-                if (this.goban[pos2] === color) {
+        temp_block.Add_Stone(pos_list[pos]);
+		var goban = this.goban;
+        this.each_Neighbour(pos_list[pos])(function (pos2) {
+                if (goban[pos2] === color) {
                     temp_block.Add_Stone(pos2);
                 }
             });
@@ -610,7 +629,7 @@ Board.prototype.Simple_Same_Block = function(pos_list)
     this.flood_mark(temp_block, pos_list[0], new_mark);
     for (var pos in pos_list)
         {
-        if (temp_block.stones[pos] !== new_mark)
+        if (temp_block.stones[pos_list[pos]] !== new_mark)
                 {
             return false;
                 }
@@ -722,7 +741,7 @@ Board.prototype.Add_Stone = function(color, pos)
         }
     for (block in changed_blocks)
         {
-        this.Calculate_Neighbour(block);
+        this.Calculate_Neighbour(changed_blocks[block]);
         }
         /*    for block in self.block_list:
             old_neighbour = block.neighbour
@@ -845,11 +864,12 @@ Board.prototype.List_Block_Liberties = function(block)
     /*Returns list of liberties for block of stones.
     */
     var liberties = [];
-    for (var pos2 in block.neighbour)
+    for (var pos in block.neighbour)
         {
-        if (this.goban[pos2]==EMPTY) //TODO: this not in scope during first move of game.
+			pos = string_as_move(pos);
+        	if (this.goban[pos]==EMPTY)
                 {
-            liberties.push(pos2);
+            		liberties.push(pos);
                 }
         }
     return liberties;
@@ -890,11 +910,11 @@ Board.prototype.Apply_Undo_Info = function(method, color, pos)
 {
     /*Apply given change to undo part of move.
     */
-    if (method.name=="add_stone")
+    if (method=="add_stone")
         {
         this.Add_Stone(color, pos);
         }
-    else if (method.name=="change_block_color")
+    else if (method=="change_block_color")
         {
         this.Change_Block_Color(color, pos);
         }
@@ -976,13 +996,12 @@ Board.prototype.Undo_Move = function(undo_log)
 {
         /*Undo move using undo_log.
         */
-    this.Change_Side();
     for (var method_color_pos in undo_log)
         {
             this.Apply_Undo_Info(
-                                 method_color_pos[0],
-                                 method_color_pos[1],
-                                 method_color_pos[2]);
+                                 undo_log[method_color_pos][0],
+                                 undo_log[method_color_pos][1],
+                                 undo_log[method_color_pos][2]);
         }
 };
 
@@ -2170,7 +2189,7 @@ Game.prototype.Undo_Move = function()
     var last_move = this.move_history.pop();
     if (!deepValueEquality(last_move, PASS_MOVE))
         {
-            this.position_seen.splice(this.current_board.key(), 1);
+            //TODO: disabled this until hashing works this.position_seen.splice(this.current_board.key(), 1);
         }
     var last_undo_log = this.undo_history.pop();
     this.current_board.Undo_Move(last_undo_log);
@@ -2280,29 +2299,40 @@ Game.prototype.Select_Crawler_Move = function(remove_opponent_dead, pass_allowed
 	
 	if (this.move_history.length <= 1)
 	{
-		return this.Select_Random_Move();
+		//for the first move, do something intelligent in the middle.
+		var middle_moves = this.current_board.List_Empty_3x3_Neighbour([9,9]);
+		return randomchoice(middle_moves[0]);
 	}
 	
-	for (var block in this.current_board.blocks)
+	for (var b in this.current_board.block_list)
 	{
-		if (block.color === this.current_board.side)
+		if (this.current_board.block_list[b].color === this.current_board.side)
 		{
-			for (liberty in this.current_board.List_Block_Liberties(this.current_board.blocks[block]))
+			var liberties = this.current_board.List_Block_Liberties(this.current_board.block_list[b]);
+			for (var liberty in liberties)
 			{
-				var current_block_liberties = this.current_board.Block_Liberties(this.current_board.blocks[block]);
+				var current_block_liberties = this.current_board.Block_Liberties(this.current_board.block_list[b]);
 				if (current_block_liberties >= most_liberties)
 				{
-					this.Make_Move(liberty);
-					var new_block_liberties = this.current_board.Block_Liberties(this.current_board.blocks[block]);
+					this.Make_Move(liberties[liberty]);
+					var new_block_liberties = this.current_board.Block_Liberties(this.current_board.block_list[b]);
 					if (new_block_liberties >= current_block_liberties)
 					{
-						best_moves.push(liberty);
+						best_moves.push(liberties[liberty]);
 					}
+					this.Undo_Move();
 				}
 			}
 		}
 	}
-	return randomchoice(best_moves);
+	if (best_moves.length > 0)
+	{
+		return randomchoice(best_moves);
+	}
+	else
+	{
+		return this.Select_Random_Move();
+	}
 };
 
 Game.prototype.Select_Scored_Move = function(remove_opponent_dead, pass_allowed) {
