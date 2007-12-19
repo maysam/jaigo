@@ -1,5 +1,6 @@
 \documentclass{memoir}
 
+\usepackage{listings}
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{memhfixc}
@@ -22,6 +23,7 @@ Despite its elegantly simple rules, Go's complexity as a game of deterministic s
 
 \tableofcontents
 \listoftables
+\lstlistoflistings
 
 \mainmatter
 \chapter{Introduction}
@@ -104,9 +106,10 @@ We implemented two different move choice engines, each of which provides a diffe
 
 \chapter{Technical details}
 %Code Listing
-- Implementation of Benson's algorithm for determining unconditional life: Analyze\_Color\_Unconditional\_Status
-- Greedy Search algorithm: select\_scored\_move
-- Crawler algorithm: select\_crawler\_move
+\lstset{language=Java,breaklines=true}% if I have extra time, I'll define JavaScript for real
+\lstinputlisting[label={code:benson}, caption={Benson's Algorithm}]{benson.js}
+\lstinputlisting[label={code:greedy}, caption={Move generator: greedy search}]{greedy.js}
+\lstinputlisting[label={code:crawler}, caption={Move generator: crawler}]{crawler.js}
 
 \chapter{Discussions, observations, and comparisons}
 We implemented representations of the board, the game, eyes, and blocks; scoring for color and blocks based on Benson's algorithm; two move choice engines based on two different algorithms; and numerous language-specific utilities. Our goals were compactness and speed due to the target platform limitations.
