@@ -114,11 +114,11 @@ We implemented two different move choice engines, each of which provides a diffe
 \chapter{Discussions, observations, and comparisons}
 We implemented representations of the board, the game, eyes, and blocks; scoring for color and blocks based on Benson's algorithm; two move choice engines based on two different algorithms; and numerous language-specific utilities. Our goals were compactness and speed due to the target platform limitations.
 
-Due to issues with the jaigo board representation, our measurements were limited to the first 100 moves.
+Due to issues with the Jaigo board representation, our measurements were limited to the first 100 moves.
 
-Regarding compactness, the total size of all jaigo files, including images, scripts, and html, was 102221 bytes for our initial release. The full implementation of the jaigo code is 66071 bytes \cite{SpeedReport}.
+Regarding compactness, the total size of all Jaigo files, including images, scripts, and html, was 102221 bytes for our initial release. The full implementation of the Jaigo code is 66071 bytes \cite{SpeedReport}.
 
-Regarding speed, we do not anticipate that the choice of processor and platform of any modern PC will have a significant change to the performance of jaigo.
+Regarding speed, we do not anticipate that the choice of processor and platform of any modern PC will have a significant change to the performance of Jaigo.
 
 \tref{table:first50} shows the first 50 moves on a 19x19 board with human (black) versus crawler (white).
 \newcolumntype{M}{D{.}{.}{3}}
@@ -170,17 +170,17 @@ Regarding speed, we do not anticipate that the choice of processor and platform 
 
 Median move response time for 10 games into the first 50 moves was was 1 second, with the high being 3 seconds and the low being unmeasurable.
 
-On an iPhone over 54mbps 802.11g wifi with a full signal connected to a 3mbps cable modem, the median jaigo load time was 5 seconds, with the initial load time being the longest measurement at 15 seconds. On an iPhone over AT\&T 2.5G EDGE with a full signal, the median jaigo load time was 21 seconds, with a low of 17 seconds and a high of 30 seconds.
+On an iPhone over 54mbps 802.11g wifi with a full signal connected to a 3mbps cable modem, the median Jaigo load time was 5 seconds, with the initial load time being the longest measurement at 15 seconds. On an iPhone over AT\&T 2.5G EDGE with a full signal, the median Jaigo load time was 21 seconds, with a low of 17 seconds and a high of 30 seconds.
 %TODO: Median move times in other go engines (gnugo especially)?
 
 \chapter{Recommendations, future work, and unsolved issues}
-We feel that the choice of browser is more important than the choice of computing platform for the performance of jaigo. Our anecdotal experience and those of others on the Web show that there is an order of magnitude difference between popular browsers for some JavaScript operations. However, we have not carefully studied this issue.%http://therealcrisp.xs4all.nl/blog/2006/12/09/string-performance-in-internet-explorer/
+We feel that the choice of browser is more important than the choice of computing platform for the performance of Jaigo. Our anecdotal experience and those of others on the Web show that there is an order of magnitude difference between popular browsers for some JavaScript operations. However, we have not carefully studied this issue.%http://therealcrisp.xs4all.nl/blog/2006/12/09/string-performance-in-internet-explorer/
 
-The performance of $\alpha-\beta$ search pruning in javascript should be investigated. like SimpleGo v3, a 30kyu $\alpha$-$\beta$ pruned search move generator.
+The performance of $\alpha$-$\beta$ search pruning in JavaScript should be investigated. like SimpleGo v3, a 30kyu $\alpha$-$\beta$ pruned search move generator.
 
-There is much more optimization and correctness work to be done to the jaigo board and game representations. For example, the move speed of jaigo could be measured on many diverse computing platforms. Jaigo could be also used as a "widget", a popular way of packaging small javascript and html applications into a format that is used by many different web sites and operating systems such as Windows Vista, Mac OS X, Facebook, Google, and others.
+There is much more optimization and correctness work to be done to the Jaigo board and game representations. For example, the move speed of Jaigo could be measured on many diverse computing platforms. Jaigo could be also used as a ``widget'', a popular way of packaging small JavaScript and html applications into a format that is used by many different web sites and operating systems such as Windows Vista, Mac OS X, Facebook, Google, and others.
 
-There are many open issues being tracked by the jaigo project at this time. Addressing them may lead to better, more correct performance. We anticipate continuing work on this project.
+There are many open issues being tracked by the Jaigo project at this time. Addressing them may lead to better, more correct performance. We anticipate continuing work on this project.
 
 \backmatter
 \bibliography{paper}
