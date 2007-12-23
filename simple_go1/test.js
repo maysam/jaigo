@@ -46,6 +46,13 @@ function test_listPotentialEyes() {
         flattened[[3,2]] === undefined) {
         throw new Error("misidentified eyes");
     }
+    expectedEyeSubset = [[4, 5], [3, 7], [6, 3], [4, 3]];
+    for (var i in expectedEyeSubset) if (expectedEyeSubset.hasOwnProperty(i)) {
+	    var expectedEye = expectedEyeSubset[i];
+	    if (!g.current_board.blocks[expectedEye].eye) {
+		throw new Error("failed to identify potential eye " + expectedEye);
+	    }
+	}
 }
 
 function test_classifyPotentialEyesByColor() {
@@ -66,6 +73,38 @@ function test_classifyPotentialEyesByColor() {
     var list = g.current_board.listPotentialEyes(BLACK);
     var classes = g.current_board.classifyPotentialEyesByColor(list, BLACK);
     if (classes[0].length !== 2) throw new Error("classifyPotentialEyesByColor gave false negatives for 'ok' eyes");
+}
+
+function test_countEyes() {
+   var g = diagram2game("ABCDEFGHI\n" +
+        "+---------+\n" +
+        "9|.........| 9\n" +
+        "8|.XX......| 8\n" +
+        "7|.X.XXX...| 7\n" +
+        "6|.XXX.XOO.| 6\n" +
+        "5|..XOOOX..| 5\n" +
+        "4|.OOXXXX..| 4\n" +
+        "3|..X.X.X..| 3\n" +
+        "2|..XXXXX..| 2\n" +
+        "1|.........| 1\n" +
+        "+---------+\n" +
+        "ABCDEFGHI\n");
+   var color = BLACK;
+   var board = g.current_board;
+   var list = board.listPotentialEyes(color);
+   var classes = board.classifyPotentialEyesByColor(list, color);
+   board.prepForCountEyes(color);
+   var changed_count = board.countEyes(color);
+   if (changed_count !== 0) {
+       throw new Error("changed_count was " + changed_count + " (expected 0)");
+   }
+   var eyesCount = 0;
+   board.each_Blocks(color)(function (block) {
+	   eyesCount += block.eye_count;
+       });
+   if (eyesCount !== 4) {
+       throw new Error("countEyes says there are " + eyesCount + " eyes when in fact there are 4.");
+   }
 }
 
 function test_speed(n)

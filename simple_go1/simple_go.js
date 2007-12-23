@@ -1195,6 +1195,46 @@ Board.prototype.classifyPotentialEyesByColor = function (eye_list, color) {
     return [ok_eye_list, not_ok_eye_list];
 };
 
+Board.prototype.prepForCountEyes = function(color) {
+    //first we assume all blocks to be ok
+    this.each_Blocks(color)(function (block) {
+            block.eye_count = 2;
+        });
+}
+
+Board.prototype.countEyes = function(color) {
+    var changed_count = 0;
+    var board = this;
+    this.each_Blocks(color)(function (block) {
+	    //not really needed but short and probably useful optimization
+	    if (block.eye_count < 2) {
+		return board.each_Blocks['continue'];
+	    }
+	    //count eyes
+	    var block_eye_list = [];
+	    for (var stone in block.neighbour)
+                {
+		    var eye = board.blocks[stone].eye;
+		    if (eye && block_eye_list.indexOf(eye) == -1)
+			{ 
+			    block_eye_list.push(eye);
+			}
+                }
+	    //count only those eyespaces which have empty point(s) adjacent to this block
+	    block.eye_count = 0;
+	    for (var e in block_eye_list) {
+		var eye = block_eye_list[e];
+		if (contains(eye.our_blocks, block, deepValueEquality)) {
+		    block.eye_count = block.eye_count + 1;
+		}
+	    }
+	    if (block.eye_count < 2) {
+		changed_count = changed_count + 1;
+	    }
+	});
+    return changed_count;
+}
+
 Board.prototype.Analyze_Color_Unconditional_Status = function(color)
 {
     /* This is Benson's Algorithm for unconditional life.
@@ -1513,40 +1553,10 @@ Board.prototype.Analyze_Color_Unconditional_Status = function(color)
     eye_list = lists[0];
     not_ok_eye_list = lists[1];
 
-    //first we assume all blocks to be ok
-    this.each_Blocks(color)(function (block) {
-            block.eye_count = 2;
-        });
+    this.prepForCountEyes(color);
     //main loop: at end of loop check if changes
     while (true) {
-        var changed_count = 0;
-        this.each_Blocks(color)(function (block) {
-                //not really needed but short and probably useful optimization
-                if (block.eye_count < 2) {
-                    return board.each_Blocks['continue'];
-                }
-                //count eyes
-                var block_eye_list = [];
-                for (var stone in block.neighbour)
-                {
-                        var eye = board.blocks[stone].eye;
-                        if (eye && block_eye_list.indexOf(eye) == -1)
-                    { 
-                                block_eye_list.push(eye);
-                    }
-                }
-                //count only those eyespaces which have empty point(s) adjacent to this block
-                block.eye_count = 0;
-                for (var e in block_eye_list) {
-                    var eye = block_eye_list[e];
-                    if (contains(eye.our_blocks, block, deepValueEquality)) {
-                        block.eye_count = block.eye_count + 1;
-                    }
-                }
-                if (block.eye_count < 2) {
-                    changed_count = changed_count + 1;
-                }
-            });
+        var changed_count = this.countEyes(color);
         //check eyes for required all groups 2 eyes
         var ok_eye_list = [];
         for (var e in eye_list) {
