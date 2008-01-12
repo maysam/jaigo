@@ -354,22 +354,28 @@ function Board(size)
         this.captures = [];
         this.captures[WHITE] = 0;
         this.captures[BLACK] = 0;
-        this.goban = []; //actual board
+        this.goban = new Array(); //actual board
         this.Init_Hash();
+//		console.log("board_hash_values[EMPTY]:" +  this.board_hash_values[EMPTY]);
         //Create and initialize board as empty size*size
         var board = this;
         this.each_Goban(function (pos) {
                 //can't use set_goban method here, because goban doesn't yet really exists
                 board.goban[pos] = EMPTY;
-                board.current_hash = board.current_hash ^ board.board_hash_values[EMPTY][pos];});
-        this.blocks = []; //blocks dictionary
+//				console.log("pos:" + pos);
+//				console.log("EMPTY:" + EMPTY);
+//				console.log("current_hash:" + board.current_hash);
+//				console.log("board_hash_values:" + board.board_hash_values);
+//				console.log("board_hash_values[EMPTY][pos]:" +  board.board_hash_values[EMPTY][pos[0]][pos[1]]);
+                board.current_hash = board.current_hash ^ board.board_hash_values[EMPTY][pos[0]][pos[1]];});
+        this.blocks = new Array(); //blocks dictionary
         //Create and initialize one whole board empty block
         var new_block = new Block(EMPTY);
         this.each_Goban(function (pos) {
             new_block.Add_Stone(pos);
             board.blocks[pos] = new_block;});
         this.block_list = [new_block];
-        this.chains = [];
+        this.chains = new Array();
 }
 
 Board.prototype.each_Goban = function(f)
@@ -379,7 +385,7 @@ Board.prototype.each_Goban = function(f)
     */
     for (var x in range(1, this.size + 1)) {
         for (var y in range(1, this.size + 1)) {
-            if (f([x, y]) === Board.prototype.each_Goban['break']) {
+            if (f([x*1, y*1]) === Board.prototype.each_Goban['break']) {
                 break;
             }
         }
@@ -511,16 +517,26 @@ Board.prototype.each_Neighbour_Eye_Blocks['break'] = false;
 Board.prototype.Init_Hash = function()
 {
     /*Individual number for every possible color and position combination */
-    var board = this; // helps with the each_Goban closure
-    board.board_hash_values = {};
-    var colors = EMPTY+WHITE+BLACK;
-    for (var c in colors) {
+	var board = this; // helps with the each_Goban closure
+	board.board_hash_values = new Array();
+	var colors = EMPTY+WHITE+BLACK;
+	//for (var c in colors) if (colors.hasOwnProperty(c)) {
+	for(var c = 0; c < 3; c++) {
         var color = colors[c];
-        board.each_Goban(function (pos) {
-                board.board_hash_values[color] = {};
-                board.board_hash_values[color][pos] = randint(-Number.MAX_VALUE, Number.MAX_VALUE);
+		board.board_hash_values[color] = new Array();
+		//console.log("board_hash_values:" + this.board_hash_values);
+		//console.log("board_hash_values[color]:" +  this.board_hash_values[color]);
+		board.each_Goban(function (pos) {
+			if(pos[1] == 1) {
+				board.board_hash_values[color][pos[0]] = new Array();
+				//console.log("pos[0]:" + pos[0] + " pos[1]:" + pos[1]);
+				//console.log("board_hash_values[color][posx]:" +  board.board_hash_values[color][pos[0]]);
+			}
+        	board.board_hash_values[color][pos[0]][pos[1]] = randint(-Number.MAX_VALUE, Number.MAX_VALUE);
+			//console.log("board_hash_values[color][pos[0]][pos[1]]:" + board.board_hash_values[color][pos[0]][pos[1]]);
             });
         board.current_hash = 0;
+		//console.log("init: board_hash_values[color]:" +  this.board_hash_values[color]);	
     }
 };
 
@@ -528,9 +544,9 @@ Board.prototype.Init_Hash = function()
 {
     /*Set stone at position to color and update hash value*/
     var old_color = this.goban[pos];
-    this.current_hash = this.current_hash ^ this.board_hash_values[old_color][pos]; //TODO: this is not actually hashing properly, at least as far as I can figure. I tried changing the structure to [color][x][y], but didn't get the init right for that. Anyways, value of current_has is always 0, and I can't seem to address a hash value in the board. I've tried _values.X[1,1], _values.X["1","1"], _values["X"][1,1], _values["X"]["1","1"]. No joy. 
+    this.current_hash = this.current_hash ^ this.board_hash_values[old_color][pos[0]][pos[1]]; //TODO: this is not actually hashing properly, at least as far as I can figure. I tried changing the structure to [color][x][y], but didn't get the init right for that. Anyways, value of current_has is always 0, and I can't seem to address a hash value in the board. I've tried _values.X[1,1], _values.X["1","1"], _values["X"][1,1], _values["X"]["1","1"]. No joy. 
     this.goban[pos] = color;
-    this.current_hash = this.current_hash ^ this.board_hash_values[color][pos];
+    this.current_hash = this.current_hash ^ this.board_hash_values[color][pos[0]][pos[1]];
 };
 
 Board.prototype.Key = function()
